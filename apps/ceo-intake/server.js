@@ -91,6 +91,12 @@ function matchDonVi(normText, donVi) {
 const WEEKDAYS = { 'chu nhat': 0, 'thu hai': 1, 'thu ba': 2, 'thu tu': 3, 'thu nam': 4, 'thu sau': 5, 'thu bay': 6 };
 function findDate(text) {
   const t0 = today();
+  // Ngày ISO (YYYY-MM-DD) phải đọc trước, nếu không bộ đọc dd/mm sẽ bắt nhầm phần giữa chuỗi
+  const iso = String(text).match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (iso) {
+    const d = new Date(+iso[1], +iso[2] - 1, +iso[3]);
+    return d.getMonth() === +iso[2] - 1 && d.getDate() === +iso[3] ? d : null;
+  }
   const m = String(text).match(/(\d{1,2})\s*[\/.\-]\s*(\d{1,2})(?:\s*[\/.\-]\s*(\d{2,4}))?/);
   if (m) {
     const dd = +m[1], mm = +m[2];
@@ -428,7 +434,10 @@ const server = http.createServer(async (req, res) => {
       const text = String(body.text || '').slice(0, 20000);
       const draft = buildDraft(text);
       let aiNote = null;
-      const ai = await aiExtract(text, loadConfig());
+      // Dữ liệu Đỏ: không gửi nội dung ra dịch vụ bên ngoài (đặc tả: chỉ đưa thông tin mô tả vào agent)
+      const isRed = draft.fields.mucDuLieu && draft.fields.mucDuLieu.value === 'Đỏ';
+      const ai = isRed ? null : await aiExtract(text, loadConfig());
+      if (isRed && process.env.ANTHROPIC_API_KEY) aiNote = 'Mức dữ liệu Đỏ: không gửi nội dung cho Claude, chỉ dùng quy tắc nội bộ.';
       if (ai && ai.error) aiNote = ai.error;
       else if (ai && ai.fields) {
         for (const fd of FIELDS) {
