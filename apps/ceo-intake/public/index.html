@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phiếu yêu cầu CEO · Trợ lý điều phối</title>
+<style>
+  :root {
+    --primary: #0f766e; --primary-50: #f0fdfa; --primary-100: #ccfbf1;
+    --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --bg: #f8fafc; --card: #ffffff;
+    --warn: #b45309; --warn-bg: #fffbeb; --warn-line: #fcd34d;
+    --ok: #047857; --danger: #b91c1c; --radius: 6px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--bg); display: flex; flex-direction: column; }
+  header { display: flex; align-items: center; gap: 16px; padding: 10px 16px; background: var(--card); border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 15px; margin: 0; font-weight: 600; }
+  header .sub { color: var(--muted); font-size: 12px; }
+  .tabs { display: flex; gap: 4px; margin-left: auto; }
+  .tab { border: 1px solid var(--line); background: var(--card); padding: 6px 12px; border-radius: var(--radius); cursor: pointer; font: inherit; color: var(--muted); }
+  .tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+  main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(320px, 2fr) 3fr; }
+  .view-list main, .view-list #compose { display: none; }
+  #list { display: none; flex: 1; min-height: 0; overflow: auto; padding: 16px; }
+  .view-list #list { display: block; }
+
+  /* Chat */
+  #chat { display: flex; flex-direction: column; border-right: 1px solid var(--line); min-height: 0; background: var(--card); }
+  #msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 88%; padding: 8px 12px; border-radius: var(--radius); white-space: pre-wrap; word-wrap: break-word; }
+  .msg.ceo { align-self: flex-end; background: var(--primary-50); border: 1px solid var(--primary-100); }
+  .msg.bot { align-self: flex-start; background: var(--bg); border: 1px solid var(--line); }
+  .who { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+  .msg.ceo .who { text-align: right; }
+  .opts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .opt { border: 1px solid var(--primary); color: var(--primary); background: #fff; border-radius: 999px; padding: 3px 10px; cursor: pointer; font: inherit; font-size: 13px; }
+  .opt:hover { background: var(--primary-50); }
+  .opt.skip { border-color: var(--line); color: var(--muted); }
+  #composer { border-top: 1px solid var(--line); padding: 10px; display: flex; gap: 8px; align-items: flex-end; }
+  #input { flex: 1; resize: none; min-height: 40px; max-height: 160px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius); font: inherit; }
+  #input:focus, .field input:focus, .field textarea:focus, .field select:focus { outline: 2px solid var(--primary-100); border-color: var(--primary); }
+  .btn { border: 1px solid var(--line); background: #fff; border-radius: var(--radius); padding: 8px 12px; cursor: pointer; font: inherit; }
+  .btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn.small { padding: 3px 8px; font-size: 12px; }
+  .hint { color: var(--muted); font-size: 12px; padding: 0 12px 8px; }
+
+  /* Phiếu */
+  #ticket { display: flex; flex-direction: column; min-height: 0; }
+  #ticketHead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 16px; background: var(--card); border-bottom: 1px solid var(--line); }
+  #ticketTitle { font-weight: 600; margin-right: auto; }
+  .chip { border-radius: 999px; padding: 2px 10px; font-size: 12px; border: 1px solid var(--line); background: #fff; color: var(--muted); }
+  .chip.warn { color: var(--warn); border-color: var(--warn-line); background: var(--warn-bg); }
+  .chip.sug { color: var(--primary); border-color: var(--primary-100); background: var(--primary-50); }
+  #fields { overflow-y: auto; padding: 12px 16px 24px; }
+  .empty { color: var(--muted); padding: 40px 16px; text-align: center; }
+  .field { display: grid; grid-template-columns: 180px 1fr; gap: 8px 12px; align-items: start; padding: 6px 8px; border-left: 3px solid transparent; border-radius: 4px; }
+  .field + .field { margin-top: 2px; }
+  .field.thieu { border-left-color: var(--warn-line); background: var(--warn-bg); }
+  .field.goiY { border-left-color: var(--primary-100); }
+  .field label { font-size: 13px; color: var(--muted); padding-top: 7px; }
+  .field label .st { display: block; font-size: 11px; }
+  .field.thieu label .st { color: var(--warn); font-weight: 600; }
+  .field.goiY label .st { color: var(--primary); }
+  .field.xacNhan label .st { color: var(--ok); }
+  .ctl { display: flex; gap: 6px; align-items: flex-start; }
+  .ctl input, .ctl textarea, .ctl select { flex: 1; width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--radius); font: inherit; background: #fff; }
+  .ctl textarea { min-height: 60px; resize: vertical; }
+  .ctl input[readonly] { background: var(--bg); color: var(--muted); }
+  .flags { margin: 8px 16px 0; display: flex; flex-direction: column; gap: 6px; }
+  .flag { font-size: 12px; padding: 6px 10px; border-radius: var(--radius); background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn-line); }
+
+  /* Danh sách */
+  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; background: var(--bg); }
+  tr.row { cursor: pointer; } tr.row:hover td { background: var(--primary-50); }
+  .lvl-Đỏ { color: var(--danger); font-weight: 600; } .lvl-Vàng { color: var(--warn); font-weight: 600; } .lvl-Xanh { color: var(--ok); font-weight: 600; }
+  pre { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; white-space: pre-wrap; font: 13px/1.5 ui-monospace, Consolas, monospace; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } #chat { border-right: 0; border-bottom: 1px solid var(--line); min-height: 50vh; } .field { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Phiếu yêu cầu CEO</h1>
+    <div class="sub">Trợ lý điều phối dựng phiếu từ câu anh gõ · chỉ phát hành khi đủ mọi trường</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-view="compose">Tạo phiếu</button>
+    <button class="tab" data-view="list" id="tabList">Phiếu đã phát hành</button>
+  </div>
+</header>
+
+<main id="compose">
+  <section id="chat">
+    <div id="msgs"></div>
+    <div id="composer">
+      <textarea id="input" rows="2" placeholder="Gõ yêu cầu, trả lời câu hỏi, hoặc dán phiếu đã điền… (Enter để gửi, Shift+Enter xuống dòng)"></textarea>
+      <button class="btn primary" id="send">Gửi</button>
+    </div>
+    <div class="hint" id="modeHint"></div>
+  </section>
+  <section id="ticket">
+    <div id="ticketHead">
+      <span id="ticketTitle">Chưa có phiếu</span>
+      <span class="chip warn" id="cMissing" hidden></span>
+      <span class="chip sug" id="cSug" hidden></span>
+      <button class="btn small" id="acceptAll" hidden>Đồng ý mọi gợi ý</button>
+      <button class="btn small" id="newBtn">Phiếu mới</button>
+      <button class="btn primary" id="confirm" disabled>Xác nhận phiếu</button>
+    </div>
+    <div class="flags" id="flags"></div>
+    <div id="fields"><div class="empty">Gõ yêu cầu ở khung chat bên trái để Trợ lý dựng phiếu nháp.</div></div>
+  </section>
+</main>
+
+<section id="list"></section>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().trim();
+  const pad = (n) => String(n).padStart(2, '0');
+  const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const dmy = (s) => { const [y, m, d] = s.split('-'); return `${d}/${m}/${y}`; };
+  const WD = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+  const MAX_Q = 5;
+  const STORE = 'ceoIntake.v1';
+
+  let schema = null;
+  let S = { fields: null, nghiepVu: null, cauHoi: [], pending: null, msgs: [] };
+
+  const save = () => { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch {} };
+  const load = () => { try { const v = JSON.parse(localStorage.getItem(STORE)); if (v && Array.isArray(v.msgs)) S = v; } catch {} };
+
+  const api = async (url, opt) => {
+    const r = await fetch(url, opt ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(opt) } : undefined);
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw Object.assign(new Error(j.error || 'Lỗi máy chủ'), { data: j });
+    return j;
+  };
+
+  // ---------- Câu hỏi ----------
+  const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  const addWorkdays = (d, n) => { const r = new Date(d); while (n > 0) { r.setDate(r.getDate() + 1); if (r.getDay() % 6) n--; } return r; };
+  const nextWd = (wd, extraWeek) => { const d = today(); let diff = (wd - d.getDay() + 7) % 7 || 7; d.setDate(d.getDate() + diff + (extraWeek ? 7 : 0)); return d; };
+  const dOpt = (d) => ({ label: `${WD[d.getDay()]} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}`, value: ymd(d) });
+  const NONE = [{ label: 'Không có', value: 'Không có' }];
+  const LEVELS = ['Xanh', 'Vàng', 'Đỏ'].map((x) => ({ label: x, value: x }));
+  const Q = {
+    mucTieu: { text: 'Mục tiêu của việc này là gì, và vì sao cần?' },
+    han: { text: 'Hạn chót khi nào? (chọn hoặc gõ dd/mm)', options: () => [dOpt(nextWd(5)), dOpt(nextWd(1)), dOpt(addWorkdays(today(), 5))] },
+    nguoiThucHien: { text: 'Đơn vị hoặc người nào thực hiện chính?' },
+    loaiViec: { text: 'Việc này thuộc loại nào (A–K)?', options: () => schema.loaiViec.map((x) => ({ label: `${x.ma} — ${x.ten}`, value: x.ma })) },
+    dauRa: { text: 'Đầu ra là gì (loại tài liệu, định dạng, độ dài)?', options: () => ['Báo cáo (Word/PDF), 1–3 trang', 'Tờ trình (Word/PDF), 1 trang', 'Bảng tính Excel'].map((x) => ({ label: x, value: x })) },
+    nguoiDungDauRa: { text: 'Ai sẽ đọc/dùng đầu ra, để làm gì?', options: () => ['CEO, để ra quyết định', 'Các trưởng đơn vị, tại họp giao ban'].map((x) => ({ label: x, value: x })) },
+    phamViNgoai: { text: 'Phạm vi KHÔNG bao gồm những gì?', options: () => [{ label: 'Không gồm triển khai, chỉ báo cáo', value: 'Không gồm triển khai, chỉ báo cáo' }, ...NONE] },
+    tieuChi: { text: 'Tiêu chí nghiệm thu? (3–5 tiêu chí, ngăn bằng dấu ;)' },
+    mucRuiRo: { text: 'Mức rủi ro?', options: () => LEVELS },
+    mucDuLieu: { text: 'Mức dữ liệu (theo mục 5)?', options: () => LEVELS },
+    phamViTrong: { text: 'Phạm vi bao gồm những gì?' },
+    phoiHop: { text: 'Bộ phận/người phối hợp?', options: () => NONE },
+    mocTrungGian: { text: 'Mốc trung gian (dàn ý / nháp / bản trình)?', options: () => NONE },
+    dauVao: { text: 'Đầu vào sẵn có (tài liệu, số liệu, văn bản tham chiếu)?', options: () => NONE },
+    rangBuoc: { text: 'Ràng buộc (pháp lý, ngân sách, nhân sự, thời gian, điều cấm)?', options: () => NONE },
+    ruiRoPhuThuoc: { text: 'Rủi ro và phụ thuộc (việc nào phải xong trước, ai có thể chặn)?', options: () => NONE },
+    nguoiDuyet: { text: 'Ai phê duyệt cuối?', options: () => ['CEO', 'Trưởng đơn vị chủ trì'].map((x) => ({ label: x, value: x })) },
+    tenViec: { text: 'Đặt tên việc ngắn gọn?' },
+    nguon: { text: 'Nguồn yêu cầu (chỉ đạo ngày… / cuộc họp… / người giao)?' },
+    luuTru: { text: 'Lưu ở thư mục nào?' }
+  };
+  const ORDER = Object.keys(Q);
+
+  const missingKeys = () => schema.fields.filter((f) => !f.auto && S.fields[f.key].status === 'thieu').map((f) => f.key);
+  const sugKeys = () => schema.fields.filter((f) => S.fields[f.key].status === 'goiY').map((f) => f.key);
+  const fieldDef = (k) => schema.fields.find((f) => f.key === k);
+
+  function matchDonVi(text) {
+    const n = norm(text);
+    let best = null, bestLen = 0;
+    for (const d of schema.donVi) {
+      for (const kw of [d.ten, d.ma, ...(d.tuKhoa || [])]) {
+        const k = norm(kw);
+        if (k && k.length > bestLen && new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(n)) { best = d; bestLen = k.length; }
+      }
+    }
+    return best;
+  }
+  function parseDate(text) {
+    const m = String(text).match(/(\d{1,2})\s*[\/.\-]\s*(\d{1,2})(?:\s*[\/.\-]\s*(\d{2,4}))?/);
+    if (!m) return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : null;
+    let y = m[3] ? +m[3] : today().getFullYear(); if (y < 100) y += 2000;
+    let d = new Date(y, +m[2] - 1, +m[1]);
+    if (isNaN(d) || d.getDate() !== +m[1]) return null;
+    if (!m[3] && d < today()) d = new Date(y + 1, +m[2] - 1, +m[1]);
+    return ymd(d);
+  }
+  function coerce(key, raw) {
+    const v = String(raw).trim();
+    if (!v) return { ok: false, why: 'Câu trả lời trống.' };
+    if (key === 'han') { const d = parseDate(v); return d ? { ok: true, value: d } : { ok: false, why: 'Em chưa đọc được ngày. Anh gõ dạng dd/mm hoặc chọn một phương án.' }; }
+    if (key === 'mucRuiRo' || key === 'mucDuLieu') {
+      const lv = ['Xanh', 'Vàng', 'Đỏ'].find((x) => norm(v).includes(norm(x)));
+      return lv ? { ok: true, value: lv } : { ok: false, why: 'Chỉ nhận Xanh, Vàng hoặc Đỏ.' };
+    }
+    if (key === 'loaiViec') { const m = v.match(/^\s*([A-Ka-k])\b/); return m ? { ok: true, value: m[1].toUpperCase() } : { ok: false, why: 'Loại việc là một chữ từ A đến K.' }; }
+    if (key === 'nguoiThucHien') { const d = matchDonVi(v); return { ok: true, value: d ? d.label : v }; }
+    if (key === 'tieuChi') return { ok: true, value: v.split(/;|\n/).map((s) => s.trim()).filter(Boolean).join('\n') };
+    return { ok: true, value: v };
+  }
+
+  // ---------- Chat ----------
+  function addMsg(role, text, extra) { S.msgs.push({ role, text, ...(extra || {}) }); renderMsgs(); save(); }
+  function renderMsgs() {
+    const box = $('#msgs');
+    box.innerHTML = S.msgs.map((m, i) => {
+      const last = i === S.msgs.length - 1;
+      const opts = m.options && last && S.pending === m.qKey
+        ? `<div class="opts">${m.options.map((o, j) => `<button class="opt" data-i="${j}">${esc(o.label)}</button>`).join('')}<button class="opt skip" data-skip="1">Bỏ qua</button></div>`
+        : (m.qKey && last && S.pending === m.qKey ? '<div class="opts"><button class="opt skip" data-skip="1">Bỏ qua</button></div>' : '');
+      return `<div class="msg ${m.role}"><div class="who">${m.role === 'ceo' ? 'CEO' : 'Trợ lý'}</div>${esc(m.text)}${opts}</div>`;
+    }).join('') || '<div class="msg bot"><div class="who">Trợ lý</div>Chào anh. Anh gõ yêu cầu bằng câu bình thường (ví dụ: "Lập báo cáo tình hình thành lập chi nhánh để họp giao ban thứ Hai"), hoặc dán nguyên phiếu đã điền theo mẫu.</div>';
+    box.scrollTop = box.scrollHeight;
+  }
+  $('#msgs').addEventListener('click', (e) => {
+    const b = e.target.closest('.opt'); if (!b || !S.pending) return;
+    const m = S.msgs[S.msgs.length - 1];
+    if (b.dataset.skip) { answer(null); return; }
+    const o = m.options[+b.dataset.i];
+    addMsg('ceo', o.label);
+    answer(o.value);
+  });
+
+  function askNext() {
+    S.pending = null;
+    const miss = missingKeys();
+    if (!miss.length) {
+      const sg = sugKeys().length;
+      addMsg('bot', sg ? `Phiếu đã đủ trường. Còn ${sg} trường là gợi ý của em (viền xanh nhạt) — anh rà lại rồi bấm "Xác nhận phiếu".` : 'Phiếu đã đủ và đã xác nhận hết. Anh bấm "Xác nhận phiếu" để phát hành.');
+      return;
+    }
+    const notAsked = miss.filter((k) => !S.cauHoi.some((q) => q.field === k));
+    if (S.cauHoi.length >= MAX_Q || !notAsked.length) {
+      addMsg('bot', `${S.cauHoi.length >= MAX_Q ? `Em đã hỏi đủ ${MAX_Q} câu. ` : ''}Còn ${miss.length} trường thiếu (viền cam bên phải): ${miss.map((k) => fieldDef(k).label).join(', ')}. Anh điền trực tiếp, hoặc gõ thêm thông tin để em tự điền.`);
+      return;
+    }
+    const key = ORDER.find((k) => notAsked.includes(k)) || notAsked[0];
+    const q = Q[key] || { text: `${fieldDef(key).label}?` };
+    const options = q.options ? q.options() : null;
+    S.pending = key;
+    S.cauHoi.push({ field: key, text: q.text, options: options ? options.map((o) => o.label) : [], answer: '' });
+    addMsg('bot', `Câu ${S.cauHoi.length}/${MAX_Q} — ${q.text}`, { qKey: key, options });
+  }
+
+  function answer(raw) {
+    const key = S.pending; if (!key) return;
+    const rec = S.cauHoi[S.cauHoi.length - 1];
+    if (raw == null) { rec.answer = '(bỏ qua)'; S.pending = null; renderFields(); askNext(); return; }
+    const r = coerce(key, raw);
+    if (!r.ok) { addMsg('bot', r.why); S.pending = key; renderMsgs(); return; }
+    S.fields[key] = { value: r.value, status: 'xacNhan' };
+    rec.answer = key === 'han' ? dmy(r.value) : r.value.replace(/\n/g, '; ');
+    renderFields();
+    askNext();
+  }
+
+  async function onSend() {
+    const text = $('#input').value.trim();
+    if (!text) return;
+    $('#input').value = '';
+    addMsg('ceo', text);
+    if (/^phi[eế]u m[oớ]i$/i.test(text)) { resetDraft(); return; }
+    if (S.fields && S.pending) { answer(text); return; }
+    $('#send').disabled = true;
+    try {
+      const d = await api('/api/draft', { text });
+      if (!S.fields) {
+        S.fields = d.fields; S.nghiepVu = d.nghiepVu; S.cauHoi = [];
+        const filled = schema.fields.filter((f) => !f.auto && d.fields[f.key].status !== 'thieu').length;
+        const total = schema.fields.filter((f) => !f.auto).length;
+        let note = `Em đã dựng phiếu nháp ${d.fields.soPhieu.value} (số tạm, cấp chính thức khi phát hành). Điền sẵn ${filled}/${total} trường.`;
+        if (d.nghiepVu) note += `\nKhớp nghiệp vụ ${d.nghiepVu.ma} · ${d.nghiepVu.ten}${d.nghiepVu.viDu ? ' (mục ví dụ trong danh mục — cần CEO chốt đơn vị chủ trì)' : ''}.`;
+        if (d.aiNote) note += '\n' + d.aiNote;
+        addMsg('bot', note);
+      } else {
+        const got = [];
+        for (const f of schema.fields) {
+          if (f.auto) continue;
+          if (S.fields[f.key].status === 'thieu' && d.fields[f.key].status !== 'thieu') { S.fields[f.key] = d.fields[f.key]; got.push(f.label); }
+        }
+        if (!S.nghiepVu && d.nghiepVu) S.nghiepVu = d.nghiepVu;
+        addMsg('bot', got.length ? `Em đã điền thêm: ${got.join(', ')}.` : 'Em chưa rút thêm được trường nào từ câu này. Anh sửa trực tiếp bên phải, hoặc gõ "phiếu mới" để làm phiếu khác.');
+      }
+      renderFields();
+      askNext();
+    } catch (e) {
+      addMsg('bot', 'Lỗi: ' + e.message);
+    } finally { $('#send').disabled = false; }
+  }
+  $('#send').addEventListener('click', onSend);
+  $('#input').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onSend(); } });
+
+  function resetDraft() {
+    S = { fields: null, nghiepVu: null, cauHoi: [], pending: null, msgs: [] };
+    save(); renderMsgs(); renderFields();
+  }
+  $('#newBtn').addEventListener('click', resetDraft);
+
+  // ---------- Phiếu ----------
+  const ST_TEXT = { thieu: 'Thiếu', goiY: 'Gợi ý', xacNhan: 'Đã xác nhận', auto: 'Tự sinh' };
+  function control(f, v) {
+    const val = esc(v.value);
+    const ro = f.auto ? ' readonly' : '';
+    if (f.type === 'textarea') return `<textarea data-k="${f.key}" placeholder="${esc(f.hint || '')}">${val}</textarea>`;
+    if (f.type === 'date') return `<input type="date" data-k="${f.key}" value="${val}" min="${schema.today}">`;
+    if (f.type === 'select') {
+      const opts = f.key === 'loaiViec' ? schema.loaiViec.map((x) => [x.ma, `${x.ma} — ${x.ten}`]) : (f.options || []).map((x) => [x, x]);
+      return `<select data-k="${f.key}"><option value="">— chọn —</option>${opts.map(([a, b]) => `<option value="${esc(a)}"${a === v.value ? ' selected' : ''}>${esc(b)}</option>`).join('')}</select>`;
+    }
+    if (f.type === 'donvi') return `<input data-k="${f.key}" list="dvList" value="${val}" placeholder="Gõ tên đơn vị hoặc người">`;
+    return `<input data-k="${f.key}" value="${val}" placeholder="${esc(f.hint || '')}"${ro}>`;
+  }
+  function renderFields() {
+    const box = $('#fields');
+    if (!S.fields) {
+      box.innerHTML = '<div class="empty">Gõ yêu cầu ở khung chat bên trái để Trợ lý dựng phiếu nháp.</div>';
+      $('#ticketTitle').textContent = 'Chưa có phiếu';
+      ['#cMissing', '#cSug', '#acceptAll'].forEach((s) => ($(s).hidden = true));
+      $('#confirm').disabled = true; $('#flags').innerHTML = ''; save(); return;
+    }
+    box.innerHTML = schema.fields.map((f) => {
+      const v = S.fields[f.key];
+      return `<div class="field ${v.status}" data-row="${f.key}"><label>${esc(f.label)}<span class="st">${ST_TEXT[v.status] || ''}</span></label>
+        <div class="ctl">${control(f, v)}${v.status === 'goiY' ? `<button class="btn small" data-accept="${f.key}" title="Đồng ý gợi ý">✓</button>` : ''}</div></div>`;
+    }).join('') + `<datalist id="dvList">${schema.donVi.filter((d) => !d.ngungHoatDong).map((d) => `<option value="${esc(d.label)}">`).join('')}</datalist>`;
+    updateHead();
+    save();
+  }
+  function updateHead() {
+    const miss = missingKeys().length, sg = sugKeys().length;
+    const t = S.fields.tenViec.value;
+    $('#ticketTitle').textContent = `PHIẾU YÊU CẦU — ${S.fields.soPhieu.value}${t ? ': ' + t : ''}`;
+    $('#cMissing').hidden = !miss; $('#cMissing').textContent = `Thiếu ${miss}`;
+    $('#cSug').hidden = !sg; $('#cSug').textContent = `Gợi ý ${sg}`;
+    $('#acceptAll').hidden = !sg;
+    $('#confirm').disabled = miss > 0;
+    $('#confirm').textContent = miss ? `Xác nhận phiếu (còn ${miss} thiếu)` : (sg ? `Xác nhận phiếu (chấp nhận ${sg} gợi ý)` : 'Xác nhận phiếu');
+    const flags = [];
+    if (S.fields.mucRuiRo.value === 'Đỏ') flags.push('Rủi ro Đỏ: mọi cổng của việc này phải chờ CEO duyệt.');
+    if (S.fields.mucDuLieu.value === 'Đỏ') flags.push('Dữ liệu Đỏ: nội dung không đưa vào agent, chỉ thông tin mô tả.');
+    if (S.nghiepVu && S.nghiepVu.viDu) flags.push(`Nghiệp vụ ${S.nghiepVu.ma} đang là mục ví dụ — đơn vị chủ trì chưa được CEO chốt.`);
+    if (schema.loaiViec.every((x) => /chưa khai báo/.test(x.ten))) flags.push('Danh sách Loại việc A–K chưa khai báo tên (sửa config/loai-viec.json).');
+    const tc = S.fields.tieuChi.value.split('\n').filter((s) => s.trim()).length;
+    if (tc && (tc < 3 || tc > 5)) flags.push(`Tiêu chí nghiệm thu cần 3–5 dòng (đang có ${tc}).`);
+    $('#flags').innerHTML = flags.map((x) => `<div class="flag">${esc(x)}</div>`).join('');
+  }
+  $('#fields').addEventListener('input', (e) => {
+    const k = e.target.dataset.k; if (!k || fieldDef(k).auto) return;
+    const v = e.target.value;
+    S.fields[k] = { value: v, status: v.trim() ? 'xacNhan' : 'thieu' };
+    const row = document.querySelector(`[data-row="${k}"]`);
+    row.className = `field ${S.fields[k].status}`;
+    row.querySelector('.st').textContent = ST_TEXT[S.fields[k].status];
+    const acc = row.querySelector('[data-accept]'); if (acc) acc.remove();
+    if (k === 'tenViec' && S.fields.luuTru.status === 'auto') {
+      S.fields.luuTru.value = S.fields.luuTru.value.replace(/(V\d+)-.*$/, '$1-' + norm(v).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50));
+      const lt = document.querySelector('[data-k="luuTru"]'); if (lt) lt.value = S.fields.luuTru.value;
+    }
+    updateHead(); save();
+  });
+  $('#fields').addEventListener('change', (e) => { if (e.target.tagName === 'SELECT' || e.target.type === 'date') renderFields(); });
+  $('#fields').addEventListener('click', (e) => {
+    const k = e.target.dataset.accept; if (!k) return;
+    S.fields[k].status = 'xacNhan'; renderFields();
+  });
+  $('#acceptAll').addEventListener('click', () => { for (const k of sugKeys()) S.fields[k].status = 'xacNhan'; renderFields(); });
+
+  $('#confirm').addEventListener('click', async () => {
+    $('#confirm').disabled = true;
+    try {
+      const r = await api('/api/phieu', { fields: S.fields, cauHoi: S.cauHoi, nghiepVu: S.nghiepVu });
+      const nguoi = S.fields.nguoiThucHien.value;
+      S = { fields: null, nghiepVu: null, cauHoi: [], pending: null, msgs: S.msgs };
+      addMsg('bot', `Đã phát hành ${r.soPhieu}. Phiếu giao việc đã gửi tới: ${nguoi}.\nLưu tại ${r.file} và ${r.giaoViec}.\nAnh gõ yêu cầu tiếp theo để làm phiếu mới.`);
+      renderFields(); refreshCount();
+    } catch (e) {
+      const errs = e.data && e.data.errors;
+      addMsg('bot', errs ? 'Chưa phát hành được:\n- ' + errs.join('\n- ') : 'Lỗi: ' + e.message);
+      updateHead();
+    }
+  });
+
+  // ---------- Danh sách phiếu ----------
+  async function refreshCount() {
+    try { const l = await api('/api/phieu'); $('#tabList').textContent = `Phiếu đã phát hành (${l.length})`; return l; } catch { return []; }
+  }
+  async function showList() {
+    const l = await refreshCount();
+    $('#list').innerHTML = l.length
+      ? `<table><thead><tr><th>Số</th><th>Tên việc</th><th>Người thực hiện</th><th>Hạn</th><th>Rủi ro</th><th>Trạng thái</th></tr></thead><tbody>${l.map((p) => `<tr class="row" data-so="${esc(p.soPhieu)}"><td>${esc(p.soPhieu)}</td><td>${esc(p.tenViec)}</td><td>${esc(p.nguoiThucHien)}</td><td>${p.han ? esc(dmy(p.han)) : ''}</td><td class="lvl-${esc(p.mucRuiRo)}">${esc(p.mucRuiRo)}</td><td>${esc(p.trangThai)}</td></tr>`).join('')}</tbody></table><div id="detail"></div>`
+      : '<div class="empty">Chưa có phiếu nào được phát hành.</div>';
+  }
+  $('#list').addEventListener('click', async (e) => {
+    const tr = e.target.closest('tr.row'); if (!tr) return;
+    const p = await api('/api/phieu/' + tr.dataset.so);
+    $('#detail').innerHTML = `<pre>${esc(p.markdown.replace(/```\n?/g, ''))}</pre>`;
+  });
+  document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('active', x === t));
+    document.body.classList.toggle('view-list', t.dataset.view === 'list');
+    if (t.dataset.view === 'list') showList();
+  }));
+
+  // ---------- Khởi động ----------
+  (async () => {
+    schema = await api('/api/schema');
+    $('#modeHint').textContent = schema.ai ? 'Chế độ: Claude đọc câu tự do + quy tắc.' : 'Chế độ: quy tắc (đặt ANTHROPIC_API_KEY để Claude đọc câu tự do tốt hơn).';
+    load();
+    if (S.fields && !S.fields.soPhieu) S.fields = null;
+    renderMsgs(); renderFields(); refreshCount();
+  })().catch((e) => { $('#msgs').innerHTML = `<div class="msg bot">Không tải được cấu hình: ${esc(e.message)}</div>`; });
+})();
+</script>
+</body>
+</html>

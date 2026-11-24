@@ -1,0 +1,16 @@
+{
+  "_ghiChu": "Danh sách Loại việc A–K theo 'mục 3' của quy định. Tên hiện là chỗ trống — sửa 'ten' và 'tuKhoa' (không dấu) cho đúng quy định thật.",
+  "loaiViec": [
+    { "ma": "A", "ten": "Loại A (chưa khai báo)", "tuKhoa": [] },
+    { "ma": "B", "ten": "Loại B (chưa khai báo)", "tuKhoa": [] },
+    { "ma": "C", "ten": "Loại C (chưa khai báo)", "tuKhoa": [] },
+    { "ma": "D", "ten": "Loại D (chưa khai báo)", "tuKhoa": [] },
+    { "ma": "E", "ten": "Loại E (chưa khai báo)", "tuKhoa": [] },
+    { "ma": "F", "ten": "Loại F (chưa khai báo)", "tuKhoa": [] },
+    { "ma": "G", "ten": "Loại G (chưa khai báo)", "tuKhoa": [] },
+    { "ma": "H", "ten": "Loại H (chưa khai báo)", "tuKhoa": [] },
+    { "ma": "I", "ten": "Loại I (chưa khai báo)", "tuKhoa": [] },
+    { "ma": "J", "ten": "Loại J (chưa khai báo)", "tuKhoa": [] },
+    { "ma": "K", "ten": "Loại K (chưa khai báo)", "tuKhoa": [] }
+  ]
+}
