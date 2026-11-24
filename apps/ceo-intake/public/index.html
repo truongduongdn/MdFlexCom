@@ -78,6 +78,39 @@
   tr.row { cursor: pointer; } tr.row:hover td { background: var(--primary-50); }
   .lvl-Đỏ { color: var(--danger); font-weight: 600; } .lvl-Vàng { color: var(--warn); font-weight: 600; } .lvl-Xanh { color: var(--ok); font-weight: 600; }
   pre { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; white-space: pre-wrap; font: 13px/1.5 ui-monospace, Consolas, monospace; }
+  /* Sơ đồ vận hành */
+  .view-ops main { display: none; }
+  #ops { display: none; flex: 1; min-height: 0; overflow: auto; padding: 16px 20px 32px; }
+  .view-ops #ops { display: block; }
+  .ops-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0; max-width: 900px; margin: 0 auto; }
+  .node { border: 1px solid var(--line); background: var(--card); border-radius: var(--radius); padding: 8px 14px; text-align: center; min-width: 220px; }
+  .node b { display: block; font-size: 14px; }
+  .node small { display: block; color: var(--muted); font-size: 12px; }
+  .node.ceo { border: 2px solid var(--primary); background: var(--primary-50); }
+  .node.ksv { border-style: dashed; }
+  .ksv-wrap { display: flex; align-items: center; justify-content: flex-end; }
+  .dash { width: 28px; border-top: 2px dashed #cbd5e1; }
+  .vline { width: 2px; height: 18px; background: #cbd5e1; margin: 0 auto; }
+  .ops-mid { display: flex; flex-direction: column; align-items: center; }
+  .flows { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin: 12px 0 14px; font-size: 12px; color: var(--muted); }
+  .flows span b { font-weight: 600; }
+  .f-down { color: #1d4ed8; } .f-side { color: #c2410c; } .f-up { color: #047857; }
+  .depts { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; align-items: start; border-top: 2px solid #cbd5e1; padding-top: 14px; }
+  .dept { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .dept-h { padding: 8px 12px; background: var(--bg); border-bottom: 1px solid var(--line); cursor: pointer; }
+  .dept-h .tier { font-size: 11px; color: var(--muted); }
+  .u { display: flex; align-items: baseline; gap: 8px; padding: 6px 12px; border-top: 1px solid var(--line); cursor: pointer; font-size: 13px; }
+  .dept-h:hover, .u:hover { background: var(--primary-50); }
+  .u .nm, .dept-h .nm { font-weight: 600; }
+  .u .mg, .dept-h .mg { color: var(--muted); font-size: 12px; margin-left: auto; text-align: right; }
+  .noMgr > .mg, .dept-h.noMgr .mg { color: var(--warn); font-weight: 600; }
+  .off .nm { color: var(--muted); text-decoration: line-through; }
+  .badge { font-size: 11px; border-radius: 999px; padding: 1px 8px; background: var(--primary-50); color: var(--primary); border: 1px solid var(--primary-100); white-space: nowrap; }
+  .badge.late { background: #fef2f2; color: var(--danger); border-color: #fecaca; }
+  .sel { outline: 2px solid var(--primary); outline-offset: -2px; }
+  #opsDetail { margin-top: 16px; }
+  #opsDetail h3 { font-size: 14px; margin: 0 0 8px; }
+  .ops-legend { font-size: 12px; color: var(--muted); margin-top: 10px; }
   @media (max-width: 900px) { main { grid-template-columns: 1fr; } #chat { border-right: 0; border-bottom: 1px solid var(--line); min-height: 50vh; } .field { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -89,6 +122,7 @@
   </div>
   <div class="tabs">
     <button class="tab active" data-view="compose">Tạo phiếu</button>
+    <button class="tab" data-view="ops">Sơ đồ vận hành</button>
     <button class="tab" data-view="list" id="tabList">Phiếu đã phát hành</button>
   </div>
 </header>
@@ -117,6 +151,7 @@
 </main>
 
 <section id="list"></section>
+<section id="ops"></section>
 
 <script>
 (() => {
@@ -426,8 +461,77 @@
   document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('active', x === t));
     document.body.classList.toggle('view-list', t.dataset.view === 'list');
+    document.body.classList.toggle('view-ops', t.dataset.view === 'ops');
     if (t.dataset.view === 'list') showList();
+    if (t.dataset.view === 'ops') showOps();
   }));
+
+  // ---------- Sơ đồ vận hành ----------
+  let OPS = null, opsSel = null;
+  async function showOps() {
+    OPS = await api('/api/van-hanh');
+    const units = OPS.donVi;
+    const kids = (ma) => units.filter((u) => u.thuoc === ma);
+    const desc = (ma) => { const out = [ma]; for (const k of kids(ma)) out.push(...desc(k.ma)); return out; };
+    const stat = (ma, deep) => {
+      const set = deep ? desc(ma) : [ma];
+      const g = OPS.giaoViec.filter((x) => set.includes(x.donVi) && x.trangThai !== 'Xong');
+      return { n: g.length, late: g.filter((x) => x.quaHan).length };
+    };
+    const badge = (st) => st.n ? `<span class="badge${st.late ? ' late' : ''}">${st.n} việc${st.late ? ` · ${st.late} trễ` : ''}</span>` : '';
+    const row = (u, depth) => {
+      const st = stat(u.ma, true);
+      return `<div class="u${u.quanLy ? '' : ' noMgr'}${u.ngungHoatDong ? ' off' : ''}" data-ma="${esc(u.ma)}" style="padding-left:${12 + depth * 16}px">
+        <span class="nm">${depth > 1 ? '└ ' : ''}${esc(u.ten)}</span>${badge(st)}<span class="mg">${u.ngungHoatDong ? 'Ngừng hoạt động · ' : ''}${esc(u.quanLy || 'Chưa gán quản lý')}</span></div>`
+        + kids(u.ma).map((k) => row(k, depth + 1)).join('');
+    };
+    const root = units.find((u) => !u.thuoc) || { ma: '', ten: 'Tổ chức', quanLy: '' };
+    const top = kids(root.ma).sort((a, b) => desc(b.ma).length - desc(a.ma).length);
+    const all = { n: OPS.giaoViec.filter((x) => x.trangThai !== 'Xong').length, late: OPS.giaoViec.filter((x) => x.quaHan).length };
+    const unassigned = OPS.giaoViec.filter((x) => !x.donVi).length;
+    $('#ops').innerHTML = `
+      <div class="ops-top">
+        <div class="ksv-wrap"><div class="node ksv"><b>Kiểm soát viên</b><small>chỉ đọc · báo cáo độc lập lên CEO</small></div><div class="dash"></div></div>
+        <div class="node ceo"><b>CEO</b><small>giao mục tiêu · duyệt cổng</small></div>
+        <div></div>
+      </div>
+      <div class="ops-mid"><div class="vline"></div>
+        <div class="node"><b>Trợ lý điều phối</b><small>${all.n} việc đang mở${all.late ? ` · <span style="color:var(--danger)">${all.late} trễ</span>` : ''}${unassigned ? ` · ${unassigned} chưa khớp đơn vị` : ''}</small></div>
+        <div class="vline"></div>
+        <div class="node"><b>${esc(root.ten)}</b><small>${esc(root.quanLy || '')} · ${units.length} đơn vị</small></div>
+        <div class="vline"></div>
+      </div>
+      <div class="flows">
+        <span class="f-down"><b>↓ Giao việc:</b> CEO → Trợ lý → Trưởng đơn vị → Chuyên viên</span>
+        <span class="f-side"><b>↔ Quy trình:</b> chỉ trưởng đơn vị ký bàn giao ngang, phòng nhận trả lời trong 15 phút</span>
+        <span class="f-up"><b>↑ Đề xuất:</b> vướng / quá 80% SLA / chạm cổng duyệt → leo từng cấp</span>
+      </div>
+      <div class="depts">${top.map((d) => {
+        const st = stat(d.ma, true);
+        return `<div class="dept"><div class="dept-h${d.quanLy ? '' : ' noMgr'}" data-ma="${esc(d.ma)}">
+            <div class="tier">Trưởng đơn vị · ${esc(d.ma)}</div>
+            <div style="display:flex;gap:8px;align-items:baseline"><span class="nm">${esc(d.ten)}</span>${badge(st)}<span class="mg">${esc(d.quanLy || 'Chưa gán quản lý')}</span></div>
+          </div>${kids(d.ma).map((k) => row(k, 1)).join('')}</div>`;
+      }).join('')}</div>
+      <div class="ops-legend">Bấm vào một đơn vị để xem việc đang giao. Chữ cam: chưa gán quản lý · gạch ngang: ngừng hoạt động · đỏ: có việc quá hạn. Cây lấy từ config/don-vi.json.</div>
+      <div id="opsDetail"></div>`;
+    if (opsSel) showUnit(opsSel);
+  }
+  function showUnit(ma) {
+    opsSel = ma;
+    document.querySelectorAll('#ops .sel').forEach((x) => x.classList.remove('sel'));
+    document.querySelectorAll(`#ops [data-ma="${CSS.escape(ma)}"]`).forEach((x) => x.classList.add('sel'));
+    const units = OPS.donVi;
+    const desc = (m) => { const out = [m]; for (const k of units.filter((u) => u.thuoc === m)) out.push(...desc(k.ma)); return out; };
+    const set = desc(ma);
+    const u = units.find((x) => x.ma === ma);
+    const g = OPS.giaoViec.filter((x) => set.includes(x.donVi)).sort((a, b) => (b.quaHan - a.quaHan) || String(a.han).localeCompare(String(b.han)));
+    const unitName = (m) => (units.find((x) => x.ma === m) || {}).ten || m;
+    $('#opsDetail').innerHTML = `<h3>${esc(u.ten)} — ${g.length ? g.length + ' việc' : 'chưa có việc nào'}</h3>` + (g.length
+      ? `<table><thead><tr><th>Phiếu</th><th>Tên việc</th><th>Đơn vị</th><th>Hạn</th><th>Rủi ro</th><th>Trạng thái</th></tr></thead><tbody>${g.map((x) => `<tr><td>${esc(x.phieuGoc)}</td><td>${esc(x.tenViec)}</td><td>${esc(unitName(x.donVi))}</td><td${x.quaHan ? ' class="lvl-Đỏ"' : ''}>${x.han ? esc(dmy(x.han)) : ''}${x.quaHan ? ' · trễ' : ''}</td><td class="lvl-${esc(x.mucRuiRo)}">${esc(x.mucRuiRo)}</td><td>${esc(x.trangThai)}</td></tr>`).join('')}</tbody></table>`
+      : '<div class="empty" style="padding:16px">Đơn vị này chưa nhận phiếu giao việc nào.</div>');
+  }
+  $('#ops').addEventListener('click', (e) => { const el = e.target.closest('[data-ma]'); if (el) showUnit(el.dataset.ma); });
 
   // ---------- Khởi động ----------
   (async () => {

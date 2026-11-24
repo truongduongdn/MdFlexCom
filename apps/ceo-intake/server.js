@@ -409,6 +409,31 @@ function listPhieu() {
   }).filter(Boolean);
 }
 
+// ---------- Sơ đồ vận hành: cây tổ chức + phiếu giao việc theo đơn vị ----------
+function vanHanh() {
+  const cfg = loadConfig();
+  const t = ymd(today());
+  const giaoViec = fs.readdirSync(GIAO_VIEC_DIR).filter((f) => f.endsWith('.json')).map((f) => {
+    const g = readJson(path.join(GIAO_VIEC_DIR, f), null);
+    if (!g) return null;
+    const p = readJson(path.join(PHIEU_DIR, g.phieuGoc + '.json'), null);
+    const code = (String(g.nguoiNhan || '').match(/\(([^()]+)\)/) || [])[1];
+    const dv = cfg.donVi.find((d) => d.ma === code) || matchDonVi(norm(g.nguoiNhan), cfg.donVi)[0] || null;
+    return {
+      ma: g.ma, phieuGoc: g.phieuGoc, donVi: dv ? dv.ma : null, nguoiNhan: g.nguoiNhan,
+      tenViec: p && p.fields.tenViec ? p.fields.tenViec.value : '',
+      mucRuiRo: p && p.fields.mucRuiRo ? p.fields.mucRuiRo.value : '',
+      han: g.han, trangThai: g.trangThai,
+      quaHan: !!(g.han && g.han < t && g.trangThai !== 'Xong')
+    };
+  }).filter(Boolean);
+  return {
+    homNay: t,
+    donVi: cfg.donVi.map((d) => ({ ma: d.ma, ten: d.ten, thuoc: d.thuoc, quanLy: d.quanLy, ngungHoatDong: !!d.ngungHoatDong })),
+    giaoViec
+  };
+}
+
 // ---------- HTTP ----------
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml' };
 const send = (res, status, obj) => { res.writeHead(status, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(obj)); };
@@ -456,6 +481,7 @@ const server = http.createServer(async (req, res) => {
       return send(res, r.status, r.body);
     }
     if (p === '/api/phieu' && req.method === 'GET') return send(res, 200, listPhieu());
+    if (p === '/api/van-hanh' && req.method === 'GET') return send(res, 200, vanHanh());
     const m = p.match(/^\/api\/phieu\/(V\d{3,})$/);
     if (m && req.method === 'GET') {
       const f = path.join(PHIEU_DIR, m[1] + '.json');

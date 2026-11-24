@@ -10,6 +10,12 @@ Cần Node.js 18 trở lên. Không cần `npm install`.
 - Mở trình duyệt: http://localhost:3100
 - Đổi cổng: `set PORT=3200` (Windows) rồi `node server.js`.
 
+## Ba màn hình
+
+- **Tạo phiếu:** khung chat + phiếu nháp.
+- **Sơ đồ vận hành:** CEO → Trợ lý điều phối → cây tổ chức (lấy từ `config/don-vi.json`), kèm Kiểm soát viên và 3 luồng (giao việc / quy trình / đề xuất). Mỗi đơn vị hiện số việc đang mở và số việc trễ; bấm vào đơn vị để xem danh sách việc. Đổi cơ cấu (vd sang MdFlex) chỉ cần sửa `config/don-vi.json`.
+- **Phiếu đã phát hành:** danh sách và nội dung từng phiếu.
+
 ## Hai chế độ đọc câu
 
 - **Quy tắc (mặc định):** nhận diện đơn vị, nghiệp vụ, ngày, loại đầu ra bằng từ khoá.
