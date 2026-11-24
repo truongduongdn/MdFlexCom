@@ -377,7 +377,16 @@
     }
     updateHead(); save();
   });
-  $('#fields').addEventListener('change', (e) => { if (e.target.tagName === 'SELECT' || e.target.type === 'date') renderFields(); });
+  $('#fields').addEventListener('change', (e) => {
+    const k = e.target.dataset.k;
+    // CEO điền thẳng vào trường đang được hỏi → coi như đã trả lời, chuyển sang câu tiếp
+    if (k && k === S.pending && S.fields[k].value.trim()) {
+      const rec = S.cauHoi[S.cauHoi.length - 1];
+      if (rec && rec.field === k) rec.answer = S.fields[k].value.replace(/\n/g, '; ');
+      renderFields(); askNext(); return;
+    }
+    if (e.target.tagName === 'SELECT' || e.target.type === 'date') renderFields();
+  });
   $('#fields').addEventListener('click', (e) => {
     const k = e.target.dataset.accept; if (!k) return;
     S.fields[k].status = 'xacNhan'; renderFields();

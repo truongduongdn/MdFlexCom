@@ -195,7 +195,8 @@ function buildDraft(text) {
   function freeText() {
   // Tên việc: câu đầu tiên, bỏ lời dẫn
   let ten = String(text).split(/[\n.!?]/)[0].replace(/\s+(để|nhằm)\s+.*$/i, '').replace(/[,;]?\s*(hạn|trước|deadline)\b.*$/i, '');
-  ten = ten.replace(/^(anh|em|chị|hãy|làm ơn|nhờ|cần|yêu cầu|giao)\s+/i, '').trim();
+  // Bỏ lời dẫn ở đầu câu (có thể nhiều lớp: "Tôi cần", "Anh muốn", "Bạn hãy"…)
+  for (let i = 0; i < 3; i++) ten = ten.replace(/^(tôi|anh|em|chị|bạn|mình|hãy|làm ơn|nhờ|cần|muốn|yêu cầu|giao)\s+/i, '').trim();
   if (ten.length > 80) ten = ten.slice(0, 77).trim() + '…';
   if (ten && !/^phieu yeu cau/.test(norm(ten))) set('tenViec', ten.charAt(0).toUpperCase() + ten.slice(1));
 
