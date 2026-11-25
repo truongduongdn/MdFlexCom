@@ -30,6 +30,7 @@ docs/doi-quan-ai/
 apps/ceo-intake/             Khung chat Phiếu yêu cầu CEO (Node thuần, cổng 3100)
 apps/mo-hinh-3d/             Mô hình 3D công ty, Canvas 9 thành tố, chức năng 5 phòng,
                              Thiết kế AI qua Perplexity, danh mục thành lập (Node thuần, cổng 3200)
+van-hanh/                    Chạy trên máy thật: khởi động 1 cú bấm, kiểm tra, sao lưu
 AGENTS.md                    Quy tắc cho agent lập trình (Codex / Claude Code)
 ```
 
@@ -38,6 +39,8 @@ Tài liệu gốc có sơ đồ nằm trên Claude: https://claude.ai/artifact/9
 ## Chạy các app
 
 Cần Node.js 18+, không cần `npm install`. Cả hai máy chủ chỉ nghe trên `127.0.0.1`.
+
+**Dùng thật trên máy chính:** bấm đúp `van-hanh\chay-mdflex.bat` để chạy kiểm tra, sao lưu, bật cả hai app và mở Bảng CEO. Cài đặt, sao lưu, khôi phục, cập nhật: [van-hanh/README.md](van-hanh/README.md).
 
 **Khung chat Phiếu yêu cầu CEO** — http://localhost:3100
 
