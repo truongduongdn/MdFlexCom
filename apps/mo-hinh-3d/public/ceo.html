@@ -140,6 +140,7 @@ a.lnk{color:var(--accent)}
   </div>
 </div>
 
+<script src="/co-cau.js"></script>
 <script>
 fetch("/api/tai-khoan").then(r=>r.json()).then(t=>{ const a=document.getElementById("acct"); if(!a||!t.email||t.email==="Không có") return; a.innerHTML="Người giao: <b></b> · <span></span>"; a.querySelector("b").textContent=t.vai; a.querySelector("span").textContent=t.email; a.hidden=false; }).catch(()=>{});
 (async function(){
@@ -159,7 +160,7 @@ function tuoi(ms){ const m=Math.round(ms/60000); if(m<60) return m+" phút"; con
 const vaoTT=x=>Date.parse(x.nhat_ky[x.nhat_ky.length-1].luc);
 const ngay=d=>new Date(d).toLocaleDateString("vi-VN");
 const phongTag=id=>id&&PH[id]?`<span class="dept-${id}"><span class="dot"></span></span>${esc(PH[id].ten_ngan)}`:"Chung";
-const lnk=x=>`<a class="lnk mono" href="/phong.html?id=${esc(x.phong||x.phong_giao||"kd")}">${esc(x.ma)}</a>`;
+const lnk=x=>`<a class="lnk mono" href="/phong.html?id=${esc(x.phong||x.phong_giao||CFG.phong[0].id)}">${esc(x.ma)}</a>`;
 
 let L=[];
 async function tai(){

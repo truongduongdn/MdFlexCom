@@ -80,6 +80,22 @@ Mở http://localhost:3200. Máy chủ chỉ nghe trên 127.0.0.1.
 | `PERPLEXITY_API_KEY` | (không có) | Khoá API Perplexity. Không có thì tab Thiết kế AI báo chưa kết nối |
 | `PERPLEXITY_MODEL` | `perplexity/auto` | Model trên Orchestrator API, dạng `creator/model-name` |
 | `PORT` | `3200` | Cổng máy chủ |
+| `CO_CAU` | (để trống = MdFlex) | Cơ cấu tổ chức. Để trống: `config/phong.json`, `config/canvas.json` (MdFlex, như cũ). `CO_CAU=vien-gut`: `config/co-cau/vien-gut/phong.json` |
+
+## Chạy với cơ cấu khác (CO_CAU)
+
+Mỗi máy chạy một cơ cấu: máy chính chạy MdFlex (không đặt `CO_CAU`), máy phụ chạy Viện Gút.
+
+```powershell
+$env:CO_CAU = "vien-gut"; node server.js     # hoặc bấm đúp van-hanh\chay-vien-gut.bat ở gốc repo
+```
+
+- Cơ cấu nằm ở `config/co-cau/<tên>/phong.json` (bắt buộc) và `canvas.json` (tuỳ chọn, cùng mẫu với `config/canvas.json`). **Không sửa `config/phong.json` của MdFlex** khi làm cơ cấu khác.
+- Mọi trang đọc cơ cấu qua `/co-cau.js` (nạp trước script trang, đặt `window.CO_CAU`) hoặc `/api/phong`; `/api/co-cau` cho biết cơ cấu đang chạy. Lời dặn gửi Claude cũng lấy tên tổ chức theo cơ cấu.
+- Trường thêm của phong.json cơ cấu khác: `to_chuc`, `ten_day_du`, `khau_hieu`, `gioi_thieu` (câu giới thiệu gửi Claude), `moc_mo_ta`, và ở mỗi phòng `mau: {sang, toi}` (màu theo bảng màu thương hiệu), `tang` (gắn tầng toà nhà, `null` = chưa gắn), `chia_to_de_xuat`.
+- Cơ cấu Viện Gút sinh từ `apps/ceo-intake/config/don-vi.json` bằng `node config/co-cau/vien-gut/tao-phong.js` (thêm `--ghi-de` để sinh lại; mọi sửa tay trong phong.json sẽ mất). Sau khi sinh, phong.json là dữ liệu do người dùng quản lý: chức năng, KPI, thẻ vị trí AI đang để "Chưa khai báo"/đề xuất.
+- Dữ liệu phiếu vẫn ở `data/` chung. Phiếu thuộc phòng không có trong cơ cấu đang chạy vẫn hiện (nhãn "Chung") nhưng mọi thao tác bị chặn (409).
+- Tab Thành lập và kế hoạch mốc G0–G3 là nội dung riêng của MdFlex, chỉ hiện khi chạy MdFlex.
 
 ## Thiết kế AI hoạt động thế nào
 
@@ -117,7 +133,9 @@ Hạn chế: chưa có đăng nhập — "vai đang thao tác" chọn trên tran
 | `GET /api/thuong-hieu` | Bộ nhận diện |
 | `GET /api/canvas` | Canvas, tầm nhìn, chức năng phòng |
 | `GET /api/thiet-ke` | 30 bản thiết kế gần nhất |
-| `GET /api/phong` | Dữ liệu 5 phòng, tổ, vị trí, thẻ vị trí AI, mẫu bàn giao (`config/phong.json`) |
+| `GET /api/phong` | Dữ liệu phòng, tổ, vị trí, thẻ vị trí AI, mẫu bàn giao của cơ cấu đang chạy (MdFlex: `config/phong.json`) |
+| `GET /api/co-cau` | Cơ cấu đang chạy: `id`, `ten`, tệp cấu hình, số phòng, có Canvas không |
+| `GET /co-cau.js` | Script nạp cơ cấu cho các trang (`window.CO_CAU`, màu phòng) |
 | `GET /api/phieu?phong=kd` | Phiếu phòng nhận hoặc gửi đi, kèm `ty_le_sla`, `qua_han` |
 | `POST /api/phieu` | Tạo phiếu: `ai, loai, nguoi_giao, nguoi_nhan, muc_tieu, dau_vao, dau_ra, tieu_chi[], uu_tien, cong, phieu_cha, ghi_chu_rui_ro` |
 | `POST /api/phieu/PH-0001/hanh-dong` | `{ hanh_dong, ai, ly_do, tieu_chi[] }` — `nhan, bat_dau, nop, nghiem_thu, tra_lai, vuong, go_vuong, ceo_duyet, ceo_tra_lai` |

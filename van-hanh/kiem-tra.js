@@ -106,6 +106,29 @@ function kiemCauHinh3d() {
   for (const k of ['P1_gio', 'P2_gio', 'P3_gio']) if (!(phong.sla && phong.sla[k] > 0)) loi(`phong.json: thiếu SLA ${k}`);
   if (!fs.existsSync(path.join(dir, 'thuong-hieu.json'))) loi('Thiếu config/thuong-hieu.json (bộ nhận diện)');
 
+  // Cơ cấu theo biến CO_CAU: MdFlex (để trống) dùng config/phong.json; khác thì config/co-cau/<tên>/phong.json
+  const coCau = (process.env.CO_CAU || '').trim().toLowerCase();
+  const dsCoCau = fs.existsSync(path.join(dir, 'co-cau')) ? fs.readdirSync(path.join(dir, 'co-cau')).filter((n) => fs.existsSync(path.join(dir, 'co-cau', n, 'phong.json'))) : [];
+  if (coCau && coCau !== 'mdflex' && !dsCoCau.includes(coCau)) loi(`CO_CAU=${coCau} nhưng không có config/co-cau/${coCau}/phong.json (có sẵn: ${dsCoCau.join(', ') || 'không'})`);
+  else dat(`Cơ cấu đang dùng: ${coCau && coCau !== 'mdflex' ? coCau + ' (CO_CAU)' : 'MdFlex (CO_CAU để trống)'}`);
+  for (const n of dsCoCau) {
+    const c = thuDocJson(path.join(dir, 'co-cau', n, 'phong.json'), `co-cau/${n}/phong.json`);
+    if (!c) continue;
+    const p = c.phong || [];
+    const ma = [...(c.vi_tri_chung || []).map((v) => v.ma), ...p.flatMap((x) => [x.truong_phong && x.truong_phong.ai && x.truong_phong.ai.ma, ...(x.to || []).flatMap((t) => (t.ai || []).map((a) => a.ma))])];
+    const trung = ma.filter((m, i) => ma.indexOf(m) !== i);
+    if (trung.length) loi(`co-cau/${n}: trùng mã vị trí ${[...new Set(trung)].join(', ')}`);
+    for (const x of p) {
+      if (!/^[a-z0-9-]+$/.test(x.id || '')) loi(`co-cau/${n}: mã phòng "${x.id}" chỉ được dùng chữ thường không dấu, số, gạch ngang`);
+      if (!(x.to || []).some((t) => (t.ai || []).length)) loi(`co-cau/${n}: phòng ${x.id} không có chuyên viên AI nào — Trưởng phòng sẽ không chia được việc`);
+    }
+    const tang = p.map((x) => x.tang).filter(Boolean);
+    if (tang.length !== new Set(tang).size) loi(`co-cau/${n}: hai phòng cùng gắn một tầng`);
+    if (!Array.isArray(c.moc) || !c.moc.length || p.some((x) => (x.truong_phong.so_nguoi || []).length !== c.moc.length)) loi(`co-cau/${n}: số phần tử so_nguoi phải bằng số mốc (moc)`);
+    if (!c.sla || !Array.isArray(c.cong_ceo)) loi(`co-cau/${n}: thiếu sla hoặc cong_ceo`);
+    dat(`co-cau/${n}/phong.json: ${p.length} phòng, ${p.reduce((a, x) => a + x.to.length, 0)} tổ${tang.length ? ', ' + tang.length + ' phòng đã gắn tầng' : ', chưa gắn tầng'}`);
+  }
+
   const tk = path.join(dir, 'tai-khoan.json');
   if (!fs.existsSync(tk)) canhBao('Chưa có config/tai-khoan.json — chép từ tai-khoan.example.json rồi điền email người giao mặc định');
   else {
@@ -190,15 +213,17 @@ async function kiemCong() {
 }
 
 // ---------- 6. Chạy thử trên bản sao ----------
-async function chayBanSao(app) {
+async function chayBanSao(app, tuyChon = {}) {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mdflex-kiem-tra-'));
   fs.cpSync(app.dir, tmp, {
     recursive: true,
     filter: (src) => path.relative(app.dir, src).split(path.sep)[0] !== 'data'
   });
+  if (tuyChon.truocKhiChay) tuyChon.truocKhiChay(tmp);
   const port = await congNgauNhien();
   const env = { ...process.env, PORT: String(port) };
-  for (const k of ['ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL', 'PERPLEXITY_API_KEY', 'PERPLEXITY_API_URL']) delete env[k];
+  for (const k of ['ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL', 'PERPLEXITY_API_KEY', 'PERPLEXITY_API_URL', 'CO_CAU']) delete env[k];
+  if (tuyChon.coCau) env.CO_CAU = tuyChon.coCau;
   const proc = spawn(process.execPath, ['server.js'], { cwd: tmp, env, stdio: ['ignore', 'pipe', 'pipe'] });
   let log = '';
   proc.stdout.on('data', (d) => { log += d; });
@@ -269,11 +294,13 @@ async function thuCeo() {
 }
 
 async function thu3d() {
-  muc('6b. Chạy thử Mô hình 3D trên bản sao');
+  muc('6b. Chạy thử Mô hình 3D trên bản sao — cơ cấu MdFlex (gỡ CO_CAU)');
   const s = await chayBanSao(APPS.m3d);
   try {
     if (s.proc.exitCode != null) { loi('Máy chủ không khởi động được:\n' + s.log()); return; }
-    for (const p of ['/', '/ceo.html', '/giao-viec.html', '/phong.html?id=kt', '/toa-nha.html', '/api/phong', '/api/ai', '/api/canvas']) {
+    const cc = await goi(s.base, '/api/co-cau');
+    cc.json && cc.json.la_mdflex && cc.json.tep === 'config/phong.json' ? dat('Không đặt CO_CAU → MdFlex, đọc config/phong.json') : loi('Không đặt CO_CAU nhưng máy chủ không chạy cơ cấu MdFlex');
+    for (const p of ['/', '/ceo.html', '/giao-viec.html', '/phong.html?id=kt', '/toa-nha.html', '/api/phong', '/api/ai', '/api/canvas', '/co-cau.js']) {
       const r = await goi(s.base, p);
       r.status === 200 ? dat(`GET ${p} → 200`) : loi(`GET ${p} → ${r.status}`);
     }
@@ -297,6 +324,40 @@ async function thu3d() {
   } finally { await s.dung(); }
 }
 
+// Mỗi cơ cấu trong config/co-cau/<tên>/: máy chủ chạy được, giao việc ra đủ chuỗi phiếu, phiếu của cơ cấu khác bị chặn thao tác
+async function thuCoCauKhac() {
+  const goc = path.join(APPS.m3d.dir, 'config', 'co-cau');
+  const ds = fs.existsSync(goc) ? fs.readdirSync(goc).filter((n) => fs.existsSync(path.join(goc, n, 'phong.json'))) : [];
+  for (const n of ds) {
+    muc(`6c. Chạy thử Mô hình 3D trên bản sao — CO_CAU=${n}`);
+    let cfg; try { cfg = docJson(path.join(goc, n, 'phong.json')); } catch { loi(`co-cau/${n}/phong.json hỏng`); continue; }
+    // Một phiếu giả của phòng không có trong cơ cấu này (như phiếu MdFlex cũ còn trong data/)
+    const s = await chayBanSao(APPS.m3d, {
+      coCau: n,
+      truocKhiChay: (tmp) => {
+        fs.mkdirSync(path.join(tmp, 'data', 'phieu'), { recursive: true });
+        fs.writeFileSync(path.join(tmp, 'data', 'phieu', 'PH-9999.json'), JSON.stringify({ ma: 'PH-9999', phong: '__khong-co__', nguoi_giao: 'CEO', nguoi_nhan: 'X', trang_thai: 'Mới', tao_luc: new Date().toISOString(), han: new Date(Date.now() + 864e5).toISOString(), nhat_ky: [], tieu_chi: [], quy_dinh: [] }));
+      }
+    });
+    try {
+      if (s.proc.exitCode != null) { loi('Máy chủ không khởi động được:\n' + s.log()); continue; }
+      const cc = await goi(s.base, '/api/co-cau');
+      cc.json && cc.json.id === n && cc.json.so_phong === cfg.phong.length ? dat(`CO_CAU=${n} → ${cc.json.ten}, ${cc.json.so_phong} phòng`) : loi(`CO_CAU=${n} nhưng /api/co-cau trả ${JSON.stringify(cc.json)}`);
+      for (const p of ['/', '/ceo.html', '/giao-viec.html', `/phong.html?id=${cfg.phong[0].id}`, '/toa-nha.html', '/co-cau.js']) {
+        const r = await goi(s.base, p);
+        r.status === 200 ? dat(`GET ${p} → 200`) : loi(`GET ${p} → ${r.status}`);
+      }
+      const ph = cfg.phong[0];
+      const gv = await goi(s.base, '/api/giao-viec', { muc_tieu: 'Phiếu chạy thử của van-hanh/kiem-tra.js', dau_vao: 'Không có', dau_ra: 'Báo cáo', tieu_chi: ['Đủ'], uu_tien: 'P3', cong: 'Không có', phong: [ph.id], tep: [] });
+      gv.status === 201 && gv.json.phieu.length >= 3 ? dat(`Giao việc cho ${ph.ten_ngan} → ${gv.json.phieu.length} phiếu`) : loi(`POST /api/giao-viec → ${gv.status}: ${gv.json && gv.json.error}`);
+      const lan = await goi(s.base, '/api/phieu/PH-9999/hanh-dong', { hanh_dong: 'nhan', ai: 'X' });
+      lan.status === 409 ? dat('Phiếu của phòng ngoài cơ cấu bị chặn thao tác (409)') : loi(`Thao tác phiếu ngoài cơ cấu → ${lan.status}, cần 409`);
+    } catch (e) {
+      loi('Lỗi khi chạy thử: ' + e.message + '\n' + s.log());
+    } finally { await s.dung(); }
+  }
+}
+
 (async () => {
   console.log(`Kiểm tra MdFlex — ${REPO}${NHANH ? ' (nhanh)' : ''}`);
   kiemMoiTruong();
@@ -305,7 +366,7 @@ async function thu3d() {
   kiemDuLieu();
   kiemGit();
   await kiemCong();
-  if (!NHANH) { await thuCeo(); await thu3d(); }
+  if (!NHANH) { await thuCeo(); await thu3d(); await thuCoCauKhac(); }
   console.log(`\nKết quả: ${soLoi ? soLoi + ' lỗi' : 'đạt'}${soCanhBao ? ', ' + soCanhBao + ' cảnh báo' : ''}.`);
   process.exit(soLoi ? 1 : 0);
 })();

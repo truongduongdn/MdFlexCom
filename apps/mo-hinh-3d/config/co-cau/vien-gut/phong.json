@@ -1,0 +1,1485 @@
+{
+  "_ghiChu": "Cơ cấu Viện Gút cho app mo-hinh-3d, dùng khi chạy với CO_CAU=vien-gut. Sinh bằng tao-phong.js rồi do người dùng quản lý. Phòng = đơn vị trực thuộc công ty; tổ = đơn vị cấp dưới (cấp thấp hơn nữa ghi trong vi_tri của tổ). so_nguoi = số người quản lý đã gán (mỗi người đếm một lần), chưa phải định biên. Thẻ vị trí AI là ĐỀ XUẤT tự sinh, chờ trưởng đơn vị và CEO duyệt. tang để null cho đến khi CEO gắn tầng toà nhà. Bỏ qua đơn vị ngừng hoạt động: Trung tâm Công nghệ.",
+  "to_chuc": "Viện Gút",
+  "ten_day_du": "Công ty TNHH MTV Viện Gút",
+  "khau_hieu": "Công ty TNHH MTV Viện Gút · CEO Nguyễn Đình Quang Huy",
+  "nguon": "Sinh từ apps/ceo-intake/config/don-vi.json (Danh sách đơn vị lấy từ phân hệ Cơ cấu tổ chức VGC ngày 23/11/2026) ngày 25/11/2026.",
+  "moc": [
+    "Hiện tại"
+  ],
+  "quy_dinh_chung": "HC-v1.0",
+  "sla": {
+    "nhan_phut": 15,
+    "P1_gio": 2,
+    "P2_gio": 24,
+    "P3_gio": 72,
+    "canh_bao_ty_le": 0.8,
+    "tra_lai_toi_da": 2
+  },
+  "cong_ceo": [
+    "Đăng công khai",
+    "Gửi ra ngoài doanh nghiệp",
+    "Chi tiền, đặt mua, ký với bên thứ ba",
+    "Xoá hoặc ghi đè dữ liệu gốc",
+    "Đổi quy định hoặc quyền"
+  ],
+  "vi_tri_chung": [
+    {
+      "ma": "CEO",
+      "ten": "CEO (người thật)"
+    },
+    {
+      "ma": "TL-DP",
+      "ten": "Trợ lý điều phối (AI)"
+    },
+    {
+      "ma": "KSV",
+      "ten": "Kiểm soát viên (AI)"
+    }
+  ],
+  "phong": [
+    {
+      "id": "cn-nt",
+      "ma": "CN.NT",
+      "ten": "Nhà thuốc Viện Gút",
+      "ten_ngan": "Nhà thuốc",
+      "tang": null,
+      "mau": {
+        "sang": "#149078",
+        "toi": "#2dd4a8"
+      },
+      "tu_khoa": [
+        "nhà thuốc viện gút",
+        "nhà thuốc",
+        "nha thuoc"
+      ],
+      "quy_che": "QC-CN-NT-v0 (chưa có)",
+      "truong_phong": {
+        "nguoi_that": "Phạm Thị Thu Huyền",
+        "so_nguoi": [
+          1
+        ],
+        "ai": {
+          "ma": "CN-NT-TP",
+          "ten": "Trưởng Nhà thuốc (AI)",
+          "nhiem_vu": "Nhận phiếu cấp phòng, chia cho chuyên viên, nghiệm thu, ký bàn giao sang phòng khác",
+          "quyen": "Duyệt hoặc trả lại đầu ra; mở Đề xuất lên Trợ lý điều phối"
+        }
+      },
+      "chuc_nang": "Chưa khai báo — trưởng đơn vị bổ sung.",
+      "nhiem_vu": [],
+      "muc_tieu": "Chưa khai báo",
+      "su_menh": "Chưa khai báo",
+      "dau_ra": "Chưa khai báo",
+      "kpi": "Chưa khai báo",
+      "to": [
+        {
+          "ten": "Nhà thuốc",
+          "ma_don_vi": "CN.NT",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý đơn vị: Phạm Thị Thu Huyền",
+              "so_nguoi": [
+                0
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "CN-NT-01",
+              "ten": "Chuyên viên AI Nhà thuốc",
+              "tu_khoa": [
+                "nhà thuốc viện gút",
+                "nhà thuốc",
+                "nha thuoc"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Nhà thuốc Viện Gút"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Nhà thuốc Viện Gút duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "CN-NT-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ankt",
+      "ma": "ANKT",
+      "ten": "Phòng An ninh - Kỹ thuật",
+      "ten_ngan": "An ninh - Kỹ thuật",
+      "tang": null,
+      "mau": {
+        "sang": "#f48c0c",
+        "toi": "#fbb040"
+      },
+      "tu_khoa": [
+        "phòng an ninh - kỹ thuật",
+        "an ninh - kỹ thuật",
+        "an ninh",
+        "phòng kỹ thuật",
+        "phong ky thuat",
+        "bảo vệ",
+        "bao ve",
+        "bếp ăn",
+        "bep an",
+        "nhà bếp",
+        "nha bep",
+        "bp kỹ thuật điện - qltn",
+        "kỹ thuật điện",
+        "ky thuat dien",
+        "qltn",
+        "điện nước",
+        "dien nuoc",
+        "tạp vụ",
+        "tap vu",
+        "vệ sinh",
+        "ve sinh"
+      ],
+      "quy_che": "QC-ANKT-v0 (chưa có)",
+      "truong_phong": {
+        "nguoi_that": "Lê Huỳnh Sơn Thành",
+        "so_nguoi": [
+          1
+        ],
+        "ai": {
+          "ma": "ANKT-TP",
+          "ten": "Trưởng An ninh - Kỹ thuật (AI)",
+          "nhiem_vu": "Nhận phiếu cấp phòng, chia cho chuyên viên, nghiệm thu, ký bàn giao sang phòng khác",
+          "quyen": "Duyệt hoặc trả lại đầu ra; mở Đề xuất lên Trợ lý điều phối"
+        }
+      },
+      "chuc_nang": "Chưa khai báo — trưởng đơn vị bổ sung.",
+      "nhiem_vu": [],
+      "muc_tieu": "Chưa khai báo",
+      "su_menh": "Chưa khai báo",
+      "dau_ra": "Chưa khai báo",
+      "kpi": "Chưa khai báo",
+      "to": [
+        {
+          "ten": "Bảo vệ",
+          "ma_don_vi": "ANKT_BV",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Bảo vệ: Lê Huỳnh Sơn Thành",
+              "so_nguoi": [
+                0
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "ANKT-BV-01",
+              "ten": "Chuyên viên AI Bảo vệ",
+              "tu_khoa": [
+                "bảo vệ",
+                "bao ve"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Bảo vệ"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Bảo vệ duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "ANKT-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Bếp ăn",
+          "ma_don_vi": "ANKT_BEP",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Bếp ăn: Bùi Thị Hường",
+              "so_nguoi": [
+                1
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "ANKT-BEP-01",
+              "ten": "Chuyên viên AI Bếp ăn",
+              "tu_khoa": [
+                "bếp ăn",
+                "bep an",
+                "nhà bếp",
+                "nha bep"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Bếp ăn"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Bếp ăn duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "ANKT-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "BP kỹ thuật điện - QLTN",
+          "ma_don_vi": "ANKT_KTĐ",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý BP kỹ thuật điện - QLTN: Lê Huỳnh Sơn Thành",
+              "so_nguoi": [
+                0
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "ANKT-KTD-01",
+              "ten": "Chuyên viên AI BP kỹ thuật điện - QLTN",
+              "tu_khoa": [
+                "bp kỹ thuật điện - qltn",
+                "kỹ thuật điện",
+                "ky thuat dien",
+                "qltn",
+                "điện nước",
+                "dien nuoc"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho BP kỹ thuật điện - QLTN"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý BP kỹ thuật điện - QLTN duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "ANKT-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Tạp vụ",
+          "ma_don_vi": "BP.TV1",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Tạp vụ: chưa gán",
+              "so_nguoi": [
+                0
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "ANKT-BP-TV1-01",
+              "ten": "Chuyên viên AI Tạp vụ",
+              "tu_khoa": [
+                "tạp vụ",
+                "tap vu",
+                "vệ sinh",
+                "ve sinh"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Tạp vụ"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Tạp vụ duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "ANKT-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hcqt",
+      "ma": "HCQT",
+      "ten": "Phòng Hành chính - Quản trị",
+      "ten_ngan": "Hành chính - Quản trị",
+      "tang": null,
+      "mau": {
+        "sang": "#3b82f6",
+        "toi": "#3b82f6"
+      },
+      "tu_khoa": [
+        "phòng hành chính - quản trị",
+        "hành chính - quản trị",
+        "hành chính",
+        "hanh chinh",
+        "quản trị",
+        "quan tri",
+        "hcqt"
+      ],
+      "quy_che": "QC-HCQT-v0 (chưa có)",
+      "truong_phong": {
+        "nguoi_that": "Trương Ánh Dương",
+        "so_nguoi": [
+          1
+        ],
+        "ai": {
+          "ma": "HCQT-TP",
+          "ten": "Trưởng Hành chính - Quản trị (AI)",
+          "nhiem_vu": "Nhận phiếu cấp phòng, chia cho chuyên viên, nghiệm thu, ký bàn giao sang phòng khác",
+          "quyen": "Duyệt hoặc trả lại đầu ra; mở Đề xuất lên Trợ lý điều phối"
+        }
+      },
+      "chuc_nang": "Chưa khai báo — trưởng đơn vị bổ sung.",
+      "nhiem_vu": [],
+      "muc_tieu": "Chưa khai báo",
+      "su_menh": "Chưa khai báo",
+      "dau_ra": "Chưa khai báo",
+      "kpi": "Chưa khai báo",
+      "to": [
+        {
+          "ten": "Hành chính - Quản trị",
+          "ma_don_vi": "HCQT",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý đơn vị: Trương Ánh Dương",
+              "so_nguoi": [
+                0
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "HCQT-01",
+              "ten": "Chuyên viên AI Hành chính - Quản trị",
+              "tu_khoa": [
+                "phòng hành chính - quản trị",
+                "hành chính - quản trị",
+                "hành chính",
+                "hanh chinh",
+                "quản trị",
+                "quan tri",
+                "hcqt"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Phòng Hành chính - Quản trị"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Phòng Hành chính - Quản trị duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "HCQT-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p-kt",
+      "ma": "P.KT",
+      "ten": "Phòng Kế toán",
+      "ten_ngan": "Kế toán",
+      "tang": null,
+      "mau": {
+        "sang": "#0d6b56",
+        "toi": "#149078"
+      },
+      "tu_khoa": [
+        "phòng kế toán",
+        "kế toán",
+        "ke toan",
+        "tài chính",
+        "tai chinh"
+      ],
+      "quy_che": "QC-P-KT-v0 (chưa có)",
+      "truong_phong": {
+        "nguoi_that": "Phạm Thị Tuyến",
+        "so_nguoi": [
+          1
+        ],
+        "ai": {
+          "ma": "P-KT-TP",
+          "ten": "Trưởng Kế toán (AI)",
+          "nhiem_vu": "Nhận phiếu cấp phòng, chia cho chuyên viên, nghiệm thu, ký bàn giao sang phòng khác",
+          "quyen": "Duyệt hoặc trả lại đầu ra; mở Đề xuất lên Trợ lý điều phối"
+        }
+      },
+      "chuc_nang": "Chưa khai báo — trưởng đơn vị bổ sung.",
+      "nhiem_vu": [],
+      "muc_tieu": "Chưa khai báo",
+      "su_menh": "Chưa khai báo",
+      "dau_ra": "Chưa khai báo",
+      "kpi": "Chưa khai báo",
+      "to": [
+        {
+          "ten": "Kế toán",
+          "ma_don_vi": "P.KT",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý đơn vị: Phạm Thị Tuyến",
+              "so_nguoi": [
+                0
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "P-KT-01",
+              "ten": "Chuyên viên AI Kế toán",
+              "tu_khoa": [
+                "phòng kế toán",
+                "kế toán",
+                "ke toan",
+                "tài chính",
+                "tai chinh"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Phòng Kế toán"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Phòng Kế toán duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "P-KT-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pk",
+      "ma": "PK",
+      "ten": "Phòng khám",
+      "ten_ngan": "Phòng khám",
+      "tang": null,
+      "mau": {
+        "sang": "#444444",
+        "toi": "#e0e0e0"
+      },
+      "tu_khoa": [
+        "phòng khám",
+        "phong kham",
+        "bộ phận điện tim",
+        "điện tim",
+        "dien tim",
+        "khoa chẩn đoán hình ảnh",
+        "chẩn đoán hình ảnh",
+        "chan doan hinh anh",
+        "cdha",
+        "bộ phận xq",
+        "x quang",
+        "x-quang",
+        "xquang",
+        "phòng siêu âm",
+        "siêu âm",
+        "sieu am",
+        "khoa ngoại",
+        "khoa ngoai",
+        "khoa nội",
+        "khoa noi",
+        "khoa xét nghiệm",
+        "xét nghiệm",
+        "xet nghiem"
+      ],
+      "quy_che": "QC-PK-v0 (chưa có)",
+      "truong_phong": {
+        "nguoi_that": "Trần Văn Chức",
+        "so_nguoi": [
+          1
+        ],
+        "ai": {
+          "ma": "PK-TP",
+          "ten": "Trưởng Phòng khám (AI)",
+          "nhiem_vu": "Nhận phiếu cấp phòng, chia cho chuyên viên, nghiệm thu, ký bàn giao sang phòng khác",
+          "quyen": "Duyệt hoặc trả lại đầu ra; mở Đề xuất lên Trợ lý điều phối"
+        }
+      },
+      "chuc_nang": "Chưa khai báo — trưởng đơn vị bổ sung.",
+      "nhiem_vu": [],
+      "muc_tieu": "Chưa khai báo",
+      "su_menh": "Chưa khai báo",
+      "dau_ra": "Chưa khai báo",
+      "kpi": "Chưa khai báo",
+      "to": [
+        {
+          "ten": "Bộ phận Điện tim",
+          "ma_don_vi": "ĐT",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Bộ phận Điện tim: Trần Văn Chức",
+              "so_nguoi": [
+                0
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "PK-DT-01",
+              "ten": "Chuyên viên AI Điện tim",
+              "tu_khoa": [
+                "bộ phận điện tim",
+                "điện tim",
+                "dien tim"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Bộ phận Điện tim"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Bộ phận Điện tim duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "PK-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Khoa Chẩn đoán hình ảnh",
+          "ma_don_vi": "CDHA",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Khoa Chẩn đoán hình ảnh: Trần Minh Khởi",
+              "so_nguoi": [
+                1
+              ]
+            },
+            {
+              "ten": "Bộ phận XQ: Trần Minh Khởi",
+              "so_nguoi": [
+                0
+              ]
+            },
+            {
+              "ten": "Phòng Siêu âm: Trần Minh Khởi",
+              "so_nguoi": [
+                0
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "PK-CDHA-01",
+              "ten": "Chuyên viên AI Chẩn đoán hình ảnh",
+              "tu_khoa": [
+                "khoa chẩn đoán hình ảnh",
+                "chẩn đoán hình ảnh",
+                "chan doan hinh anh",
+                "cdha",
+                "bộ phận xq",
+                "x quang",
+                "x-quang",
+                "xquang",
+                "phòng siêu âm",
+                "siêu âm",
+                "sieu am"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Khoa Chẩn đoán hình ảnh"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Khoa Chẩn đoán hình ảnh duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "PK-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Khoa Ngoại",
+          "ma_don_vi": "NG.KHOA",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Khoa Ngoại: Nguyễn Đức Thanh Bình",
+              "so_nguoi": [
+                1
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "PK-NG-KHOA-01",
+              "ten": "Chuyên viên AI Ngoại",
+              "tu_khoa": [
+                "khoa ngoại",
+                "khoa ngoai"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Khoa Ngoại"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Khoa Ngoại duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "PK-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Khoa Nội",
+          "ma_don_vi": "Noi_Khoa",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Khoa Nội: Trần Văn Chức",
+              "so_nguoi": [
+                0
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "PK-NOI-KHOA-01",
+              "ten": "Chuyên viên AI Nội",
+              "tu_khoa": [
+                "khoa nội",
+                "khoa noi"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Khoa Nội"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Khoa Nội duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "PK-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Khoa Xét nghiệm",
+          "ma_don_vi": "XN",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Khoa Xét nghiệm: Mai Thị Trong",
+              "so_nguoi": [
+                1
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "PK-XN-01",
+              "ten": "Chuyên viên AI Xét nghiệm",
+              "tu_khoa": [
+                "khoa xét nghiệm",
+                "xét nghiệm",
+                "xet nghiem"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Khoa Xét nghiệm"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Khoa Xét nghiệm duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "PK-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p-qlhaucan",
+      "ma": "P.QLHAUCAN",
+      "ten": "Phòng Quản lý cung ứng - Hậu cần",
+      "ten_ngan": "Quản lý cung ứng - Hậu cần",
+      "tang": null,
+      "mau": {
+        "sang": "#f59e0b",
+        "toi": "#f59e0b"
+      },
+      "tu_khoa": [
+        "phòng quản lý cung ứng - hậu cần",
+        "quản lý cung ứng - hậu cần",
+        "cung ứng",
+        "cung ung",
+        "hậu cần",
+        "hau can",
+        "mua hàng",
+        "mua hang",
+        "vật tư",
+        "vat tu"
+      ],
+      "quy_che": "QC-P-QLHAUCAN-v0 (chưa có)",
+      "truong_phong": {
+        "nguoi_that": "Nguyễn Thu Giang",
+        "so_nguoi": [
+          1
+        ],
+        "ai": {
+          "ma": "P-QLHAUCAN-TP",
+          "ten": "Trưởng Quản lý cung ứng - Hậu cần (AI)",
+          "nhiem_vu": "Nhận phiếu cấp phòng, chia cho chuyên viên, nghiệm thu, ký bàn giao sang phòng khác",
+          "quyen": "Duyệt hoặc trả lại đầu ra; mở Đề xuất lên Trợ lý điều phối"
+        }
+      },
+      "chuc_nang": "Chưa khai báo — trưởng đơn vị bổ sung.",
+      "nhiem_vu": [],
+      "muc_tieu": "Chưa khai báo",
+      "su_menh": "Chưa khai báo",
+      "dau_ra": "Chưa khai báo",
+      "kpi": "Chưa khai báo",
+      "to": [
+        {
+          "ten": "Quản lý cung ứng - Hậu cần",
+          "ma_don_vi": "P.QLHAUCAN",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý đơn vị: Nguyễn Thu Giang",
+              "so_nguoi": [
+                0
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "P-QLHAUCAN-01",
+              "ten": "Chuyên viên AI Quản lý cung ứng - Hậu cần",
+              "tu_khoa": [
+                "phòng quản lý cung ứng - hậu cần",
+                "quản lý cung ứng - hậu cần",
+                "cung ứng",
+                "cung ung",
+                "hậu cần",
+                "hau can",
+                "mua hàng",
+                "mua hang",
+                "vật tư",
+                "vat tu"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Phòng Quản lý cung ứng - Hậu cần"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Phòng Quản lý cung ứng - Hậu cần duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "P-QLHAUCAN-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ttnc",
+      "ma": "TTNC",
+      "ten": "Trung tâm nghiên cứu",
+      "ten_ngan": "Nghiên cứu",
+      "tang": null,
+      "mau": {
+        "sang": "#22c55e",
+        "toi": "#22c55e"
+      },
+      "tu_khoa": [
+        "trung tâm nghiên cứu",
+        "nghiên cứu",
+        "trung tam nghien cuu",
+        "nghien cuu"
+      ],
+      "quy_che": "QC-TTNC-v0 (chưa có)",
+      "truong_phong": {
+        "nguoi_that": "Trần Văn Chức",
+        "so_nguoi": [
+          0
+        ],
+        "ai": {
+          "ma": "TTNC-TP",
+          "ten": "Trưởng Nghiên cứu (AI)",
+          "nhiem_vu": "Nhận phiếu cấp phòng, chia cho chuyên viên, nghiệm thu, ký bàn giao sang phòng khác",
+          "quyen": "Duyệt hoặc trả lại đầu ra; mở Đề xuất lên Trợ lý điều phối"
+        }
+      },
+      "chuc_nang": "Chưa khai báo — trưởng đơn vị bổ sung.",
+      "nhiem_vu": [],
+      "muc_tieu": "Chưa khai báo",
+      "su_menh": "Chưa khai báo",
+      "dau_ra": "Chưa khai báo",
+      "kpi": "Chưa khai báo",
+      "to": [
+        {
+          "ten": "Nghiên cứu",
+          "ma_don_vi": "TTNC",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý đơn vị: Trần Văn Chức",
+              "so_nguoi": [
+                0
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "TTNC-01",
+              "ten": "Chuyên viên AI Nghiên cứu",
+              "tu_khoa": [
+                "trung tâm nghiên cứu",
+                "nghiên cứu",
+                "trung tam nghien cuu",
+                "nghien cuu"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Trung tâm nghiên cứu"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Trung tâm nghiên cứu duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "TTNC-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tt-icc",
+      "ma": "TT_ICC",
+      "ten": "Trung tâm Truyền thông - Thông tin",
+      "ten_ngan": "Truyền thông - Thông tin",
+      "tang": null,
+      "mau": {
+        "sang": "#1a1a2e",
+        "toi": "#f1f5f9"
+      },
+      "tu_khoa": [
+        "trung tâm truyền thông - thông tin",
+        "truyền thông - thông tin",
+        "truyen thong - thong tin",
+        "trung tâm truyền thông",
+        "trung tam truyen thong",
+        "bộ phận media",
+        "media",
+        "phòng công nghệ kỹ thuật",
+        "công nghệ kỹ thuật",
+        "cong nghe ky thuat",
+        "it",
+        "phòng kế hoạch tổng hợp",
+        "kế hoạch tổng hợp",
+        "ke hoach tong hop",
+        "khth",
+        "chăm sóc khách hàng",
+        "cham soc khach hang",
+        "cskh",
+        "điều dưỡng",
+        "dieu duong",
+        "phòng marketing - truyền thông",
+        "marketing - truyền thông",
+        "marketing",
+        "quảng cáo",
+        "quang cao",
+        "phòng phát triển công nghệ",
+        "phát triển công nghệ",
+        "phat trien cong nghe",
+        "phần mềm",
+        "phan mem",
+        "lập trình",
+        "lap trinh",
+        "phòng sản xuất video",
+        "sản xuất video",
+        "san xuat video",
+        "video"
+      ],
+      "quy_che": "QC-TT-ICC-v0 (chưa có)",
+      "truong_phong": {
+        "nguoi_that": "Huỳnh Phước Đại",
+        "so_nguoi": [
+          1
+        ],
+        "ai": {
+          "ma": "TT-ICC-TP",
+          "ten": "Trưởng Truyền thông - Thông tin (AI)",
+          "nhiem_vu": "Nhận phiếu cấp phòng, chia cho chuyên viên, nghiệm thu, ký bàn giao sang phòng khác",
+          "quyen": "Duyệt hoặc trả lại đầu ra; mở Đề xuất lên Trợ lý điều phối"
+        }
+      },
+      "chuc_nang": "Chưa khai báo — trưởng đơn vị bổ sung.",
+      "nhiem_vu": [],
+      "muc_tieu": "Chưa khai báo",
+      "su_menh": "Chưa khai báo",
+      "dau_ra": "Chưa khai báo",
+      "kpi": "Chưa khai báo",
+      "to": [
+        {
+          "ten": "Bộ phận Media",
+          "ma_don_vi": "BP.Media",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Bộ phận Media: Nguyễn Sơn",
+              "so_nguoi": [
+                1
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "TT-ICC-BP-MEDIA-01",
+              "ten": "Chuyên viên AI Media",
+              "tu_khoa": [
+                "bộ phận media",
+                "media"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Bộ phận Media"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Bộ phận Media duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "TT-ICC-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Phòng Công nghệ Kỹ thuật",
+          "ma_don_vi": "TTCN_IT",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Phòng Công nghệ Kỹ thuật: Nguyễn Đình Nhị",
+              "so_nguoi": [
+                1
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "TT-ICC-TTCN-IT-01",
+              "ten": "Chuyên viên AI Công nghệ Kỹ thuật",
+              "tu_khoa": [
+                "phòng công nghệ kỹ thuật",
+                "công nghệ kỹ thuật",
+                "cong nghe ky thuat",
+                "it"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Phòng Công nghệ Kỹ thuật"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Phòng Công nghệ Kỹ thuật duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "TT-ICC-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Phòng Kế hoạch tổng hợp",
+          "ma_don_vi": "P.KHTH",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Phòng Kế hoạch tổng hợp: Lê Hiếu Nghĩa",
+              "so_nguoi": [
+                1
+              ]
+            },
+            {
+              "ten": "Chăm sóc khách hàng: Nguyễn Thu Trang",
+              "so_nguoi": [
+                1
+              ]
+            },
+            {
+              "ten": "Điều dưỡng: Phạm Thị Trang",
+              "so_nguoi": [
+                1
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "TT-ICC-P-KHTH-01",
+              "ten": "Chuyên viên AI Kế hoạch tổng hợp",
+              "tu_khoa": [
+                "phòng kế hoạch tổng hợp",
+                "kế hoạch tổng hợp",
+                "ke hoach tong hop",
+                "khth",
+                "chăm sóc khách hàng",
+                "cham soc khach hang",
+                "cskh",
+                "điều dưỡng",
+                "dieu duong"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Phòng Kế hoạch tổng hợp"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Phòng Kế hoạch tổng hợp duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "TT-ICC-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Phòng Marketing - Truyền thông",
+          "ma_don_vi": "ICT_MKT",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Phòng Marketing - Truyền thông: Nguyễn Sơn",
+              "so_nguoi": [
+                0
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "TT-ICC-ICT-MKT-01",
+              "ten": "Chuyên viên AI Marketing - Truyền thông",
+              "tu_khoa": [
+                "phòng marketing - truyền thông",
+                "marketing - truyền thông",
+                "marketing",
+                "quảng cáo",
+                "quang cao"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Phòng Marketing - Truyền thông"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Phòng Marketing - Truyền thông duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "TT-ICC-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Phòng Phát triển Công nghệ",
+          "ma_don_vi": "TTCN_Dev",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Phòng Phát triển Công nghệ: Lê Tấn Trọng",
+              "so_nguoi": [
+                1
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "TT-ICC-TTCN-DEV-01",
+              "ten": "Chuyên viên AI Phát triển Công nghệ",
+              "tu_khoa": [
+                "phòng phát triển công nghệ",
+                "phát triển công nghệ",
+                "phat trien cong nghe",
+                "phần mềm",
+                "phan mem",
+                "lập trình",
+                "lap trinh"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Phòng Phát triển Công nghệ"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Phòng Phát triển Công nghệ duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "TT-ICC-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Phòng Sản xuất Video",
+          "ma_don_vi": "P.SX",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý Phòng Sản xuất Video: chưa gán",
+              "so_nguoi": [
+                0
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "TT-ICC-P-SX-01",
+              "ten": "Chuyên viên AI Sản xuất Video",
+              "tu_khoa": [
+                "phòng sản xuất video",
+                "sản xuất video",
+                "san xuat video",
+                "video"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp văn bản, báo cáo, số liệu theo phiếu giao cho Phòng Sản xuất Video"
+              ],
+              "dau_vao": "Theo phiếu: mục tiêu, đầu vào, tiêu chí nghiệm thu",
+              "dau_ra": "Bản nháp chờ quản lý Phòng Sản xuất Video duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Đúng mục tiêu và đầu ra ghi trong phiếu",
+                "Nêu rõ nguồn số liệu, phần còn thiếu"
+              ],
+              "cong_cu_duoc_phep": [
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "chi_tien",
+                "xoa_du_lieu_goc",
+                "doi_quy_dinh"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "TT-ICC-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ban_giao": []
+}

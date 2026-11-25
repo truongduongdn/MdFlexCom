@@ -265,11 +265,15 @@ pre.code{font-family:var(--f-mono);font-size:12px;background:var(--surface);bord
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="/co-cau.js"></script>
 <script>
 (function(){
 "use strict";
 /* ============ DỮ LIỆU (nguồn: tài liệu "MdFlex — Lộ trình triển khai vận hành doanh nghiệp", tab Kế hoạch nhân sự) ============ */
-const STAGES=[
+/* Cơ cấu đang dùng (biến CO_CAU trên máy chủ): /co-cau.js đặt window.CO_CAU */
+if(!window.CO_CAU||!window.CO_CAU.phong){ document.body.innerHTML='<p style="padding:24px;font-family:system-ui">Không đọc được cơ cấu tổ chức (/co-cau.js). Mở trang qua máy chủ: chạy node server.js trong apps/mo-hinh-3d rồi vào http://localhost:3200.</p>'; return; }
+const CO=window.CO_CAU, CFG=CO.phong, LA_MDFLEX=!!CO.la_mdflex;
+const STAGES_MDFLEX=[
   {key:"F", name:"Thành lập", sub:"Ngày 1", cost:122, costNote:"chỉ CTO, chưa tính CEO",
    gate:"Pháp nhân, tài khoản, hợp đồng lao động mẫu và cơ cấu 5 phòng được ban hành. Có quyết định đầu tư và đặc tả sản phẩm để bắt đầu tuyển.",
    hire:"CEO và CTO (đề xuất đội sáng lập). CTO là vị trí đầu tiên trong thứ tự tuyển."},
@@ -286,60 +290,14 @@ const STAGES=[
    gate:"Đạt chỉ tiêu năm thứ hai (tham khảo: 80–100 khách hàng, 25–30 đối tác, 45% doanh thu qua đối tác).",
    hire:"+24: VP Customer Success, trưởng nhóm hỗ trợ, 2 hỗ trợ, 3 triển khai, 2 CS, 3 NV kinh doanh, 1 quản lý đối tác, 4 lập trình viên, 1 QA, PO, chuyên gia y tế, 2 MKT, kế toán viên, hành chính – pháp chế. Kích hoạt khi doanh thu định kỳ đủ trả lương."}
 ];
-const DEPTS=[
- {id:"kd",name:"Kinh doanh",head:"VP Sales",headN:[0,1,1,1,1],color:"--c-kd",
-  mission:"Bán trực tiếp; quản lý đối tác phân phối; Customer Success: đón khách, kiểm tra định kỳ, gia hạn, bán thêm.",
-  outputs:"Pipeline tuần; dự báo doanh thu tháng; báo cáo sức khoẻ khách hàng quý.",
-  kpi:"Số khách hàng và doanh thu năm đầu (tham khảo 25–30 khách, ~20 tỷ); % doanh thu qua đối tác (tham khảo 30%); số đối tác (tham khảo 10 tại N0+9).",
-  teams:[
-   {name:"Bán hàng trực tiếp",roles:[["Nhân viên kinh doanh",[0,1,2,4,7]]]},
-   {name:"Đối tác & kênh",roles:[["Quản lý đối tác",[0,0,1,2,3]]]},
-   {name:"Customer Success",proposed:true,roles:[["VP Customer Success",[0,0,0,0,1]],["Chuyên viên CS",[0,0,0,2,4]]]}]},
- {id:"mkt",name:"Marketing – Truyền thông",short:"Marketing",head:"Trưởng phòng Marketing",headN:[0,1,1,1,1],color:"--c-mkt",
-  mission:"Website MDflex.com, SEO, nội dung, quảng cáo số; sự kiện, webinar; case study khách hàng.",
-  outputs:"Kế hoạch nội dung tháng; báo cáo lead tuần; case study.",
-  kpi:"Số lead đạt chuẩn chuyển Kinh doanh; chi phí mỗi lead; số case study từ khách thử nghiệm (tham khảo 5).",
-  split:true,
-  teams:[
-   {name:"Digital & SEO",roles:[["Chuyên viên marketing",[0,1,1,1,2]]]},
-   {name:"Nội dung & sự kiện",roles:[["Chuyên viên marketing",[0,0,1,1,2]]]},
-   {name:"Thương hiệu & PR",roles:[["Chuyên viên marketing",[0,0,0,1,1]]]}]},
- {id:"pt",name:"Phát triển phần mềm",short:"Phát triển PM",head:"CTO",headN:[1,1,1,1,1],color:"--c-pt",
-  mission:"Hoàn thiện sản phẩm đến N0; phát triển theo sprint 2 tuần; QA và tuân thủ; cloud, bảo mật; triển khai 90 ngày; hỗ trợ 24/7 ba cấp.",
-  outputs:"Bản phát hành mỗi sprint; tiến độ triển khai từng khách hàng; báo cáo sự cố.",
-  kpi:"Sản phẩm đạt tiêu chí N0 (HIS, EMR, PMS); module AI sau N0; % khách go-live đúng 90 ngày; thời gian xử lý sự cố theo cấp.",
-  teams:[
-   {name:"Sản phẩm & y khoa",roles:[["PO / BA",[0,1,1,2,3]],["Chuyên gia y tế",[0,1,1,2,3]]]},
-   {name:"Dev · QA · DevOps",roles:[["Tech Lead",[0,1,1,2,2]],["Lập trình viên",[0,6,6,8,12]],["QA / Tester",[0,2,2,3,4]],["DevOps",[0,1,1,2,2]]]},
-   {name:"Triển khai & hỗ trợ",proposed:true,roles:[["Trưởng nhóm triển khai & hỗ trợ",[0,0,1,1,1]],["Trưởng nhóm hỗ trợ",[0,0,0,0,1]],["Chuyên viên triển khai",[0,1,1,3,6]],["Hỗ trợ cấp 1",[0,0,2,5,6]],["Hỗ trợ cấp 2",[0,0,0,1,2]]]}]},
- {id:"kt",name:"Kế toán",head:"Kế toán trưởng",headN:[0,1,1,1,1],color:"--c-kt",
-  mission:"Hạch toán, thuế, hoá đơn; công nợ theo 5 dòng doanh thu; ngân sách và dòng tiền.",
-  outputs:"Báo cáo tài chính tháng; dự báo dòng tiền 13 tuần; báo cáo theo dòng doanh thu.",
-  kpi:"Biên lợi nhuận gộp (tham khảo 75–80%); CAC (≤ 150 triệu); số ngày thu tiền; EBITDA (15–20% năm thứ 3).",
-  split:true,
-  teams:[
-   {name:"Tổng hợp & thuế",roles:[["Kế toán viên",[0,0,0,1,1]]]},
-   {name:"Công nợ & hoá đơn",roles:[["Kế toán viên",[0,0,0,0,1]]]},
-   {name:"Kế hoạch tài chính",kiem:"Kế toán trưởng kiêm",roles:[]}]},
- {id:"ns",name:"Nhân sự – Hành chính",short:"NS–HC",head:"Trưởng phòng NS–HC",headN:[0,1,1,1,1],color:"--c-ns",
-  mission:"Tuyển dụng, đào tạo; lương, phúc lợi; hành chính 2 văn phòng; pháp chế: hồ sơ pháp lý công ty, thương hiệu, hợp đồng.",
-  outputs:"Báo cáo tuyển dụng tuần; bảng lương tháng; danh mục hồ sơ pháp lý.",
-  kpi:"Đủ nhân sự chủ chốt trước N0; chi phí nhân sự ≤ 45% tổng chi (tham khảo); tỷ lệ nghỉ việc; hồ sơ pháp lý đúng hạn.",
-  teams:[
-   {name:"Tuyển dụng, đào tạo",roles:[["Chuyên viên tuyển dụng",[0,0,0,1,1]]]},
-   {name:"Lương & phúc lợi",kiem:"Trưởng phòng kiêm",roles:[]},
-   {name:"Hành chính, pháp chế",proposed:true,roles:[["Hành chính – pháp chế",[0,0,1,1,2]]]}]}
-];
-const FLOWS=[
- ["mkt","kd","Lead đạt chuẩn","Tên cơ sở y tế, quy mô, nhu cầu, nguồn lead","Liên hệ trong 1 ngày làm việc"],
- ["kd","kt","Hợp đồng đã ký","Hợp đồng, lịch thanh toán, dòng doanh thu","Hoá đơn đợt 1 trong 2 ngày"],
- ["kd","pt","Hợp đồng đã ký","Module mua, mốc go-live, đầu mối khách hàng","Kế hoạch triển khai 90 ngày trong 5 ngày"],
- ["pt","kd","Go-live","Biên bản nghiệm thu, tài khoản, tình trạng đào tạo","CS gọi kiểm tra trong 7 ngày"],
- ["kd","pt","Yêu cầu tính năng","Mô tả, khách hàng, giá trị hợp đồng","Xếp lịch trong sprint kế tiếp"],
- ["kd","mkt","Khách hàng thành công","Đồng ý làm case study, số liệu trước/sau","Xuất bản trong 30 ngày"],
- ["*","ns","Nhu cầu nhân sự","Vị trí, mô tả công việc, ngày cần người","Kế hoạch tuyển trong 3 ngày"],
- ["*","kt","Đề nghị chi","Khoản chi, dòng ngân sách, chứng từ","Duyệt hoặc trả lời trong 2 ngày"]
-];
+// Mốc: MdFlex dùng kế hoạch nhân sự ở trên; cơ cấu khác chỉ có tên mốc trong phong.json (chưa có chi phí, cổng)
+const STAGES=LA_MDFLEX?STAGES_MDFLEX:CFG.moc.map((ten,i)=>({key:ten,name:ten,sub:(CFG.moc_mo_ta&&CFG.moc_mo_ta[i])||"quản lý đã gán",cost:null,gate:"",hire:""}));
+// Phòng, tổ, vị trí lấy từ phong.json của cơ cấu đang dùng.
+// split: ghi chú "chia chuyên viên giữa các tổ là đề xuất"; khai báo bằng chia_to_de_xuat, MdFlex giữ ghi chú cũ cho mkt, kt.
+const DEPTS=CFG.phong.map(p=>({id:p.id,name:p.ten,short:p.ten_ngan,head:p.truong_phong.nguoi_that,headN:p.truong_phong.so_nguoi,color:"--c-"+p.id,
+  mission:p.su_menh,outputs:p.dau_ra,kpi:p.kpi,split:p.chia_to_de_xuat!=null?!!p.chia_to_de_xuat:(LA_MDFLEX&&(p.id==="mkt"||p.id==="kt")),
+  teams:p.to.map(t=>({name:t.ten,proposed:!!t.de_xuat,kiem:t.kiem||undefined,roles:t.vi_tri.map(v=>[v.ten,v.so_nguoi])}))}));
+const FLOWS=(CFG.ban_giao||[]).map(b=>[b.tu,b.den,b.ten,b.noi_dung,b.cam_ket]);
 const FOUND=[
  {id:"p1",title:"Pháp nhân",when:"Tuần 1–4",items:[
   ["Chọn loại hình doanh nghiệp","Đề xuất công ty cổ phần vì Canvas dự kiến gọi vốn 50–100 tỷ; chốt cổ đông sáng lập, tỷ lệ góp vốn, vốn điều lệ.","CEO"],
@@ -379,7 +337,7 @@ const $=s=>document.querySelector(s);
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-let stage=1, selected=null, hlSet=null;
+let stage=Math.min(1,STAGES.length-1), selected=null, hlSet=null;
 function teamN(t,s){return t.roles.reduce((a,r)=>a+r[1][s],0)}
 function deptN(d,s){return d.headN[s]+d.teams.reduce((a,t)=>a+teamN(t,s),0)}
 function totalN(s){return 1+DEPTS.reduce((a,d)=>a+deptN(d,s),0)}
@@ -437,7 +395,7 @@ const R_MAIN=15, R_TEAM=22.4;
 const people={bodies:null,heads:null,max:140};
 const pickables=[];
 DEPTS.forEach((d,i)=>{
-  const ang=-Math.PI/2 + i*(2*Math.PI/5) + Math.PI/5*0;
+  const ang=-Math.PI/2 + i*(2*Math.PI/DEPTS.length);
   const u=new THREE.Vector3(Math.cos(ang),0,Math.sin(ang)), t=new THREE.Vector3(-Math.sin(ang),0,Math.cos(ang));
   d.u=u; d.t=t; d.ang=ang;
   d.group=new THREE.Group(); scene.add(d.group);
@@ -455,15 +413,18 @@ DEPTS.forEach((d,i)=>{
   d.h=1; d.hTarget=1;
   // cửa sổ (sọc ngang) dùng chung màu phòng
   // tổ
+  const nT=d.teams.length, nhieu=nT>3, cot=nhieu?Math.max(2,Math.min(4,Math.floor(2*Math.PI*R_TEAM/DEPTS.length/3.7))):3;
+  const sp=nhieu?3.7:5.2, sz=nhieu?2.6:3.4;
   d.teams.forEach((tm,j)=>{
-    const off=(j-1)*5.2;
-    const tp=u.clone().multiplyScalar(R_TEAM).add(t.clone().multiplyScalar(off)); tm.pos=tp;
+    const hang=Math.floor(j/cot), trongHang=Math.min(cot,nT-hang*cot);
+    const off=(j%cot-(trongHang-1)/2)*sp;
+    const tp=u.clone().multiplyScalar(R_TEAM+hang*(sz+1.2)).add(t.clone().multiplyScalar(off)); tm.pos=tp;
     const tmat=new THREE.MeshStandardMaterial({roughness:.85,transparent:true}); tm.mat=tmat;
-    const m=new THREE.Mesh(new THREE.BoxGeometry(3.4,1,3.4),tmat); m.position.copy(tp); m.rotation.y=-ang; m.castShadow=m.receiveShadow=true;
+    const m=new THREE.Mesh(new THREE.BoxGeometry(sz,1,sz),tmat); m.position.copy(tp); m.rotation.y=-ang; m.castShadow=m.receiveShadow=true;
     m.userData={kind:"team",d,tm}; d.group.add(m); tm.mesh=m; pickables.push(m);
-    const wire=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(3.4,1,3.4)),new THREE.LineDashedMaterial({dashSize:.35,gapSize:.25,transparent:true}));
+    const wire=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(sz,1,sz)),new THREE.LineDashedMaterial({dashSize:.35,gapSize:.25,transparent:true}));
     wire.position.copy(tp); wire.rotation.y=-ang; d.group.add(wire); tm.wire=wire;
-    const stripe=new THREE.Mesh(new THREE.BoxGeometry(3.45,0.18,3.45),capMat); stripe.position.copy(tp); stripe.rotation.y=-ang; d.group.add(stripe); tm.stripe=stripe;
+    const stripe=new THREE.Mesh(new THREE.BoxGeometry(sz+0.05,0.18,sz+0.05),capMat); stripe.position.copy(tp); stripe.rotation.y=-ang; d.group.add(stripe); tm.stripe=stripe;
     tm.h=1; tm.hTarget=1;
     // lối nhỏ từ phòng ra tổ
     const a=pos.clone(), b=tp.clone(); const len=a.distanceTo(b)-4.6; const mid=a.clone().lerp(b,.5);
@@ -531,7 +492,7 @@ function buildFlows(){
     const sources=f[0]==="*"?DEPTS.filter(d=>d.id!==f[1]).map(d=>d.id):[f[0]];
     sources.forEach((sid,si)=>{
       const a=deptById(sid), b=deptById(f[1]); const support=f[0]==="*";
-      const lift=fi===4?2.5:0; // tách 2 luồng KD→PT trùng nhau
+      const lift=FLOWS.slice(0,fi).filter(g=>g[0]===f[0]&&g[1]===f[1]).length*2.5; // tách các luồng trùng cặp
       const pa=a.pos.clone(); pa.y=a.h+0.6; const pb=b.pos.clone(); pb.y=b.h+0.6;
       const mid=pa.clone().lerp(pb,.5); mid.y=Math.max(pa.y,pb.y)+(support?3:6)+lift;
       const curve=new THREE.QuadraticBezierCurve3(pa,mid,pb);
@@ -622,7 +583,7 @@ $("#stages").addEventListener("click",e=>{const b=e.target.closest(".stage"); if
 function renderStats(){
   const s=STAGES[stage];
   $("#stats").innerHTML=`<div class="stat"><b>${totalN(stage)}</b><span>người</span></div>
-   <div class="stat"><b>${fmtCost(s.cost)}</b><span>chi phí NS/tháng</span></div>
+   ${s.cost!=null?`<div class="stat"><b>${fmtCost(s.cost)}</b><span>chi phí NS/tháng</span></div>`:`<div class="stat"><b>${DEPTS.length}</b><span>phòng</span></div>`}
    <div class="stat"><b>${s.name}</b><span>${esc(s.sub)}</span></div>`;
 }
 function renderLegend(){
@@ -632,15 +593,15 @@ function renderLegend(){
 function renderOrg(){
   const el=$("#paneOrg"), s=STAGES[stage];
   if(!selected){
-    const rows=DEPTS.map(d=>`<tr class="deptrow" data-id="${d.id}"><td><span class="sw" style="background:var(${d.color})"></span>${esc(d.name)}</td><td>${esc(d.head)}</td>${[0,1,2,3,4].map(i=>`<td class="n" ${i===stage?'style="font-weight:600"':''}>${deptN(d,i)}</td>`).join("")}</tr>`).join("");
-    el.innerHTML=`<h2>Cơ cấu MdFlex tại ${esc(s.name)}</h2>
-      <p class="sub">${esc(s.sub)} · ${totalN(stage)} người · chi phí nhân sự ${fmtCost(s.cost)}/tháng${s.costNote?" ("+esc(s.costNote)+")":""}, đã gồm bảo hiểm 21,5%.</p>
+    const rows=DEPTS.map(d=>`<tr class="deptrow" data-id="${d.id}"><td><span class="sw" style="background:var(${d.color})"></span>${esc(d.name)}</td><td>${esc(d.head)}</td>${STAGES.map((_,i)=>`<td class="n" ${i===stage?'style="font-weight:600"':''}>${deptN(d,i)}</td>`).join("")}</tr>`).join("");
+    el.innerHTML=`<h2>Cơ cấu ${esc(CO.ten)} tại ${esc(s.name)}</h2>
+      ${s.cost!=null?`<p class="sub">${esc(s.sub)} · ${totalN(stage)} người · chi phí nhân sự ${fmtCost(s.cost)}/tháng${s.costNote?" ("+esc(s.costNote)+")":""}, đã gồm bảo hiểm 21,5%.</p>
       <div class="gate"><b>${stage===0?"ĐIỀU KIỆN BẮT ĐẦU TUYỂN":"TIÊU CHÍ QUA CỔNG "+esc(s.name)}</b><br>${esc(s.gate)}</div>
-      <h3>Tuyển để đạt mốc này</h3><p style="font-size:13px">${esc(s.hire)}</p>
+      <h3>Tuyển để đạt mốc này</h3><p style="font-size:13px">${esc(s.hire)}</p>`:`<p class="sub">${DEPTS.length} phòng · ${DEPTS.reduce((a,d)=>a+d.teams.length,0)} tổ · ${totalN(stage)} người (${esc(s.sub)}). Nguồn: ${esc(CFG.nguon||"phong.json")}</p>`}
       <h3>Số người theo phòng</h3>
       <div style="overflow-x:auto"><table><thead><tr><th>Phòng</th><th>Phụ trách</th>${STAGES.map((x,i)=>`<th class="n" ${i===stage?'style="color:var(--accent)"':''}>${esc(x.name)}</th>`).join("")}</tr></thead>
-      <tbody>${rows}<tr><td>CEO</td><td></td>${[0,1,2,3,4].map(()=>`<td class="n">1</td>`).join("")}</tr>
-      <tr><td><b>Tổng</b></td><td></td>${[0,1,2,3,4].map(i=>`<td class="n"><b>${totalN(i)}</b></td>`).join("")}</tr></tbody></table></div>
+      <tbody>${rows}<tr><td>CEO</td><td></td>${STAGES.map(()=>`<td class="n">1</td>`).join("")}</tr>
+      <tr><td><b>Tổng</b></td><td></td>${STAGES.map((_,i)=>`<td class="n"><b>${totalN(i)}</b></td>`).join("")}</tr></tbody></table></div>
       <h3>Cách vận hành</h3>
       <ul class="plain" style="font-size:13px">
         <li>CEO không giao thẳng cho tổ: mục tiêu đi qua <b>Trợ lý điều phối (AI)</b> thành phiếu cho trưởng phòng.</li>
@@ -649,15 +610,15 @@ function renderOrg(){
         <li>Hai phòng không thống nhất: Trợ lý mở phiếu Đề xuất, CEO quyết trong 2 ngày làm việc.</li>
       </ul>
       <h3>Luồng bàn giao giữa các phòng</h3>${flowTable(FLOWS)}
-      ${stage===1?`<div class="note">Ở N0 có 7 quản lý cho 14 người làm chuyên môn (2:1). Trước G1 các trưởng phòng phải trực tiếp làm chuyên môn; thuê ngoài kế toán đến G1 đưa tổng về 20 người.</div>`:""}
-      ${stage===0?`<div class="note">Đội sáng lập CEO + CTO là đề xuất. Anh có thể đổi nếu thực tế công ty bắt đầu với người khác.</div>`:""}`;
+      ${LA_MDFLEX&&stage===1?`<div class="note">Ở N0 có 7 quản lý cho 14 người làm chuyên môn (2:1). Trước G1 các trưởng phòng phải trực tiếp làm chuyên môn; thuê ngoài kế toán đến G1 đưa tổng về 20 người.</div>`:""}
+      ${LA_MDFLEX&&stage===0?`<div class="note">Đội sáng lập CEO + CTO là đề xuất. Anh có thể đổi nếu thực tế công ty bắt đầu với người khác.</div>`:""}`;
     el.querySelectorAll(".deptrow").forEach(r=>r.addEventListener("click",()=>select(deptById(r.dataset.id))));
     return;
   }
   const d=selected;
   const teamRows=d.teams.map(tm=>{
-    const roles=tm.roles.length?tm.roles.map(r=>`<tr><td style="padding-left:16px">${esc(r[0])}</td>${r[1].map((v,i)=>`<td class="n" ${i===stage?'style="font-weight:600"':''}>${v||"·"}</td>`).join("")}</tr>`).join(""):`<tr><td style="padding-left:16px;color:var(--quiet)" colspan="6">${esc(tm.kiem||"")}</td></tr>`;
-    return `<tr><td colspan="6"><b>${esc(tm.name)}</b>${tm.proposed?'<span class="tag">đề xuất gán, chờ CEO chốt</span>':""}</td></tr>${roles}`;
+    const roles=tm.roles.length?tm.roles.map(r=>`<tr><td style="padding-left:16px">${esc(r[0])}</td>${r[1].map((v,i)=>`<td class="n" ${i===stage?'style="font-weight:600"':''}>${v||"·"}</td>`).join("")}</tr>`).join(""):`<tr><td style="padding-left:16px;color:var(--quiet)" colspan="${STAGES.length+1}">${esc(tm.kiem||"")}</td></tr>`;
+    return `<tr><td colspan="${STAGES.length+1}"><b>${esc(tm.name)}</b>${tm.proposed?'<span class="tag">đề xuất gán, chờ CEO chốt</span>':""}</td></tr>${roles}`;
   }).join("");
   const myFlows=FLOWS.filter(f=>f[0]===d.id||f[1]===d.id||f[0]==="*");
   el.innerHTML=`<button class="back" id="backBtn">← Toàn công ty</button>
@@ -677,7 +638,8 @@ function renderOrg(){
   $("#backBtn").addEventListener("click",()=>select(null));
 }
 function flowTable(list){
-  const nm=id=>id==="*"?"Mọi phòng":(deptById(id).short||deptById(id).name);
+  const nm=id=>id==="*"?"Mọi phòng":(deptById(id)?(deptById(id).short||deptById(id).name):id);
+  if(!list.length) return `<p class="sub">Chưa khai báo bàn giao (ban_giao trong phong.json).</p>`;
   return `<div style="overflow-x:auto"><table><thead><tr><th>Bàn giao</th><th>Từ → đến</th><th>Hạn</th></tr></thead><tbody>${list.map(f=>`<tr><td>${esc(f[2])}<br><small style="color:var(--quiet)">${esc(f[3])}</small></td><td style="white-space:nowrap">${esc(nm(f[0]))} → ${esc(nm(f[1]))}</td><td>${esc(f[4])}</td></tr>`).join("")}</tbody></table></div>`;
 }
 function select(d){
@@ -745,13 +707,14 @@ function frame(now){
 /* ============ CANVAS 9 THÀNH TỐ (config/canvas.json) ============ */
 let CANVAS=null, activeBlock=null;
 const DNAME=id=>{const d=deptById(id);return d?(d.short||d.name):id};
-const DCODE={kd:"KD",mkt:"MKT",pt:"PTPM",kt:"KT",ns:"NS–HC"};
+const DCODE=LA_MDFLEX?{kd:"KD",mkt:"MKT",pt:"PTPM",kt:"KT",ns:"NS–HC"}:Object.fromEntries(CFG.phong.map(p=>[p.id,p.ma]));
 async function loadCanvas(){ try{ const r=await fetch("/api/canvas"); if(!r.ok) throw 0; CANVAS=await r.json(); if(!CANVAS) throw 0; }catch(e){ CANVAS=null; } renderCanvas(); }
 function ownerChips(b){ return `<div class="owners"><span class="owner-chip a" style="--c:var(${deptById(b.chu_tri).color})" title="Chủ trì: ${esc(deptById(b.chu_tri).name)}">${DCODE[b.chu_tri]}</span>${b.phoi_hop.map(id=>`<span class="owner-chip" style="--c:var(${deptById(id).color})" title="Phối hợp: ${esc(deptById(id).name)}">${DCODE[id]}</span>`).join("")}</div>`; }
 function renderCanvas(){
   const el=$("#paneCanvas");
+  if(!CANVAS&&!CO.co_canvas){ el.innerHTML=`<h2>Business Model Canvas</h2><div class="note">Cơ cấu ${esc(CO.ten)} chưa có Canvas. Muốn có thì đặt tệp canvas.json (cùng mẫu config/canvas.json) vào config/co-cau/${esc(CO.id)}/.</div>`; return; }
   if(!CANVAS){ el.innerHTML=`<h2>Business Model Canvas</h2><div class="note err">Không tải được config/canvas.json. Mở trang qua máy chủ: chạy node server.js trong apps/mo-hinh-3d rồi vào http://localhost:3200.</div>`; return; }
-  const c=CANVAS, blocks=c.thanh_to, order=["kd","mkt","pt","kt","ns"];
+  const c=CANVAS, blocks=c.thanh_to, order=DEPTS.map(d=>d.id);
   const byNo=[...blocks].sort((a,b)=>a.so-b.so);
   const detail=activeBlock?blocks.find(b=>b.id===activeBlock):null;
   el.innerHTML=`<h2>Canvas, tầm nhìn và chức năng</h2>
@@ -761,14 +724,14 @@ function renderCanvas(){
    <div class="goals">${c.muc_tieu.map(g=>`<div class="goal"><b>${esc(g.moc)}</b>${esc(g.noi_dung)}</div>`).join("")}</div>
    <h3>Business Model Canvas</h3>
    <div class="bmc">${blocks.map(b=>`<button class="bmc-cell c-${b.vi_tri} ${activeBlock===b.id?"on":""}" data-b="${b.id}" aria-pressed="${activeBlock===b.id}"><h4><em>${b.so}</em>${esc(b.ten)}</h4>${ownerChips(b)}</button>`).join("")}</div>
-   <p class="sub" style="font-size:12px">Nhãn đặc = phòng chủ trì, nhãn viền = phòng phối hợp. KD Kinh doanh · MKT Marketing · PTPM Phát triển phần mềm · KT Kế toán · NS–HC Nhân sự – Hành chính. Số là thứ tự điền Canvas.</p>
+   <p class="sub" style="font-size:12px">Nhãn đặc = phòng chủ trì, nhãn viền = phòng phối hợp. ${LA_MDFLEX?"KD Kinh doanh · MKT Marketing · PTPM Phát triển phần mềm · KT Kế toán · NS–HC Nhân sự – Hành chính":DEPTS.map(d=>esc(DCODE[d.id]+" "+d.name)).join(" · ")}. Số là thứ tự điền Canvas.</p>
    ${detail?`<div class="block-detail"><h4>${esc(detail.ten)}${detail.suy_ra?'<span class="badge">suy ra, cần đối chiếu Canvas gốc</span>':""}</h4><ul class="plain" style="font-size:14px">${detail.noi_dung.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><p style="font-size:14px;margin-top:8px"><b>Chủ trì:</b> ${esc(deptById(detail.chu_tri).name)} · <b>Phối hợp:</b> ${detail.phoi_hop.map(id=>esc(deptById(id).name)).join(", ")}</p></div>`:""}
    <h3>Ma trận trách nhiệm: phòng × thành tố</h3>
    <div style="overflow-x:auto"><table class="matrix"><thead><tr><th>Phòng</th>${byNo.map(b=>`<th class="v">${b.so}. ${esc(b.ten)}</th>`).join("")}</tr></thead><tbody>
    ${order.map(id=>`<tr><td style="white-space:nowrap"><span class="sw" style="background:var(${deptById(id).color})"></span>${esc(DNAME(id))}</td>${byNo.map(b=>b.chu_tri===id?'<td class="a">A</td>':(b.phoi_hop.includes(id)?'<td class="p">P</td>':'<td></td>')).join("")}</tr>`).join("")}
    </tbody></table></div>
    <p class="sub" style="font-size:12px;margin-top:4px">A = chủ trì, chịu trách nhiệm cuối · P = phối hợp.</p>
-   <h3>Chức năng, nhiệm vụ của 5 phòng</h3>
+   <h3>Chức năng, nhiệm vụ của ${DEPTS.length} phòng</h3>
    ${order.map(id=>{const f=c.chuc_nang[id],d=deptById(id);const owns=byNo.filter(b=>b.chu_tri===id).map(b=>b.ten);return `<div class="fn" style="--c:var(${d.color})"><h4>${esc(d.name)}</h4><p><b>Chức năng.</b> ${esc(f.chuc_nang)}</p><ul>${f.nhiem_vu.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="goal-line">Chủ trì thành tố: ${esc(owns.join(", ")||"không có")} · Mục tiêu: ${esc(f.muc_tieu)}</div></div>`}).join("")}
    <p class="sub" style="font-size:12px">Nguồn: ${esc(c.nguon)}</p>`;
   el.querySelectorAll(".bmc-cell").forEach(btn=>btn.addEventListener("click",()=>{
@@ -939,6 +902,17 @@ loadCanvas(); loadDesign(); taiViec(); setInterval(()=>{ if(!document.hidden) ta
 /* Theo dõi đổi theme */
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{applyTheme();setDim();});
 new MutationObserver(()=>{applyTheme();setDim();}).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+/* Tiêu đề và tab theo cơ cấu (MdFlex giữ nguyên chữ trong HTML) */
+if(!LA_MDFLEX){
+  const nTo=DEPTS.reduce((a,d)=>a+d.teams.length,0);
+  $(".brand h1").textContent=CO.ten+" — mô hình tổ chức";
+  $(".brand h1+span").textContent=(CO.khau_hieu?CO.khau_hieu+" · ":"")+DEPTS.length+" phòng · "+nTo+" tổ · lớp AI điều phối";
+  $(".logo").textContent=CO.ten.split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
+  $("#scene").setAttribute("aria-label","Mô hình 3D cơ cấu tổ chức "+CO.ten);
+  const pl=document.querySelector('a.stage[href="/phong.html"] small'); if(pl) pl.textContent=DEPTS.length+" phòng · phiếu việc";
+  $("#tabFound").hidden=true;
+}
 
 /* Khởi động */
 applyTheme(); applyStage(); renderFound(); setDim(); resize();

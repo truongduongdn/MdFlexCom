@@ -243,6 +243,7 @@ section.list h2{font-size:22px;margin:0 0 4px}
   </section>
 </div>
 
+<script src="/co-cau.js"></script>
 <script>
 fetch("/api/tai-khoan").then(r=>r.json()).then(t=>{ const a=document.getElementById("acct"); if(!a||!t.email||t.email==="Không có") return; a.innerHTML="Người giao: <b></b> · <span></span>"; a.querySelector("b").textContent=t.vai; a.querySelector("span").textContent=t.email; a.hidden=false; }).catch(()=>{});
 (async function(){

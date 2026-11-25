@@ -234,6 +234,7 @@ dialog h2{margin:0 0 16px;font-size:20px}
   </form>
 </dialog>
 
+<script src="/co-cau.js"></script>
 <script>
 (async function(){
 const $=s=>document.querySelector(s);
@@ -255,14 +256,15 @@ CFG.vi_tri_chung.forEach(v=>DB[v.ma]={ten:v.ten,phong:null,laTP:false});
 CFG.phong.forEach(p=>{ DB[p.truong_phong.ai.ma]={ten:p.truong_phong.ai.ten,phong:p.id,laTP:true}; p.to.forEach(t=>t.ai.forEach(a=>DB[a.ma]={ten:a.ten,phong:p.id,laTP:false})); });
 const tenVT=m=>DB[m]?`${m} · ${DB[m].ten}`:m;
 
-const S={id:new URLSearchParams(location.search).get("id")||"kd",tab:"tong",filter:"tat-ca",sel:null,list:[],moc:1};
-if(!CFG.phong.some(p=>p.id===S.id)) S.id="kd";
+const PHONG_DAU=CFG.phong[0].id;
+const S={id:new URLSearchParams(location.search).get("id")||PHONG_DAU,tab:"tong",filter:"tat-ca",sel:null,list:[],moc:Math.min(1,CFG.moc.length-1)};
+if(!CFG.phong.some(p=>p.id===S.id)) S.id=PHONG_DAU;
 const P=()=>CFG.phong.find(p=>p.id===S.id);
 
 // ---------- Khung ----------
 $("#depts").innerHTML=CFG.phong.map(p=>`<button data-id="${p.id}" class="dept-${p.id}"><span class="dot"></span>${esc(p.ten_ngan)}</button>`).join("");
 $("#depts").addEventListener("click",e=>{ const b=e.target.closest("button[data-id]"); if(!b) return; chonPhong(b.dataset.id,true); });
-window.addEventListener("popstate",()=>chonPhong(new URLSearchParams(location.search).get("id")||"kd",false));
+window.addEventListener("popstate",()=>chonPhong(new URLSearchParams(location.search).get("id")||PHONG_DAU,false));
 
 function oVaiTro(){
   const nhom=[["Chung",CFG.vi_tri_chung.map(v=>v.ma)]].concat(CFG.phong.map(p=>[p.ten,[p.truong_phong.ai.ma].concat(...p.to.map(t=>t.ai.map(a=>a.ma)))]));
@@ -280,8 +282,8 @@ function chonPhong(id,push){
   document.body.className="dept-"+id;
   $("#logo").textContent=p.ma.slice(0,4);
   $("#title").textContent=p.ten;
-  $("#subtitle").textContent=`Tầng ${p.tang.slice(1).replace(/^0/,"")} · ${p.truong_phong.nguoi_that} · ${p.to.length} tổ · ${p.quy_che}`;
-  document.title=p.ten_ngan+" · MdFlex";
+  $("#subtitle").textContent=`${p.tang?"Tầng "+p.tang.slice(1).replace(/^0/,"")+" · ":""}${p.truong_phong.nguoi_that} · ${p.to.length} tổ · ${p.quy_che}`;
+  document.title=p.ten_ngan+" · "+((window.CO_CAU&&window.CO_CAU.ten)||"MdFlex");
   document.querySelectorAll("#depts button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.id===id)));
   $("#actor").value=store.get("mdflex-vai-"+id)||p.truong_phong.ai.ma;
   taiPhieu();

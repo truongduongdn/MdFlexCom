@@ -116,6 +116,7 @@ td.n{font-family:var(--f-mono)}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="/co-cau.js"></script>
 <script>
 (async function(){
 const $=s=>document.querySelector(s);
@@ -242,7 +243,11 @@ canvas.addEventListener("pointerup",e=>{
 
 // ---------- Bảng bên phải ----------
 const COLOR={amber:"amber",teal:"teal",frame:"frame"};
-const PHONG_TANG={T02:"kd",T03:"mkt",T04:"pt",T05:"kt",T06:"ns"};
+// Tầng → phòng lấy từ trường "tang" trong phong.json của cơ cấu đang dùng (biến CO_CAU)
+const CO=window.CO_CAU||null, CO_PHONG=CO?CO.phong.phong:[];
+const PHONG_TANG=Object.fromEntries(CO_PHONG.filter(p=>p.tang).map(p=>[p.tang,p.id]));
+// Cơ cấu khác MdFlex: tầng đã gắn phòng thì hiện tên, trưởng phòng, tổ của phòng đó thay cho công năng thiết kế MdFlex
+if(CO&&!CO.la_mdflex) CO_PHONG.filter(p=>p.tang&&INFO[p.tang]).forEach(p=>{ Object.assign(INFO[p.tang],{ten:p.ten,vai_tro:p.truong_phong.nguoi_that,mo_ta:p.chuc_nang||"",khu:p.to.slice(0,3).map(t=>[t.ten,t.vi_tri.map(v=>v.ten).join("; ")])}); });
 function renderPanel(){
   const p=PAL[S.theme], t=S.sel&&INFO[S.sel];
   const list=spec.tang.slice().reverse().map(x=>`<li><button data-id="${x.id}" aria-current="${S.sel===x.id}">
@@ -254,7 +259,7 @@ function renderPanel(){
     :`<h3>Chi tiết</h3><p class="note">Chọn một tầng trong danh mục hoặc bấm vào mô hình để xem công năng.</p>`;
   const m=spec.moc_nhan_su_ke_hoach;
   $("#panel").innerHTML=`<span class="badge">${esc(spec.phien_ban)}</span>
-    <h3>Danh mục tầng</h3><ul class="floors">${list}</ul>${chiTiet}
+    ${CO&&!CO.la_mdflex?`<p class="note">Toà nhà 7 tầng là thiết kế cho MdFlex. Cơ cấu ${esc(CO.ten)} ${Object.keys(PHONG_TANG).length?"đã gắn "+Object.keys(PHONG_TANG).length+" phòng vào tầng":"chưa gắn phòng nào vào tầng"} (trường tang trong config/co-cau/${esc(CO.id)}/phong.json).</p>`:""}<h3>Danh mục tầng</h3><ul class="floors">${list}</ul>${chiTiet}
     <h3>Mốc nhân sự kế hoạch</h3>
     <table><tr><th>Thành lập</th><th>G0</th><th>G1</th><th>G2</th><th>G3</th></tr>
     <tr><td class="n">${m.thanh_lap}</td><td class="n">${m.G0}</td><td class="n">${m.G1}</td><td class="n">${m.G2}</td><td class="n">${m.G3}</td></tr></table>

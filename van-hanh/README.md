@@ -14,8 +14,9 @@ Cả hai máy chủ chỉ nghe trên `127.0.0.1`: chỉ dùng được ngay trê
 
 | Tệp | Việc |
 | --- | --- |
-| `chay-mdflex.bat` | Bấm đúp để chạy: kiểm tra nhanh → sao lưu → bật 2 máy chủ → mở Bảng CEO và Khung chat |
-| `kiem-tra.js` | `node van-hanh/kiem-tra.js`: kiểm tra đầy đủ, gồm chạy thử hai app trên **bản sao tạm** (không đụng `data/` thật, không gọi Claude/Perplexity, không tốn tiền). Thêm `--nhanh` để bỏ phần chạy thử |
+| `chay-mdflex.bat` | Bấm đúp để chạy: kiểm tra nhanh → sao lưu → bật 2 máy chủ → mở Bảng CEO và Khung chat. Cơ cấu MdFlex — **máy chính dùng tệp này** |
+| `chay-vien-gut.bat` | Như trên nhưng Mô hình 3D chạy cơ cấu Viện Gút (`CO_CAU=vien-gut`) — chỉ dùng trên máy phụ |
+| `kiem-tra.js` | `node van-hanh/kiem-tra.js`: kiểm tra đầy đủ, gồm chạy thử hai app trên **bản sao tạm** (không đụng `data/` thật, không gọi Claude/Perplexity, không tốn tiền). Mô hình 3D luôn được thử với MdFlex (gỡ `CO_CAU`) và với từng cơ cấu trong `config/co-cau/`. Thêm `--nhanh` để bỏ phần chạy thử |
 | `sao-luu.js` | `node van-hanh/sao-luu.js`: chép `data/` của hai app và `config/tai-khoan.json` ra ngoài repo |
 
 Mã thoát của `kiem-tra.js`: `0` là đạt (có thể kèm dòng ⚠ cảnh báo), `1` là có dòng ✘ phải sửa trước khi chạy.

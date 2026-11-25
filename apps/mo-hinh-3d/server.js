@@ -19,7 +19,43 @@ fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const readJson = (file, fallback) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; } };
 const brand = () => readJson(path.join(CONFIG_DIR, 'thuong-hieu.json'), null);
-const canvas = () => readJson(path.join(CONFIG_DIR, 'canvas.json'), null);
+
+// ---------- Cơ cấu tổ chức theo biến CO_CAU ----------
+// Không đặt (hoặc "mdflex") = MdFlex: config/phong.json, config/canvas.json — hành vi như cũ.
+// CO_CAU=<tên> = config/co-cau/<tên>/phong.json (bắt buộc) và canvas.json (tuỳ chọn).
+// Dữ liệu phiếu vẫn ở data/ như cũ.
+const CO_CAU = (process.env.CO_CAU || '').trim().toLowerCase() || 'mdflex';
+if (!/^[a-z0-9-]+$/.test(CO_CAU)) { console.error(`CO_CAU="${process.env.CO_CAU}" không hợp lệ: chỉ dùng chữ thường không dấu, số, gạch ngang.`); process.exit(1); }
+const LA_MDFLEX = CO_CAU === 'mdflex';
+const CO_CAU_DIR = LA_MDFLEX ? CONFIG_DIR : path.join(CONFIG_DIR, 'co-cau', CO_CAU);
+const PHONG_FILE = path.join(CO_CAU_DIR, 'phong.json');
+if (!fs.existsSync(PHONG_FILE)) { console.error(`Không thấy ${path.relative(ROOT, PHONG_FILE)} cho CO_CAU=${CO_CAU}. Các cơ cấu có sẵn: mdflex (để trống), ${fs.existsSync(path.join(CONFIG_DIR, 'co-cau')) ? fs.readdirSync(path.join(CONFIG_DIR, 'co-cau')).join(', ') : ''}`); process.exit(1); }
+const canvas = () => readJson(path.join(CO_CAU_DIR, 'canvas.json'), null);
+// Tên và lời giới thiệu tổ chức dùng trong giao diện và lời dặn gửi Claude. MdFlex giữ nguyên câu cũ.
+function toChuc(cfg) {
+  cfg = cfg || phongCfg() || {};
+  if (LA_MDFLEX) return { ten: 'MdFlex', gioiThieu: 'MdFlex — công ty phần mềm y tế (HIS, EMR, LIS, PMS, PACS) cho phòng khám tư nhân tại Việt Nam', gioiThieuNgan: 'MdFlex — công ty phần mềm y tế cho phòng khám tư nhân tại Việt Nam' };
+  const ten = cfg.to_chuc || CO_CAU;
+  const gt = cfg.gioi_thieu || `${ten}${cfg.ten_day_du ? ' (' + cfg.ten_day_du + ')' : ''}`;
+  return { ten, gioiThieu: gt, gioiThieuNgan: gt };
+}
+// /co-cau.js: nạp đồng bộ trước script trang, đặt window.CO_CAU và màu của phòng có khai báo "mau"
+function coCauJs(res) {
+  const cfg = phongCfg();
+  if (!cfg) return send(res, 500, { error: `Không đọc được ${path.relative(ROOT, PHONG_FILE)}` });
+  const tc = toChuc(cfg);
+  const data = { id: CO_CAU, la_mdflex: LA_MDFLEX, ten: tc.ten, khau_hieu: cfg.khau_hieu || null, co_canvas: !!canvas(), phong: cfg };
+  const mau = cfg.phong.filter((p) => p.mau && /^[a-z0-9-]+$/.test(p.id) && /^#[0-9a-f]{6}$/i.test(p.mau.sang || '') && /^#[0-9a-f]{6}$/i.test(p.mau.toi || ''));
+  const sang = mau.map((p) => `--c-${p.id}:${p.mau.sang};`).join('');
+  const toi = mau.map((p) => `--c-${p.id}:${p.mau.toi};`).join('');
+  const css = mau.length ? `:root{${sang}}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){${toi}}}:root[data-theme="dark"]{${toi}}` +
+    mau.map((p) => `.dept-${p.id}{--dept:var(--c-${p.id})}`).join('') : '';
+  const js = `window.CO_CAU=${JSON.stringify(data).replace(/</g, '\\u003c')};\n` +
+    (css ? `(function(){var s=document.createElement("style");s.id="co-cau-mau";s.textContent=${JSON.stringify(css)};document.head.appendChild(s);})();\n` : '') +
+    (LA_MDFLEX ? '' : `document.title=document.title.replace(/MdFlex(Com)?/g,${JSON.stringify(tc.ten)});\n`);
+  res.writeHead(200, { 'content-type': 'application/javascript; charset=utf-8', 'cache-control': 'no-store' });
+  res.end(js);
+}
 
 const send = (res, status, obj) => {
   res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
@@ -214,7 +250,7 @@ function tinh(req, res) {
 // ---------- Phòng ban và phiếu việc (giao thức phiếu: docs/doi-quan-ai/01-dac-ta-kien-truc.md) ----------
 const PHIEU_DIR = path.join(ROOT, 'data', 'phieu');
 fs.mkdirSync(PHIEU_DIR, { recursive: true });
-const phongCfg = () => readJson(path.join(CONFIG_DIR, 'phong.json'), null);
+const phongCfg = () => readJson(PHONG_FILE, null);
 // Tài khoản vào công ty mặc định (config/tai-khoan.json, người dùng quản lý). Vai vẫn là mã 'CEO' để kiểm quyền; email chỉ để ghi nhận.
 const taiKhoan = () => {
   const t = (readJson(path.join(CONFIG_DIR, 'tai-khoan.json'), {}) || {}).nguoi_giao_mac_dinh || {};
@@ -235,6 +271,8 @@ function danhBa(cfg) {
   return m;
 }
 const docPhieu = (ma) => readJson(path.join(PHIEU_DIR, ma + '.json'), null);
+// data/ dùng chung cho mọi cơ cấu: phiếu của phòng không có trong cơ cấu đang chạy thì chỉ xem, không thao tác
+const phieuKhacCoCau = (p) => { const c = phongCfg(); return !!(p && p.phong && c && !c.phong.some((x) => x.id === p.phong)); };
 const ghiPhieu = (p) => fs.writeFileSync(path.join(PHIEU_DIR, p.ma + '.json'), JSON.stringify(p, null, 2), 'utf8');
 function maPhieuMoi() {
   const n = fs.readdirSync(PHIEU_DIR).map((f) => /^PH-(\d+)\.json$/.exec(f)).filter(Boolean).map((x) => Number(x[1]));
@@ -342,6 +380,7 @@ async function hanhDong(req, res, ma) {
   const cfg = phongCfg(); const db = danhBa(cfg);
   const p = docPhieu(ma);
   if (!p) return send(res, 404, { error: 'Không tìm thấy phiếu ' + ma + '.' });
+  if (phieuKhacCoCau(p)) return send(res, 409, { error: `Phiếu ${ma} thuộc phòng "${p.phong}" không có trong cơ cấu ${toChuc().ten} đang chạy (CO_CAU). Mở bằng đúng cơ cấu đã tạo phiếu.` });
   const hd = HANH_DONG[chu(b.hanh_dong)];
   if (!hd) return send(res, 400, { error: 'Hành động không hợp lệ.' });
   const ai = chu(b.ai);
@@ -404,6 +443,7 @@ async function suaPhieu(req, res, ma) {
   const cfg = phongCfg(); const db = danhBa(cfg);
   const p = docPhieu(ma);
   if (!p) return send(res, 404, { error: 'Không tìm thấy phiếu ' + ma + '.' });
+  if (phieuKhacCoCau(p)) return send(res, 409, { error: `Phiếu ${ma} thuộc phòng "${p.phong}" không có trong cơ cấu ${toChuc().ten} đang chạy (CO_CAU). Mở bằng đúng cơ cấu đã tạo phiếu.` });
   const ai = chu(b.ai), lyDo = chu(b.ly_do);
   if (!db[ai]) return send(res, 400, { error: 'Vai đang thao tác không có trong danh bạ vị trí.' });
   if (!['Mới', 'Đã nhận', 'Đang làm', 'Vướng'].includes(p.trang_thai)) return send(res, 409, { error: `Không sửa được khi phiếu ở trạng thái ${p.trang_thai}.` });
@@ -512,7 +552,7 @@ function laChuyenVienAI(cfg, ma) {
 function heThongChuyenVien(cfg, v) {
   const a = v.the;
   return [
-    `Bạn là ${a.ten} (mã ${a.ma}), thuộc tổ ${v.to.ten}, phòng ${v.phong.ten} của MdFlex — công ty phần mềm y tế (HIS, EMR, LIS, PMS, PACS) cho phòng khám tư nhân tại Việt Nam.`,
+    `Bạn là ${a.ten} (mã ${a.ma}), thuộc tổ ${v.to.ten}, phòng ${v.phong.ten} của ${toChuc(cfg).gioiThieu}.`,
     `Bạn báo cáo cho ${a.bao_cao_cho}. Quy định áp dụng: ${cfg.quy_dinh_chung}, ${v.phong.quy_che}.`,
     '',
     'Thẻ vị trí của bạn:',
@@ -597,6 +637,7 @@ async function aiLamPhieu(req, res, ma) {
   const cfg = phongCfg(); const db = danhBa(cfg);
   const p = docPhieu(ma);
   if (!p) return send(res, 404, { error: 'Không tìm thấy phiếu ' + ma + '.' });
+  if (phieuKhacCoCau(p)) return send(res, 409, { error: `Phiếu ${ma} thuộc phòng "${p.phong}" không có trong cơ cấu ${toChuc().ten} đang chạy (CO_CAU). Mở bằng đúng cơ cấu đã tạo phiếu.` });
   const ai = chu(b.ai);
   if (!db[ai]) return send(res, 400, { error: 'Vai đang thao tác không có trong danh bạ vị trí.' });
   const v = laChuyenVienAI(cfg, p.nguoi_nhan);
@@ -857,7 +898,7 @@ async function goiYGiaoViec(req, res) {
   const top = xh[0] && xh[0].diem > 0 ? xh[0] : null;
   const v = top && laChuyenVienAI(cfg, top.chuyen_vien.ma);
   const system = [
-    'Bạn là Trợ lý điều phối (AI) của MdFlex — công ty phần mềm y tế cho phòng khám tư nhân tại Việt Nam.',
+    `Bạn là Trợ lý điều phối (AI) của ${toChuc(cfg).gioiThieuNgan}.`,
     'CEO đang viết một yêu cầu giao việc. Hãy gợi ý để phiếu đủ rõ cho Trưởng phòng và chuyên viên làm được ngay, và nghiệm thu được.',
     'Quy tắc:',
     '- Gợi ý BỔ SUNG cho chữ CEO viết, không đổi mục tiêu. Giữ nguyên các dữ kiện CEO đưa ra.',
@@ -961,6 +1002,7 @@ async function dieuPhoiLai(req, res, ma) {
   const cfg = phongCfg(); const db = danhBa(cfg);
   const p = docPhieu(ma);
   if (!p) return send(res, 404, { error: 'Không tìm thấy phiếu ' + ma + '.' });
+  if (phieuKhacCoCau(p)) return send(res, 409, { error: `Phiếu ${ma} thuộc phòng "${p.phong}" không có trong cơ cấu ${toChuc().ten} đang chạy (CO_CAU). Mở bằng đúng cơ cấu đã tạo phiếu.` });
   const ai = chu(b.ai);
   if (!(ai === 'CEO' || ai === 'TL-DP' || ai === p.nguoi_giao)) return send(res, 403, { error: 'Chỉ CEO, Trợ lý điều phối hoặc người giao được chuyển phiếu cho Trợ lý điều phối.' });
   // Phiếu gốc vừa bị ngừng nhánh sai bộ phận, đang chờ chọn phòng
@@ -1029,6 +1071,7 @@ async function ngungPhieu(req, res, ma) {
   const cfg = phongCfg(); const db = danhBa(cfg);
   const p = docPhieu(ma);
   if (!p) return send(res, 404, { error: 'Không tìm thấy phiếu ' + ma + '.' });
+  if (phieuKhacCoCau(p)) return send(res, 409, { error: `Phiếu ${ma} thuộc phòng "${p.phong}" không có trong cơ cấu ${toChuc().ten} đang chạy (CO_CAU). Mở bằng đúng cơ cấu đã tạo phiếu.` });
   const ai = chu(b.ai);
   if (!db[ai]) return send(res, 400, { error: 'Vai đang thao tác không có trong danh bạ vị trí.' });
   const lyDo = chu(b.ly_do);
@@ -1104,6 +1147,8 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && u === '/api/thiet-ke') return lichSu(res);
     if (req.method === 'POST' && u === '/api/thiet-ke') return await thietKe(req, res);
     if (req.method === 'GET' && u === '/api/phong') return send(res, 200, phongCfg());
+    if (req.method === 'GET' && u === '/co-cau.js') return coCauJs(res);
+    if (req.method === 'GET' && u === '/api/co-cau') { const c = phongCfg() || {}; return send(res, 200, { id: CO_CAU, la_mdflex: LA_MDFLEX, ten: toChuc(c).ten, tep: path.relative(ROOT, PHONG_FILE).replace(/\\/g, '/'), so_phong: (c.phong || []).length, co_canvas: !!canvas() }); }
     if (req.method === 'GET' && u === '/api/phieu') return dsPhieu(res, new URL(req.url, 'http://x').searchParams.get('phong'));
     if (req.method === 'POST' && u === '/api/phieu') return await taoPhieu(req, res);
     if (req.method === 'POST' && u === '/api/giao-viec/xem-truoc') return await xemTruocGiaoViec(req, res);
@@ -1135,6 +1180,7 @@ const server = http.createServer(async (req, res) => {
 });
 server.listen(PORT, HOST, () => {
   console.log(`Mô hình 3D MdFlex: http://localhost:${PORT}`);
+  console.log(`Cơ cấu: ${toChuc().ten} (${path.relative(ROOT, PHONG_FILE)})${LA_MDFLEX ? '' : ` — CO_CAU=${CO_CAU}`}`);
   console.log(process.env.ANTHROPIC_API_KEY ? `Claude: đã có khoá, model ${CLAUDE_MODEL}, effort ${CLAUDE_EFFORT}` : "Claude: CHƯA có khoá — chuyên viên AI chưa tự làm phiếu cho đến khi đặt ANTHROPIC_API_KEY.");
   console.log(process.env.PERPLEXITY_API_KEY ? `Perplexity: đã có khoá, model ${MODEL}` : 'Perplexity: CHƯA có khoá — tab Thiết kế AI sẽ báo lỗi cho đến khi đặt PERPLEXITY_API_KEY.');
 });
