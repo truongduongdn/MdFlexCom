@@ -929,6 +929,13 @@ async function goiYGiaoViec(req, res) {
 // CEO giao việc → Trợ lý điều phối tự nhận, chọn phòng → Trưởng phòng AI tự nhận, chia cho chuyên viên → chuyên viên tự nhận
 async function giaoViec(req, res) {
   let b; try { b = await readBody(req); } catch (e) { return send(res, 400, { error: e.message }); }
+  const r = taoChuoiGiaoViec(b);
+  if (r.loi) return send(res, 400, { error: r.loi, ...(r.ngang ? { ngang: r.ngang } : {}) });
+  send(res, 201, r);
+}
+// Lõi giao việc: phiếu gốc CEO → Trợ lý → Trưởng phòng → Chuyên viên. maMucTieu: gắn phiếu gốc vào mục tiêu (Buồng điều hành).
+// Trả { loi, ngang? } hoặc { goc, phieu, dinh_tuyen, tu_dong, ai_chay }.
+function taoChuoiGiaoViec(b, { maMucTieu } = {}) {
   const cfg = phongCfg(); const db = danhBa(cfg);
   const tieuChi = (Array.isArray(b.tieu_chi) ? b.tieu_chi : []).map(chu).filter(Boolean);
   const cong = chu(b.cong) || 'Không có';
@@ -938,20 +945,21 @@ async function giaoViec(req, res) {
   let tuDong = false;
   if (!chon.length) {
     const t = tuChonPhong(xh);
-    if (t.loi) return send(res, 400, { error: t.loi, ngang: t.ngang });
+    if (t.loi) return { loi: t.loi, ngang: t.ngang };
     chon = t.chon; tuDong = true;
   }
   // 1. Phiếu gốc: CEO → Trợ lý điều phối
   const goc = taoPhieuTuDuLieu(cfg, db, { ...b, loai: 'Giao việc', nguoi_giao: 'CEO', nguoi_nhan: 'TL-DP', tieu_chi: tieuChi, cong: 'Không có', phieu_cha: '' }, 'CEO');
-  if (goc.loi) return send(res, 400, { error: goc.loi.join(' ') });
+  if (goc.loi) return { loi: goc.loi.join(' ') };
   const G = goc.phieu;
   G.cong_yeu_cau = cong;
+  if (maMucTieu) G.ma_muc_tieu = maMucTieu;
   const tk = taiKhoan();
   G.tai_khoan_giao = tk.email; G.nhat_ky[0].tai_khoan = tk.email;
   const kq = phanPhoi(cfg, db, G, b, chon, xh, tuDong, cong, tieuChi);
   // Tuỳ chọn: chuyên viên AI làm ngay bằng Claude
   const aiChay = b.ai_lam_ngay ? batDauAI(cfg, kq.la, 'CEO') : [];
-  send(res, 201, { goc: G.ma, phieu: kq.tao, dinh_tuyen: chon, tu_dong: tuDong, ai_chay: aiChay });
+  return { goc: G.ma, phieu: kq.tao, dinh_tuyen: chon, tu_dong: tuDong, ai_chay: aiChay };
 }
 
 // Cho Claude làm các phiếu chuyên viên AI vừa tạo (bỏ qua khi chưa có khoá hoặc dữ liệu Đỏ)
