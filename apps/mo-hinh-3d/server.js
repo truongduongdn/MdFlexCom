@@ -1168,9 +1168,15 @@ function toaNha(res, [ten, loai]) {
   });
 }
 
+// Buồng điều hành CEO: mục tiêu nối xuống phiếu (muc-tieu.js)
+const mucTieu = require('./muc-tieu')({
+  ROOT, CO_CAU, phongCfg, danhBa, tatCaPhieu, docPhieu, ghiPhieu, kemChiSo, readBody, send, taoChuoiGiaoViec, toChuc
+});
+
 const server = http.createServer(async (req, res) => {
   try {
     const u = req.url.split('?')[0];
+    if ((u.startsWith('/api/muc-tieu') || u === '/api/truong-phong') && await mucTieu.xuLy(req, res, u)) return;
     if (req.method === 'GET' && u === '/api/trang-thai') return send(res, 200, { coKhoa: !!process.env.PERPLEXITY_API_KEY, model: MODEL, vung: Object.fromEntries(Object.entries(VUNG).map(([k, v]) => [k, v.ten])) });
     if (req.method === 'GET' && u === '/api/thuong-hieu') return send(res, 200, brand());
     if (req.method === 'GET' && u === '/api/canvas') return send(res, 200, canvas());
