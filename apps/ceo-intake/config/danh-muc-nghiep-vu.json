@@ -22,7 +22,7 @@
     {
       "ma": "NV-KD-01",
       "ten": "Ký hợp đồng với phòng khám / bệnh viện",
-      "tuKhoa": ["ky hop dong", "hop dong phong kham", "hop dong benh vien", "chot hop dong"],
+      "tuKhoa": ["hop dong khach hang", "ky hop dong khach hang", "hop dong phong kham", "hop dong benh vien", "ky hop dong voi phong kham", "ky hop dong voi benh vien", "chot hop dong"],
       "donViChuTri": "KD_BH",
       "phoiHop": ["NSHC_PC", "KT", "PTPM_TKHT"],
       "slaNgayBaoCao": 2,

@@ -93,6 +93,20 @@ function matchDonVi(normText, donVi) {
   return found;
 }
 
+// Tìm đơn vị trong một giá trị đã ghi (phiếu dán lại, phiếu giao việc): mã trong ngoặc trước, rồi tên đúng, cuối cùng mới đến từ khoá
+function findDonVi(text, donVi) {
+  const s = String(text || '');
+  for (const m of s.matchAll(/\(([^()]+)\)/g)) {
+    const dv = donVi.find((d) => d.ma === m[1].trim());
+    if (dv) return dv;
+  }
+  const n = norm(s).trim();
+  const byName = donVi
+    .filter((d) => n === norm(d.ten) || n.startsWith(norm(d.ten) + ' '))
+    .sort((a, b) => b.ten.length - a.ten.length)[0];
+  return byName || matchDonVi(n, donVi)[0] || null;
+}
+
 // ---------- Đọc ngày trong câu ----------
 const WEEKDAYS = { 'chu nhat': 0, 'thu hai': 1, 'thu ba': 2, 'thu tu': 3, 'thu nam': 4, 'thu sau': 5, 'thu bay': 6 };
 function findDate(text) {
@@ -149,8 +163,9 @@ function parseTemplate(text) {
     const title = line.match(/PHI[EẾ]U Y[EÊ]U C[AẦ]U\s*[—\-–]\s*V?[^:]*:\s*(.+)$/i);
     if (title) { if (!isPlaceholder(title[1])) out.tenViec = title[1].trim(); last = null; continue; }
     if (/^c[aâ]u h[oỏ]i c[aầ]n x[aá]c nh[aậ]n/i.test(norm(line)) || /^cau hoi can xac nhan/.test(norm(line))) { last = null; continue; }
-    // Một dòng có thể chứa 2 cặp "Nhãn: giá trị" ngăn bởi — hoặc khoảng trắng dài
-    const segments = /^pham vi\s*:/.test(norm(line)) ? [line] : line.split(/\s+[—–]\s+|\s{3,}(?=[^\s:\d][^\s:]*(?: [^\s:]+){0,4}:\s)/);
+    // Một dòng có thể chứa 2 cặp "Nhãn: giá trị" ngăn bởi — hoặc khoảng trắng dài.
+    // Chỉ tách khi phía sau là một "Nhãn:"; gạch ngang nằm trong giá trị (vd "Hành chính – Pháp chế") được giữ nguyên.
+    const segments = /^pham vi\s*:/.test(norm(line)) ? [line] : line.split(/(?:\s+[—–]\s+|\s{3,})(?=[^\s:\d][^\s:]*(?: [^\s:]+){0,4}:\s)/);
     let matched = false;
     for (const seg of segments) {
       const m = seg.match(/^([^:]{2,40}):\s*(.*)$/);
@@ -276,8 +291,8 @@ function buildDraft(text) {
   // Phiếu dán theo mẫu: giá trị CEO tự gõ là đã xác nhận
   for (const [k, v] of Object.entries(tpl)) set(k, v, 'xacNhan');
   if (tpl.nguoiThucHien) {
-    const m = matchDonVi(norm(tpl.nguoiThucHien), cfg.donVi);
-    if (m.length) set('nguoiThucHien', donViLabel(m[0]), 'xacNhan');
+    const dv = findDonVi(tpl.nguoiThucHien, cfg.donVi);
+    if (dv) set('nguoiThucHien', donViLabel(dv), 'xacNhan');
   }
 
   if (f.tenViec) set('luuTru', `Phieu-yeu-cau/${today().getFullYear()}/V${pad(so)}-${slug(f.tenViec.value)}`, 'auto');
@@ -423,8 +438,7 @@ function vanHanh() {
     const g = readJson(path.join(GIAO_VIEC_DIR, f), null);
     if (!g) return null;
     const p = readJson(path.join(PHIEU_DIR, g.phieuGoc + '.json'), null);
-    const code = (String(g.nguoiNhan || '').match(/\(([^()]+)\)/) || [])[1];
-    const dv = cfg.donVi.find((d) => d.ma === code) || matchDonVi(norm(g.nguoiNhan), cfg.donVi)[0] || null;
+    const dv = findDonVi(g.nguoiNhan, cfg.donVi);
     return {
       ma: g.ma, phieuGoc: g.phieuGoc, donVi: dv ? dv.ma : null, nguoiNhan: g.nguoiNhan,
       tenViec: p && p.fields.tenViec ? p.fields.tenViec.value : '',
