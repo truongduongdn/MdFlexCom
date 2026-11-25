@@ -29,4 +29,4 @@ Cần Node.js 18+, không cần `npm install`. Chi tiết: [apps/ceo-intake/READ
 
 - Danh sách Loại việc A–K ("mục 3") và định nghĩa Mức dữ liệu ("mục 5") chưa có — điền vào `apps/ceo-intake/config/loai-viec.json` và tài liệu đặc tả.
 - Đơn vị chủ trì nghiệp vụ "Thành lập chi nhánh" đang là ví dụ, cần CEO chốt.
-- Phiếu giao việc hiện chỉ ghi tệp JSON; chưa nối sang module Công việc của VGC.
+- Phiếu giao việc hiện chỉ ghi tệp JSON; chưa nối sang công cụ quản lý công việc.

@@ -1,12 +1,66 @@
 {
-  "_ghiChu": "Danh mục nghiệp vụ: mỗi nghiệp vụ có đúng 1 đơn vị chủ trì (mã theo config/don-vi.json). tuKhoa viết không dấu, chữ thường. slaNgay = số ngày làm việc gợi ý cho hạn chót. Mục dưới đây là VÍ DỤ — cần CEO chốt đơn vị chủ trì.",
+  "_ghiChu": "Danh mục nghiệp vụ MdFlex: mỗi nghiệp vụ có đúng 1 đơn vị chủ trì (mã theo config/don-vi.json). tuKhoa viết không dấu, chữ thường. slaNgayBaoCao = số ngày làm việc gợi ý cho hạn báo cáo tiến độ. Các mục có viDu=true là VÍ DỤ — cần CEO chốt đơn vị chủ trì và phối hợp. Danh mục Viện Gút cũ nằm ở danh-muc-nghiep-vu.vgc.json.",
   "nghiepVu": [
     {
-      "ma": "NV-HCQT-07",
-      "ten": "Thành lập chi nhánh",
-      "tuKhoa": ["chi nhanh", "mo chi nhanh", "co so moi", "dia diem kinh doanh"],
-      "donViChuTri": "HCQT",
-      "phoiHop": ["P.KT", "PK", "P.QLHAUCAN"],
+      "ma": "NV-PTPM-01",
+      "ten": "Triển khai phần mềm cho khách hàng mới",
+      "tuKhoa": ["trien khai cho khach hang", "trien khai khach hang moi", "go-live", "golive", "cai dat cho phong kham"],
+      "donViChuTri": "PTPM_TKHT",
+      "phoiHop": ["KD_BH", "KD_CS", "KT"],
+      "slaNgayBaoCao": 2,
+      "viDu": true
+    },
+    {
+      "ma": "NV-PTPM-02",
+      "ten": "Phát hành phiên bản sản phẩm",
+      "tuKhoa": ["phat hanh phien ban", "ra mat phien ban", "release", "ban cap nhat"],
+      "donViChuTri": "PTPM",
+      "phoiHop": ["PTPM_KT", "PTPM_SP", "MKT", "PTPM_TKHT"],
+      "slaNgayBaoCao": 2,
+      "viDu": true
+    },
+    {
+      "ma": "NV-KD-01",
+      "ten": "Ký hợp đồng với phòng khám / bệnh viện",
+      "tuKhoa": ["hop dong khach hang", "ky hop dong khach hang", "hop dong phong kham", "hop dong benh vien", "ky hop dong voi phong kham", "ky hop dong voi benh vien", "chot hop dong"],
+      "donViChuTri": "KD_BH",
+      "phoiHop": ["NSHC_PC", "KT", "PTPM_TKHT"],
+      "slaNgayBaoCao": 2,
+      "viDu": true
+    },
+    {
+      "ma": "NV-MKT-01",
+      "ten": "Chiến dịch ra mắt sản phẩm",
+      "tuKhoa": ["chien dich ra mat", "ra mat san pham", "launch", "chien dich marketing"],
+      "donViChuTri": "MKT",
+      "phoiHop": ["KD", "PTPM_SP"],
+      "slaNgayBaoCao": 2,
+      "viDu": true
+    },
+    {
+      "ma": "NV-NSHC-01",
+      "ten": "Tuyển dụng theo kế hoạch nhân sự",
+      "tuKhoa": ["ke hoach tuyen dung", "tinh hinh tuyen dung", "tuyen dung theo ke hoach", "tuyen them"],
+      "donViChuTri": "NSHC_TD",
+      "phoiHop": ["KT"],
+      "slaNgayBaoCao": 2,
+      "viDu": true
+    },
+    {
+      "ma": "NV-NSHC-02",
+      "ten": "Thành lập chi nhánh / văn phòng mới",
+      "tuKhoa": ["chi nhanh", "mo chi nhanh", "van phong moi", "van phong ha noi", "dia diem kinh doanh"],
+      "donViChuTri": "NSHC_PC",
+      "phoiHop": ["KT", "KD"],
+      "slaNgayBaoCao": 2,
+      "viDu": true
+    },
+    {
+      "ma": "NV-KT-01",
+      "ten": "Báo cáo tài chính tháng",
+      "tuKhoa": ["bao cao tai chinh thang", "ket qua kinh doanh thang", "chi phi thang", "dong tien thang"],
+      "donViChuTri": "KT",
+      "phoiHop": ["KD", "NSHC"],
       "slaNgayBaoCao": 2,
       "viDu": true
     }

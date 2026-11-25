@@ -1,0 +1,14 @@
+{
+  "_ghiChu": "Danh mục nghiệp vụ: mỗi nghiệp vụ có đúng 1 đơn vị chủ trì (mã theo config/don-vi.json). tuKhoa viết không dấu, chữ thường. slaNgay = số ngày làm việc gợi ý cho hạn chót. Mục dưới đây là VÍ DỤ — cần CEO chốt đơn vị chủ trì.",
+  "nghiepVu": [
+    {
+      "ma": "NV-HCQT-07",
+      "ten": "Thành lập chi nhánh",
+      "tuKhoa": ["chi nhanh", "mo chi nhanh", "co so moi", "dia diem kinh doanh"],
+      "donViChuTri": "HCQT",
+      "phoiHop": ["P.KT", "PK", "P.QLHAUCAN"],
+      "slaNgayBaoCao": 2,
+      "viDu": true
+    }
+  ]
+}

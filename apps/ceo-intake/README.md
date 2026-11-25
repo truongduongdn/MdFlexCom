@@ -26,13 +26,16 @@ Cần Node.js 18 trở lên. Không cần `npm install`.
 | Tệp | Nội dung |
 | --- | --- |
 | `config/loai-viec.json` | Danh sách Loại việc A–K (hiện là chỗ trống — cần điền theo mục 3 của quy định) |
-| `config/don-vi.json` | 29 đơn vị lấy từ Cơ cấu tổ chức VGC ngày 23/11/2026, kèm từ khoá nhận diện |
-| `config/danh-muc-nghiep-vu.json` | Danh mục nghiệp vụ → đơn vị chủ trì. Mục "Thành lập chi nhánh" là ví dụ, cần CEO chốt |
+| `config/don-vi.json` | Cơ cấu MdFlex: công ty, 5 phòng và 8 nhóm con theo kế hoạch nhân sự mốc N0+12 tháng. `chucDanh` là chức danh quản lý; `quanLy` để trống đến khi có người giữ vị trí |
+| `config/danh-muc-nghiep-vu.json` | Danh mục nghiệp vụ MdFlex → đơn vị chủ trì. 7 mục đều là ví dụ (`viDu: true`), cần CEO chốt |
+| `config/don-vi.vgc.json`, `config/danh-muc-nghiep-vu.vgc.json` | Cơ cấu 29 đơn vị Viện Gút (VGC) và ví dụ "Thành lập chi nhánh" cũ, giữ lại để đối chiếu |
+
+**Chọn bộ cơ cấu.** Mặc định app dùng cơ cấu MdFlex. Muốn chạy lại cơ cấu Viện Gút thì đặt biến `ORG=vgc` trước khi chạy (Windows: `set ORG=vgc` rồi `node server.js`). Phiếu cũ giao cho mã đơn vị không có trong bộ đang dùng được đếm vào "chưa khớp đơn vị" ở ô Trợ lý điều phối trên Sơ đồ vận hành.
 
 ## Dữ liệu sinh ra
 
 - `data/phieu/V001.json` và `V001.md` — phiếu đã phát hành (bản đọc được theo đúng mẫu).
-- `data/giao-viec/GV-V001.json` — phiếu Giao việc cho người thực hiện. Bản này chỉ ghi tệp; chưa gửi đi đâu. Bước sau là nối sang module Công việc của VGC.
+- `data/giao-viec/GV-V001.json` — phiếu Giao việc cho người thực hiện. Bản này chỉ ghi tệp; chưa gửi đi đâu. Bước sau là nối sang công cụ quản lý công việc của doanh nghiệp.
 - `data/counter.json` — bộ đếm số phiếu.
 
 ## Quy tắc đã cài

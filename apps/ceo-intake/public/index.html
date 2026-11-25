@@ -468,6 +468,7 @@
 
   // ---------- Sơ đồ vận hành ----------
   let OPS = null, opsSel = null;
+  const mgr = (u) => u.quanLy ? (u.chucDanh ? u.chucDanh + ' · ' + u.quanLy : u.quanLy) : (u.chucDanh ? u.chucDanh + ' · chưa gán người' : 'Chưa gán quản lý');
   async function showOps() {
     OPS = await api('/api/van-hanh');
     const units = OPS.donVi;
@@ -482,7 +483,7 @@
     const row = (u, depth) => {
       const st = stat(u.ma, true);
       return `<div class="u${u.quanLy ? '' : ' noMgr'}${u.ngungHoatDong ? ' off' : ''}" data-ma="${esc(u.ma)}" style="padding-left:${12 + depth * 16}px">
-        <span class="nm">${depth > 1 ? '└ ' : ''}${esc(u.ten)}</span>${badge(st)}<span class="mg">${u.ngungHoatDong ? 'Ngừng hoạt động · ' : ''}${esc(u.quanLy || 'Chưa gán quản lý')}</span></div>`
+        <span class="nm">${depth > 1 ? '└ ' : ''}${esc(u.ten)}</span>${badge(st)}<span class="mg">${u.ngungHoatDong ? 'Ngừng hoạt động · ' : ''}${esc(mgr(u))}</span></div>`
         + kids(u.ma).map((k) => row(k, depth + 1)).join('');
     };
     const root = units.find((u) => !u.thuoc) || { ma: '', ten: 'Tổ chức', quanLy: '' };
@@ -498,7 +499,7 @@
       <div class="ops-mid"><div class="vline"></div>
         <div class="node"><b>Trợ lý điều phối</b><small>${all.n} việc đang mở${all.late ? ` · <span style="color:var(--danger)">${all.late} trễ</span>` : ''}${unassigned ? ` · ${unassigned} chưa khớp đơn vị` : ''}</small></div>
         <div class="vline"></div>
-        <div class="node"><b>${esc(root.ten)}</b><small>${esc(root.quanLy || '')} · ${units.length} đơn vị</small></div>
+        <div class="node"><b>${esc(root.ten)}</b><small>${esc(root.quanLy ? mgr(root) : (root.chucDanh || ''))} · ${units.length - 1} đơn vị</small></div>
         <div class="vline"></div>
       </div>
       <div class="flows">
@@ -510,10 +511,10 @@
         const st = stat(d.ma, true);
         return `<div class="dept"><div class="dept-h${d.quanLy ? '' : ' noMgr'}" data-ma="${esc(d.ma)}">
             <div class="tier">Trưởng đơn vị · ${esc(d.ma)}</div>
-            <div style="display:flex;gap:8px;align-items:baseline"><span class="nm">${esc(d.ten)}</span>${badge(st)}<span class="mg">${esc(d.quanLy || 'Chưa gán quản lý')}</span></div>
+            <div style="display:flex;gap:8px;align-items:baseline"><span class="nm">${esc(d.ten)}</span>${badge(st)}<span class="mg">${esc(mgr(d))}</span></div>
           </div>${kids(d.ma).map((k) => row(k, 1)).join('')}</div>`;
       }).join('')}</div>
-      <div class="ops-legend">Bấm vào một đơn vị để xem việc đang giao. Chữ cam: chưa gán quản lý · gạch ngang: ngừng hoạt động · đỏ: có việc quá hạn. Cây lấy từ config/don-vi.json.</div>
+      <div class="ops-legend">Bấm vào một đơn vị để xem việc đang giao. Chữ cam: chưa gán người giữ vị trí quản lý · gạch ngang: ngừng hoạt động · đỏ: có việc quá hạn. Cây lấy từ config/don-vi.json.</div>
       <div id="opsDetail"></div>`;
     if (opsSel) showUnit(opsSel);
   }

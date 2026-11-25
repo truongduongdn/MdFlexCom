@@ -62,10 +62,13 @@ const addWorkdays = (d, n) => {
 };
 const slug = (s) => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'phieu';
 
+// ORG chọn bộ cơ cấu: mặc định MdFlex (don-vi.json); ORG=vgc đọc don-vi.vgc.json và danh-muc-nghiep-vu.vgc.json
+const ORG = (process.env.ORG || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+const orgFile = (base) => path.join(CONFIG_DIR, ORG ? `${base}.${ORG}.json` : `${base}.json`);
 const loadConfig = () => ({
-  donVi: (readJson(path.join(CONFIG_DIR, 'don-vi.json'), {}).donVi || []),
+  donVi: (readJson(orgFile('don-vi'), {}).donVi || []),
   loaiViec: (readJson(path.join(CONFIG_DIR, 'loai-viec.json'), {}).loaiViec || []),
-  nghiepVu: (readJson(path.join(CONFIG_DIR, 'danh-muc-nghiep-vu.json'), {}).nghiepVu || [])
+  nghiepVu: (readJson(orgFile('danh-muc-nghiep-vu'), {}).nghiepVu || [])
 });
 
 const peekNumber = () => readJson(COUNTER_FILE, { next: 1 }).next;
@@ -76,7 +79,10 @@ const takeNumber = () => {
   const n = c.next; c.next = n + 1; writeJson(COUNTER_FILE, c); return n;
 };
 
-const donViLabel = (dv) => `${dv.ten} (${dv.ma})${dv.quanLy ? ' — ' + dv.quanLy : ' — chưa gán quản lý'}`;
+const quanLyText = (dv) => dv.quanLy
+  ? (dv.chucDanh ? `${dv.chucDanh} ${dv.quanLy}` : dv.quanLy)
+  : (dv.chucDanh ? `${dv.chucDanh} (chưa gán người)` : 'chưa gán quản lý');
+const donViLabel = (dv) => `${dv.ten} (${dv.ma}) — ${quanLyText(dv)}`;
 
 function matchDonVi(normText, donVi) {
   const pairs = [];
@@ -85,6 +91,20 @@ function matchDonVi(normText, donVi) {
   const found = [];
   for (const p of pairs) if (hasKw(normText, p.kw) && !found.includes(p.dv)) found.push(p.dv);
   return found;
+}
+
+// Tìm đơn vị trong một giá trị đã ghi (phiếu dán lại, phiếu giao việc): mã trong ngoặc trước, rồi tên đúng, cuối cùng mới đến từ khoá
+function findDonVi(text, donVi) {
+  const s = String(text || '');
+  for (const m of s.matchAll(/\(([^()]+)\)/g)) {
+    const dv = donVi.find((d) => d.ma === m[1].trim());
+    if (dv) return dv;
+  }
+  const n = norm(s).trim();
+  const byName = donVi
+    .filter((d) => n === norm(d.ten) || n.startsWith(norm(d.ten) + ' '))
+    .sort((a, b) => b.ten.length - a.ten.length)[0];
+  return byName || matchDonVi(n, donVi)[0] || null;
 }
 
 // ---------- Đọc ngày trong câu ----------
@@ -143,8 +163,9 @@ function parseTemplate(text) {
     const title = line.match(/PHI[EẾ]U Y[EÊ]U C[AẦ]U\s*[—\-–]\s*V?[^:]*:\s*(.+)$/i);
     if (title) { if (!isPlaceholder(title[1])) out.tenViec = title[1].trim(); last = null; continue; }
     if (/^c[aâ]u h[oỏ]i c[aầ]n x[aá]c nh[aậ]n/i.test(norm(line)) || /^cau hoi can xac nhan/.test(norm(line))) { last = null; continue; }
-    // Một dòng có thể chứa 2 cặp "Nhãn: giá trị" ngăn bởi — hoặc khoảng trắng dài
-    const segments = /^pham vi\s*:/.test(norm(line)) ? [line] : line.split(/\s+[—–]\s+|\s{3,}(?=[^\s:\d][^\s:]*(?: [^\s:]+){0,4}:\s)/);
+    // Một dòng có thể chứa 2 cặp "Nhãn: giá trị" ngăn bởi — hoặc khoảng trắng dài.
+    // Chỉ tách khi phía sau là một "Nhãn:"; gạch ngang nằm trong giá trị (vd "Hành chính – Pháp chế") được giữ nguyên.
+    const segments = /^pham vi\s*:/.test(norm(line)) ? [line] : line.split(/(?:\s+[—–]\s+|\s{3,})(?=[^\s:\d][^\s:]*(?: [^\s:]+){0,4}:\s)/);
     let matched = false;
     for (const seg of segments) {
       const m = seg.match(/^([^:]{2,40}):\s*(.*)$/);
@@ -270,8 +291,8 @@ function buildDraft(text) {
   // Phiếu dán theo mẫu: giá trị CEO tự gõ là đã xác nhận
   for (const [k, v] of Object.entries(tpl)) set(k, v, 'xacNhan');
   if (tpl.nguoiThucHien) {
-    const m = matchDonVi(norm(tpl.nguoiThucHien), cfg.donVi);
-    if (m.length) set('nguoiThucHien', donViLabel(m[0]), 'xacNhan');
+    const dv = findDonVi(tpl.nguoiThucHien, cfg.donVi);
+    if (dv) set('nguoiThucHien', donViLabel(dv), 'xacNhan');
   }
 
   if (f.tenViec) set('luuTru', `Phieu-yeu-cau/${today().getFullYear()}/V${pad(so)}-${slug(f.tenViec.value)}`, 'auto');
@@ -417,8 +438,7 @@ function vanHanh() {
     const g = readJson(path.join(GIAO_VIEC_DIR, f), null);
     if (!g) return null;
     const p = readJson(path.join(PHIEU_DIR, g.phieuGoc + '.json'), null);
-    const code = (String(g.nguoiNhan || '').match(/\(([^()]+)\)/) || [])[1];
-    const dv = cfg.donVi.find((d) => d.ma === code) || matchDonVi(norm(g.nguoiNhan), cfg.donVi)[0] || null;
+    const dv = findDonVi(g.nguoiNhan, cfg.donVi);
     return {
       ma: g.ma, phieuGoc: g.phieuGoc, donVi: dv ? dv.ma : null, nguoiNhan: g.nguoiNhan,
       tenViec: p && p.fields.tenViec ? p.fields.tenViec.value : '',
@@ -429,7 +449,7 @@ function vanHanh() {
   }).filter(Boolean);
   return {
     homNay: t,
-    donVi: cfg.donVi.map((d) => ({ ma: d.ma, ten: d.ten, thuoc: d.thuoc, quanLy: d.quanLy, ngungHoatDong: !!d.ngungHoatDong })),
+    donVi: cfg.donVi.map((d) => ({ ma: d.ma, ten: d.ten, thuoc: d.thuoc, quanLy: d.quanLy, chucDanh: d.chucDanh || null, ngungHoatDong: !!d.ngungHoatDong })),
     giaoViec
   };
 }
@@ -451,7 +471,7 @@ const server = http.createServer(async (req, res) => {
       const cfg = loadConfig();
       return send(res, 200, {
         fields: FIELDS, loaiViec: cfg.loaiViec,
-        donVi: cfg.donVi.map((d) => ({ ma: d.ma, ten: d.ten, quanLy: d.quanLy, ngungHoatDong: !!d.ngungHoatDong, tuKhoa: d.tuKhoa, label: donViLabel(d) })),
+        donVi: cfg.donVi.map((d) => ({ ma: d.ma, ten: d.ten, quanLy: d.quanLy, chucDanh: d.chucDanh || null, ngungHoatDong: !!d.ngungHoatDong, tuKhoa: d.tuKhoa, label: donViLabel(d) })),
         ai: !!process.env.ANTHROPIC_API_KEY, today: ymd(today())
       });
     }
