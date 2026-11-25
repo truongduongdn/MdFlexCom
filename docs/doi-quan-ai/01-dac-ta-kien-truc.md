@@ -212,7 +212,7 @@ Năm loại việc luôn dừng ở trạng thái Chờ CEO duyệt, dù agent n
 
 Các lớp bảo vệ khác:
 
-- **Quyền tối thiểu:** mỗi agent chỉ được cấp công cụ trong thẻ vị trí; khoá API tách theo phòng; chuyên viên không có quyền ghi ra ngoài.
+- **Quyền tối thiểu:** mỗi agent chỉ được cấp công cụ trong thẻ vị trí; một khoá API dùng chung cho tất cả các phòng, chỉ đặt qua biến môi trường hoặc gắn trên trang Giao việc (giữ trong bộ nhớ máy chủ, không ghi ra tệp); chuyên viên không có quyền ghi ra ngoài.
 - **Chống lệnh cài cắm:** nội dung quét được chỉ là dữ liệu; Kiểm soát viên nhận cờ khi gặp câu có dạng lệnh.
 - **Nhật ký không xoá được:** ai, lúc nào, công cụ gì, phiên bản quy định nào.
 - **Trần ngân sách:** theo phiếu và theo ngày; chạm trần thì dừng và hỏi CEO.

@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
+.acct{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:4px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:12px;color:var(--quiet);overflow-wrap:anywhere}
+.acct b{color:var(--ink);font-weight:600}
 /* Token theo config/thuong-hieu.json */
 :root{
   --bg:#ffffff; --surface:#f5f5f5; --line:#e0e0e0; --ink:#1a1a2e; --quiet:#444444;
@@ -99,6 +101,12 @@ aside.side{position:sticky;top:16px;display:flex;flex-direction:column;gap:16px}
 .steps span{font-size:12px;color:var(--quiet)}
 .steps .auto{font-size:12px;color:var(--accent);font-weight:600}
 .err{color:var(--err);font-size:12px;min-height:18px;margin:8px 0}
+.kstate{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:14px}
+.kstate i{width:10px;height:10px;border-radius:999px;background:var(--warn);flex:none}
+.kstate.on i{background:var(--ok)}
+.krow{display:flex;flex-wrap:wrap;gap:8px}
+.krow .btn{min-height:44px}
+#kInput{font-family:var(--f-mono)}
 .mono{font-family:var(--f-mono)}
 section.list{margin-top:32px}
 section.list h2{font-size:22px;margin:0 0 4px}
@@ -126,6 +134,7 @@ section.list h2{font-size:22px;margin:0 0 4px}
     <div><h1>Giao việc</h1><span>CEO giao · Trợ lý điều phối tự nhận, chọn phòng · Trưởng phòng AI tự chia cho chuyên viên</span></div>
   </div>
   <div class="tools">
+    <span class="acct" id="acct" hidden title="Tài khoản vào công ty mặc định (config/tai-khoan.json)"></span>
     <a class="btn" href="/ceo.html">Bảng CEO</a>
     <a class="btn" href="/phong.html">Phòng làm việc</a>
     <a class="btn" href="/">Mô hình công ty</a>
@@ -184,6 +193,18 @@ section.list h2{font-size:22px;margin:0 0 4px}
     </div>
 
     <aside class="side">
+      <div class="card" id="khoaCard">
+        <h2 style="font-size:18px">Khoá Claude</h2>
+        <p class="kstate" id="kState" role="status"><i></i><span>Đang kiểm tra…</span></p>
+        <label class="field" style="margin-bottom:8px"><span>Khoá API (ANTHROPIC_API_KEY)</span>
+          <input type="password" id="kInput" placeholder="sk-ant-…" autocomplete="off" spellcheck="false" autocapitalize="off"></label>
+        <div class="krow">
+          <button class="btn primary" type="button" id="kGan">Gắn khoá</button>
+          <button class="btn" type="button" id="kHien" aria-pressed="false">Hiện</button>
+          <button class="btn" type="button" id="kGo" hidden>Gỡ khoá</button>
+        </div>
+        <p class="sub" style="margin:8px 0 0">Khoá chỉ giữ trong bộ nhớ máy chủ trên máy này, không ghi ra tệp. Chạy lại máy chủ thì phải gắn lại, hoặc đặt biến môi trường ANTHROPIC_API_KEY để giữ lâu dài.</p>
+      </div>
       <div class="card">
         <h2 style="font-size:18px">Hệ thống sẽ giao cho</h2>
         <p class="sub" id="routeNote">Gõ mục tiêu hoặc thả tệp để xem đề xuất.</p>
@@ -206,6 +227,7 @@ section.list h2{font-size:22px;margin:0 0 4px}
 </div>
 
 <script>
+fetch("/api/tai-khoan").then(r=>r.json()).then(t=>{ const a=document.getElementById("acct"); if(!a||!t.email||t.email==="Không có") return; a.innerHTML="Người giao: <b></b> · <span></span>"; a.querySelector("b").textContent=t.vai; a.querySelector("span").textContent=t.email; a.hidden=false; }).catch(()=>{});
 (async function(){
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -217,8 +239,32 @@ let CFG; try{ CFG=await api("/api/phong"); }catch(e){ document.body.innerHTML='<
 const PH=Object.fromEntries(CFG.phong.map(p=>[p.id,p]));
 const TEN={}; CFG.vi_tri_chung.forEach(v=>TEN[v.ma]=v.ten); CFG.phong.forEach(p=>{ TEN[p.truong_phong.ai.ma]=p.truong_phong.ai.ten; p.to.forEach(t=>t.ai.forEach(a=>TEN[a.ma]=a.ten)); });
 let AI={coKhoa:false}; try{ AI=await api("/api/ai"); }catch(_){}
-if(AI.coKhoa){ $("#ai_lam_ngay").checked=true; $("#aiNote").textContent=`Cho Claude (${AI.model}) làm ngay sau khi giao`; }
-else { $("#ai_lam_ngay").disabled=true; $("#aiNote").textContent="Chưa có khoá Claude (ANTHROPIC_API_KEY); chuyên viên AI chỉ nhận phiếu"; }
+function veAI(){
+  const cb=$("#ai_lam_ngay");
+  if(AI.coKhoa){ cb.disabled=false; if($("#muc_du_lieu").value!=="Đỏ") cb.checked=true; $("#aiNote").textContent=`Cho Claude (${AI.model}) làm ngay sau khi giao`; }
+  else { cb.checked=false; cb.disabled=true; $("#aiNote").textContent="Chưa có khoá Claude; chuyên viên AI chỉ nhận phiếu"; }
+  const st=$("#kState");
+  st.classList.toggle("on",!!AI.coKhoa);
+  st.querySelector("span").textContent=AI.coKhoa
+    ? `Đã gắn khoá ${AI.duoi||""} · ${AI.nguon==="giao-dien"?"nhập trên trang":"từ biến môi trường"} · ${AI.model}`
+    : "Chưa có khoá — chuyên viên AI chưa tự làm phiếu";
+  $("#kGo").hidden=AI.nguon!=="giao-dien";
+  $("#kGan").textContent=AI.coKhoa?"Thay khoá":"Gắn khoá";
+}
+veAI();
+$("#kHien").addEventListener("click",()=>{ const i=$("#kInput"), hien=i.type==="password"; i.type=hien?"text":"password"; $("#kHien").textContent=hien?"Ẩn":"Hiện"; $("#kHien").setAttribute("aria-pressed",String(hien)); });
+async function ganKhoa(){
+  const k=$("#kInput").value.trim(); if(!k){ toast("Chưa nhập khoá",true); $("#kInput").focus(); return; }
+  $("#kGan").disabled=true;
+  try{ AI=await api("/api/ai/khoa",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({khoa:k})}); $("#kInput").value=""; veAI(); toast("Đã gắn khoá Claude"); }
+  catch(e){ toast(e.message,true); }
+  $("#kGan").disabled=false;
+}
+$("#kGan").addEventListener("click",ganKhoa);
+$("#kInput").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); ganKhoa(); } });
+$("#kGo").addEventListener("click",async()=>{
+  try{ AI=await api("/api/ai/khoa",{method:"DELETE"}); veAI(); toast("Đã gỡ khoá gắn trên trang"); }catch(e){ toast(e.message,true); }
+});
 $("#muc_du_lieu").addEventListener("change",()=>{ if($("#muc_du_lieu").value==="Đỏ") $("#ai_lam_ngay").checked=false; });
 $("#cong").innerHTML+=CFG.cong_ceo.map(c=>`<option>${esc(c)}</option>`).join("");
 $("#depts").innerHTML=CFG.phong.map(p=>`<label class="chip dept-${p.id}"><input type="checkbox" value="${p.id}"><span class="dot"></span>${esc(p.ten_ngan)}</label>`).join("");

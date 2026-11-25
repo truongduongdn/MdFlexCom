@@ -1,0 +1,7 @@
+{
+  "ghi_chu": "Mẫu. Chép thành tai-khoan.json (đã gitignore) rồi điền email tài khoản vào công ty. Không đặt mật khẩu hay khoá API vào tệp này.",
+  "nguoi_giao_mac_dinh": {
+    "vai": "CEO",
+    "email": "ten@vi-du.com"
+  }
+}

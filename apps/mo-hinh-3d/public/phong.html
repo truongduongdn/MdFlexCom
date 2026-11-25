@@ -433,7 +433,7 @@ function khoiAI(x){
     ${k.cau_hoi.length?`<p style="margin-top:8px"><b>Câu hỏi cần trả lời</b></p><ul class="list">${k.cau_hoi.map(v=>`<li>${esc(v)}</li>`).join("")}</ul>`:""}</div>`;
   if(coThe){
     if(dl==="Đỏ") h+=`<p class="note">Mức dữ liệu Đỏ: không gửi cho Claude, người thật làm phiếu này.</p>`;
-    else if(!AI.coKhoa) h+=`<p class="note">Chưa có khoá Claude. Đặt biến môi trường ANTHROPIC_API_KEY rồi chạy lại máy chủ để chuyên viên AI tự làm.</p>`;
+    else if(!AI.coKhoa) h+=`<p class="note">Chưa có khoá Claude. <a href="/giao-viec.html">Gắn khoá ở trang Giao việc</a> hoặc đặt biến môi trường ANTHROPIC_API_KEY để chuyên viên AI tự làm.</p>`;
     else h+=`<div class="actions"><button class="btn primary" data-ailam="1">${k?"Cho Claude làm lại":"Để Claude làm phiếu này"}</button></div><p class="note">Gửi nội dung phiếu và tệp đính kèm cho Claude (${esc(AI.model)}). Kết quả là bản nháp; Trưởng phòng vẫn nghiệm thu.</p>`;
   }
   return h;

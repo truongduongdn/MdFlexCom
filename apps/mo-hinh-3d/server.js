@@ -215,6 +215,11 @@ function tinh(req, res) {
 const PHIEU_DIR = path.join(ROOT, 'data', 'phieu');
 fs.mkdirSync(PHIEU_DIR, { recursive: true });
 const phongCfg = () => readJson(path.join(CONFIG_DIR, 'phong.json'), null);
+// Tài khoản vào công ty mặc định (config/tai-khoan.json, người dùng quản lý). Vai vẫn là mã 'CEO' để kiểm quyền; email chỉ để ghi nhận.
+const taiKhoan = () => {
+  const t = (readJson(path.join(CONFIG_DIR, 'tai-khoan.json'), {}) || {}).nguoi_giao_mac_dinh || {};
+  return { vai: chu(t.vai) || 'CEO', email: chu(t.email) || 'Không có' };
+};
 const LOAI = ['Giao việc', 'Bàn giao', 'Đề xuất'];
 const MUC_DL = ['Xanh', 'Vàng', 'Đỏ']; // Đỏ: không gửi nội dung tới dịch vụ AI bên ngoài
 const UU_TIEN = ['P1', 'P2', 'P3'];
@@ -449,6 +454,43 @@ const GIA_USD = { 'claude-opus-5-5': [4, 20], 'claude-sonnet-5-5': [2, 10], 'cla
 const KQ_DIR = path.join(ROOT, 'data', 'ket-qua');
 fs.mkdirSync(KQ_DIR, { recursive: true });
 
+// ---------- Gắn khoá Claude từ giao diện ----------
+// Khoá nhập trên trang chỉ giữ trong bộ nhớ tiến trình (process.env), không ghi ra đĩa, không trả lại nguyên văn (AGENTS.md).
+// Tắt máy chủ là mất; muốn giữ lâu thì đặt biến môi trường ANTHROPIC_API_KEY.
+const KHOA_MOI_TRUONG = process.env.ANTHROPIC_API_KEY || '';
+let khoaNguon = KHOA_MOI_TRUONG ? 'moi-truong' : null;
+const ttKhoa = () => {
+  const k = process.env.ANTHROPIC_API_KEY || '';
+  return { coKhoa: !!k, nguon: k ? khoaNguon : null, duoi: k ? '…' + k.slice(-4) : null, model: CLAUDE_MODEL, effort: CLAUDE_EFFORT };
+};
+// Chặn trang web khác gọi vào máy chủ cục bộ (CSRF, DNS rebinding): chỉ nhận Host/Origin là máy này.
+const cungMay = (req) => {
+  const laMay = (h) => /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(h || '');
+  if (!laMay(req.headers.host)) return false;
+  const o = req.headers.origin;
+  if (o) { try { if (!laMay(new URL(o).host)) return false; } catch { return false; } }
+  return true;
+};
+async function ganKhoa(req, res) {
+  if (!cungMay(req)) return send(res, 403, { error: 'Chỉ được gắn khoá từ trang chạy trên máy này.' });
+  if (!/^application\/json/i.test(req.headers['content-type'] || '')) return send(res, 415, { error: 'Cần gửi dữ liệu dạng JSON.' });
+  const b = await readBody(req, 4 * 1024);
+  const k = String(b.khoa || '').trim();
+  if (!k) return send(res, 400, { error: 'Chưa nhập khoá.' });
+  if (k.length < 20 || k.length > 400 || /\s/.test(k)) return send(res, 400, { error: 'Khoá không đúng dạng (không được có khoảng trắng, dài 20–400 ký tự).' });
+  process.env.ANTHROPIC_API_KEY = k; khoaNguon = 'giao-dien';
+  console.log(`Claude: đã gắn khoá từ giao diện (${ttKhoa().duoi}), chỉ giữ trong bộ nhớ.`);
+  send(res, 200, ttKhoa());
+}
+function goKhoa(req, res) {
+  if (!cungMay(req)) return send(res, 403, { error: 'Chỉ được gỡ khoá từ trang chạy trên máy này.' });
+  if (khoaNguon !== 'giao-dien') return send(res, 400, { error: 'Khoá đang lấy từ biến môi trường ANTHROPIC_API_KEY; gỡ ở biến môi trường rồi chạy lại máy chủ.' });
+  if (KHOA_MOI_TRUONG) { process.env.ANTHROPIC_API_KEY = KHOA_MOI_TRUONG; khoaNguon = 'moi-truong'; }
+  else { delete process.env.ANTHROPIC_API_KEY; khoaNguon = null; }
+  console.log('Claude: đã gỡ khoá gắn từ giao diện.');
+  send(res, 200, ttKhoa());
+}
+
 const SCHEMA_KQ = {
   type: 'object', additionalProperties: false,
   required: ['tom_tat', 'ket_qua', 'tieu_chi', 'viec_can_nguoi', 'cau_hoi', 'vuong'],
@@ -550,7 +592,7 @@ async function goiClaude(system, content) {
 
 async function aiLamPhieu(req, res, ma) {
   let b; try { b = await readBody(req); } catch (e) { return send(res, 400, { error: e.message }); }
-  if (!process.env.ANTHROPIC_API_KEY) return send(res, 503, { error: 'Chưa có khoá Claude. Đặt biến môi trường ANTHROPIC_API_KEY rồi chạy lại máy chủ.' });
+  if (!process.env.ANTHROPIC_API_KEY) return send(res, 503, { error: 'Chưa có khoá Claude. Gắn khoá ở trang Giao việc (/giao-viec.html) hoặc đặt biến môi trường ANTHROPIC_API_KEY rồi chạy lại máy chủ.' });
   const cfg = phongCfg(); const db = danhBa(cfg);
   const p = docPhieu(ma);
   if (!p) return send(res, 404, { error: 'Không tìm thấy phiếu ' + ma + '.' });
@@ -774,6 +816,8 @@ async function giaoViec(req, res) {
   if (goc.loi) return send(res, 400, { error: goc.loi.join(' ') });
   const G = goc.phieu;
   G.cong_yeu_cau = cong;
+  const tk = taiKhoan();
+  G.tai_khoan_giao = tk.email; G.nhat_ky[0].tai_khoan = tk.email;
   const kq = phanPhoi(cfg, db, G, b, chon, xh, tuDong, cong, tieuChi);
   // Tuỳ chọn: chuyên viên AI làm ngay bằng Claude
   const aiChay = b.ai_lam_ngay ? batDauAI(cfg, kq.la, 'CEO') : [];
@@ -889,7 +933,10 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && mDp) return await dieuPhoiLai(req, res, mDp[1]);
     const mAi = /^\/api\/phieu\/(PH-\d{4,})\/ai-lam$/.exec(u);
     if (req.method === 'POST' && mAi) return await aiLamPhieu(req, res, mAi[1]);
-    if (req.method === 'GET' && u === '/api/ai') return send(res, 200, { coKhoa: !!process.env.ANTHROPIC_API_KEY, model: CLAUDE_MODEL, effort: CLAUDE_EFFORT });
+    if (req.method === 'GET' && u === '/api/ai') return send(res, 200, ttKhoa());
+    if (req.method === 'GET' && u === '/api/tai-khoan') return send(res, 200, taiKhoan());
+    if (req.method === 'POST' && u === '/api/ai/khoa') return await ganKhoa(req, res);
+    if (req.method === 'DELETE' && u === '/api/ai/khoa') return goKhoa(req, res);
     const mHd = /^\/api\/phieu\/(PH-\d{4,})\/hanh-dong$/.exec(u);
     if (req.method === 'POST' && mHd) return await hanhDong(req, res, mHd[1]);
     if (req.method === 'GET' && TOA_NHA[u]) return toaNha(res, TOA_NHA[u]);

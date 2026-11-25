@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
+.acct{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:4px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:12px;color:var(--quiet);overflow-wrap:anywhere}
+.acct b{color:var(--ink);font-weight:600}
 /* Token theo config/thuong-hieu.json. Bảng điều hành theo mục "Giám sát và báo cáo cho CEO" trong docs/doi-quan-ai/01-dac-ta-kien-truc.md */
 :root{
   --bg:#ffffff; --surface:#f5f5f5; --line:#e0e0e0; --ink:#1a1a2e; --quiet:#444444;
@@ -93,6 +95,7 @@ a.lnk{color:var(--accent)}
     <div><h1>Bảng điều hành CEO</h1><span id="updated">Đang tải…</span></div>
   </div>
   <div class="tools">
+    <span class="acct" id="acct" hidden title="Tài khoản vào công ty mặc định (config/tai-khoan.json)"></span>
     <a class="btn primary" href="/giao-viec.html">+ Giao việc</a>
     <a class="btn" href="/phong.html">Phòng làm việc</a>
     <a class="btn" href="/toa-nha.html">Toà nhà</a>
@@ -138,6 +141,7 @@ a.lnk{color:var(--accent)}
 </div>
 
 <script>
+fetch("/api/tai-khoan").then(r=>r.json()).then(t=>{ const a=document.getElementById("acct"); if(!a||!t.email||t.email==="Không có") return; a.innerHTML="Người giao: <b></b> · <span></span>"; a.querySelector("b").textContent=t.vai; a.querySelector("span").textContent=t.email; a.hidden=false; }).catch(()=>{});
 (async function(){
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
