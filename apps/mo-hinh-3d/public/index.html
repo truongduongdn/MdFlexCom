@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MdFlex — mô hình công ty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: mô hình kiến trúc chiếm toàn màn, bảng 3 tab bên phải. Token lấy từ bộ nhận diện MdFlex (config/thuong-hieu.json) */
+:root{
+  --bg:#ffffff; --surface:#f5f5f5; --panel:#ffffff; --line:#e0e0e0; --ink:#1a1a2e; --quiet:#444444; --faint:#666666;
+  --accent:#149078; --accent-hover:#0d6b56; --accent-soft:#e8f5f1; --accent-ink:#ffffff;
+  --brand-accent:#f48c0c; --brand-accent-soft:#fef3e2;
+  --ok:#22c55e; --warn:#f59e0b; --err:#ef4444; --info:#3b82f6;
+  --scene-bg:#ffffff; --plinth:#f5f5f5; --plinth-edge:#e0e0e0; --building:#ffffff; --road:#e0e0e0; --ai:#2dd4a8;
+  --c-kd:#149078; --c-mkt:#f48c0c; --c-pt:#3b82f6; --c-kt:#0d6b56; --c-ns:#444444; --c-ceo:#1a1a2e;
+  --warn-bg:#fef3e2;
+  --f-display:"DM Sans",system-ui,"Segoe UI",sans-serif;
+  --f-body:"Inter",system-ui,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --r-btn:8px; --r-card:12px; --r-modal:16px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f172a; --surface:#1e293b; --panel:#0f172a; --line:#334155; --ink:#f1f5f9; --quiet:#e0e0e0; --faint:#e0e0e0;
+  --accent:#2dd4a8; --accent-hover:#149078; --accent-soft:#1e293b; --accent-ink:#0f172a;
+  --brand-accent:#fbb040; --brand-accent-soft:#1e293b;
+  --scene-bg:#0f172a; --plinth:#1e293b; --plinth-edge:#334155; --building:#1e293b; --road:#334155; --ai:#2dd4a8;
+  --c-kd:#2dd4a8; --c-mkt:#fbb040; --c-pt:#3b82f6; --c-kt:#149078; --c-ns:#e0e0e0; --c-ceo:#f1f5f9;
+  --warn-bg:#1e293b; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0f172a; --surface:#1e293b; --panel:#0f172a; --line:#334155; --ink:#f1f5f9; --quiet:#e0e0e0; --faint:#e0e0e0;
+  --accent:#2dd4a8; --accent-hover:#149078; --accent-soft:#1e293b; --accent-ink:#0f172a;
+  --brand-accent:#fbb040; --brand-accent-soft:#1e293b;
+  --scene-bg:#0f172a; --plinth:#1e293b; --plinth-edge:#334155; --building:#1e293b; --road:#334155; --ai:#2dd4a8;
+  --c-kd:#2dd4a8; --c-mkt:#fbb040; --c-pt:#3b82f6; --c-kt:#149078; --c-ns:#e0e0e0; --c-ceo:#f1f5f9;
+  --warn-bg:#1e293b; color-scheme:dark;}
+
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5;overflow:hidden}
+*{box-sizing:border-box}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.2}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 440px;grid-template-rows:auto minmax(0,1fr);height:100%}
+header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding-block:12px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  border-bottom:1px solid var(--line);background:var(--panel)}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:var(--r-btn);background:var(--accent);color:var(--accent-ink);font-family:var(--f-display);font-weight:700;font-size:16px;flex:none}
+.brand h1{margin:0;font-size:18px;font-weight:700}
+.brand span{font-size:12px;color:var(--quiet)}
+.stages{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.stage{font:inherit;font-size:14px;font-weight:500;border:1px solid var(--line);background:var(--panel);color:var(--ink);min-height:44px;
+  padding:4px 12px;border-radius:var(--r-btn);cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;line-height:1.25}
+.stage small{font-family:var(--f-mono);font-size:12px;font-weight:400;color:var(--quiet)}
+.stage:hover{border-color:var(--accent)}
+.stage[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.stage[aria-pressed="true"] small{color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.stagewrap{position:relative;min-height:0;overflow:hidden;background:var(--scene-bg)}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+#labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lbl{position:absolute;transform:translate(-50%,-100%);white-space:nowrap;font-size:12px;font-weight:600;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line);border-left:4px solid var(--c,var(--ink));
+  padding:2px 8px;border-radius:var(--r-btn)}
+.lbl small{font-family:var(--f-mono);font-weight:400;color:var(--quiet);margin-left:4px;font-size:12px}
+.lbl.team{font-weight:500}
+.lbl.ai{border-left-color:var(--ai)}
+.lbl.dim{opacity:.35}
+.hud{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:12px;display:flex;flex-direction:column;gap:8px;max-width:calc(100% - 24px)}
+.stats{display:flex;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-card);padding:8px 12px;flex-wrap:wrap}
+.stat b{display:block;font-family:var(--f-mono);font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--quiet)}
+.toggles{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font:inherit;font-size:12px;font-weight:500;border:1px solid var(--line);background:var(--panel);color:var(--ink);min-height:32px;padding:4px 12px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.chip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ai);margin-right:4px}
+.legend{position:absolute;left:max(12px,env(safe-area-inset-left,0px));bottom:12px;display:flex;gap:12px;flex-wrap:wrap;
+  font-size:12px;color:var(--quiet);background:var(--panel);border:1px solid var(--line);border-radius:var(--r-card);padding:8px 12px;max-width:calc(100% - 24px)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:4px;vertical-align:-1px}
+.hint{position:absolute;right:12px;bottom:12px;font-size:12px;color:var(--faint)}
+
+aside{border-left:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;border-bottom:1px solid var(--line);padding:0 16px;gap:4px;overflow-x:auto}
+.tab{font:inherit;font-family:var(--f-display);font-weight:600;font-size:14px;background:none;border:0;border-bottom:2px solid transparent;color:var(--quiet);padding:12px 8px;min-height:44px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.pane{overflow-y:auto;padding:16px 20px 32px;min-height:0;flex:1}
+.pane h2{font-size:22px;font-weight:600;margin:0 0 4px;text-wrap:balance}
+.pane h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--quiet);margin:24px 0 8px;font-weight:600;font-family:var(--f-body)}
+.pane p{margin:0 0 8px}
+.sub{color:var(--quiet);font-size:14px;margin-bottom:12px}
+.back{font:inherit;font-size:14px;background:none;border:0;color:var(--accent);padding:0;min-height:32px;cursor:pointer;margin-bottom:8px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.kv dt{color:var(--quiet)} .kv dd{margin:0}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--quiet);font-size:12px}
+td.n,th.n{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.deptrow{cursor:pointer} .deptrow:hover td{background:var(--surface)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:8px;vertical-align:-1px}
+ul.plain{margin:0;padding-left:20px} ul.plain li{margin-bottom:4px}
+.tag{display:inline-block;font-size:12px;padding:0 8px;border-radius:999px;border:1px dashed var(--faint);color:var(--quiet);margin-left:4px}
+.note{font-size:14px;background:var(--warn-bg);color:var(--ink);border:1px solid var(--line);border-left:4px solid var(--brand-accent);padding:8px 12px;border-radius:var(--r-card);margin:12px 0}
+.note.err{border-left-color:var(--err)}
+.note.ok{border-left-color:var(--ok)}
+.gate{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:var(--r-card);padding:12px;background:var(--surface);font-size:14px}
+.gate b{font-family:var(--f-mono);font-size:12px;color:var(--accent)}
+.phase{margin-top:20px}
+.phase h4{margin:0 0 8px;font-size:16px;display:flex;justify-content:space-between;gap:8px}
+.phase h4 span{font-family:var(--f-mono);font-size:12px;color:var(--quiet);font-weight:400;white-space:nowrap}
+.check{display:grid;grid-template-columns:20px 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;align-items:start}
+.check input{margin:4px 0 0;width:16px;height:16px;accent-color:var(--accent)}
+.check label{cursor:pointer}
+.check small{display:block;color:var(--quiet);font-size:12px}
+.check input:checked + label{color:var(--quiet);text-decoration:line-through}
+.progress{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:8px 0 4px}
+.progress i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.owner{font-family:var(--f-mono);font-size:12px;color:var(--quiet);white-space:nowrap}
+
+/* Canvas 9 thành tố */
+.vision{border-radius:var(--r-card);background:var(--accent);color:var(--accent-ink);padding:16px;margin-bottom:12px}
+.vision h4{margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-family:var(--f-body)}
+.vision p{margin:0 0 12px;font-family:var(--f-display);font-size:16px;font-weight:500;line-height:1.35}
+.vision p:last-child{margin-bottom:0}
+.vision small{display:block;font-size:12px;opacity:.85;font-family:var(--f-body);font-weight:400}
+.goals{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.goal{border:1px solid var(--line);border-radius:var(--r-card);padding:8px 12px;font-size:12px;background:var(--surface)}
+.goal b{display:block;font-family:var(--f-mono);color:var(--accent);font-size:12px}
+.bmc{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));grid-auto-rows:minmax(64px,auto);gap:4px;margin:8px 0}
+.bmc-cell{border:1px solid var(--line);border-radius:var(--r-btn);background:var(--panel);padding:8px;cursor:pointer;text-align:left;font:inherit;color:var(--ink);display:flex;flex-direction:column;gap:4px;min-width:0}
+.bmc-cell:hover{border-color:var(--accent)}
+.bmc-cell.on{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.bmc-cell h4{margin:0;font-size:12px;font-weight:600;font-family:var(--f-body);line-height:1.25}
+.bmc-cell h4 em{font-style:normal;font-family:var(--f-mono);color:var(--quiet);margin-right:4px}
+.owners{display:flex;gap:4px;flex-wrap:wrap;margin-top:auto}
+.owner-chip{white-space:nowrap;font-size:12px;line-height:1;padding:4px 8px;border-radius:999px;border:1px solid var(--c);color:var(--ink)}
+.owner-chip.a{background:var(--c);color:var(--bg);font-weight:600;border-color:var(--c)}
+.c-kp{grid-column:1/3;grid-row:1/3}.c-ka{grid-column:3/5;grid-row:1}.c-kr{grid-column:3/5;grid-row:2}
+.c-vp{grid-column:5/7;grid-row:1/3}.c-cr{grid-column:7/9;grid-row:1}.c-ch{grid-column:7/9;grid-row:2}
+.c-cs{grid-column:9/11;grid-row:1/3}.c-co{grid-column:1/6;grid-row:3}.c-rs{grid-column:6/11;grid-row:3}
+.block-detail{border:1px solid var(--line);border-radius:var(--r-card);padding:12px;margin-top:8px}
+.block-detail h4{margin:0 0 4px;font-size:18px;font-weight:500}
+.badge{display:inline-block;font-size:12px;padding:0 8px;border-radius:999px;background:var(--brand-accent-soft);color:var(--ink);border:1px solid var(--brand-accent);margin-left:8px;font-family:var(--f-body);font-weight:500}
+.matrix td.a{font-weight:700;color:var(--accent);text-align:center}
+.matrix td.p{color:var(--quiet);text-align:center}
+.matrix th.v{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;text-align:left;padding:8px 4px;font-weight:500}
+.fn{border:1px solid var(--line);border-left:4px solid var(--c);border-radius:var(--r-card);padding:12px;margin-bottom:8px}
+.fn h4{margin:0 0 4px;font-size:16px;font-weight:600}
+.fn p{font-size:14px}
+.fn ul{margin:4px 0 8px;padding-left:20px;font-size:14px}
+.fn .goal-line{font-size:12px;color:var(--quiet)}
+
+/* Thiết kế AI */
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field label{font-size:14px;font-weight:500}
+.field small{font-size:12px;color:var(--quiet)}
+select,textarea{font:inherit;font-size:14px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:var(--r-btn);padding:8px 12px;min-height:44px}
+textarea{min-height:120px;resize:vertical;line-height:1.5}
+select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px var(--accent-soft)}
+.btn{font:inherit;font-size:14px;font-weight:600;border-radius:var(--r-btn);border:1px solid var(--line);background:var(--panel);color:var(--ink);min-height:44px;padding:8px 16px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.palette{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px;margin:8px 0}
+.swatch{border:1px solid var(--line);border-radius:var(--r-btn);overflow:hidden;font-size:12px}
+.swatch i{display:block;height:32px}
+.swatch span{display:block;padding:4px 8px;font-family:var(--f-mono)}
+.examples{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.examples button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 12px;min-height:32px;cursor:pointer}
+.result{border:1px solid var(--line);border-radius:var(--r-card);padding:12px;margin-top:12px}
+.result h4{margin:0 0 4px;font-size:16px;display:flex;justify-content:space-between;gap:8px}
+.result h4 span{font-family:var(--f-mono);font-size:12px;color:var(--quiet);font-weight:400}
+pre.code{font-family:var(--f-mono);font-size:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-btn);padding:8px 12px;max-height:240px;overflow:auto;white-space:pre}
+.pass{color:var(--ok);font-weight:600} .fail{color:var(--err);font-weight:600}
+.status{font-size:12px;display:flex;align-items:center;gap:8px;color:var(--quiet);margin-bottom:12px}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--err)}
+.status.on i{background:var(--ok)}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--accent-soft);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;vertical-align:-3px;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (max-width:900px){
+  body{overflow:auto}
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 60vh auto;height:auto}
+  aside{border-left:0;border-top:1px solid var(--line)}
+  .pane{overflow:visible}
+  .stages{margin-left:0}
+  .hint{display:none}
+}
+@media (max-width:520px){ .stat b{font-size:16px} .stats{gap:12px} .legend{display:none} .goals{grid-template-columns:1fr}
+  .bmc{grid-template-columns:1fr 1fr} .bmc>*{grid-column:auto!important;grid-row:auto!important} }
+@media (prefers-reduced-motion: reduce){ .progress i{transition:none} .spinner{animation:none} }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">Md</div>
+      <div><h1>MdFlex — mô hình công ty</h1>
+      <span>Phần mềm y tế cho phòng khám · 5 phòng · 15 tổ · lớp AI điều phối</span></div>
+    </div>
+    <div class="stages" id="stages" role="group" aria-label="Chọn mốc"></div>
+    <a class="stage" href="/giao-viec.html" style="text-decoration:none;border-color:var(--accent)">Giao việc<small>CEO · tự động</small></a>
+    <a class="stage" href="/ceo.html"style="text-decoration:none;border-color:var(--accent)">Bảng CEO<small>điều hành · duyệt</small></a>
+    <a class="stage" href="/phong.html"style="text-decoration:none;border-color:var(--accent)">Phòng làm việc<small>5 phòng · phiếu việc</small></a>
+    <a class="stage" href="/toa-nha.html" style="text-decoration:none;border-color:var(--accent)">Toà nhà 7 tầng<small>bản nháp 02</small></a>
+  </header>
+
+  <div class="stagewrap" id="wrap">
+    <canvas id="scene" aria-label="Mô hình 3D cơ cấu tổ chức MdFlex"></canvas>
+    <div id="labels"></div>
+    <div class="hud">
+      <div class="stats" id="stats"></div>
+      <div class="toggles">
+        <button class="chip" id="tAI" aria-pressed="true"><span class="dot"></span>Lớp AI</button>
+        <button class="chip" id="tFlow" aria-pressed="true">Luồng bàn giao</button>
+        <button class="chip" id="tSpin" aria-pressed="false">Tự xoay</button>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="hint">Kéo để xoay · cuộn để phóng to · bấm vào toà nhà</div>
+  </div>
+
+  <aside>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabOrg" aria-selected="true" aria-controls="paneOrg">Tổ chức</button>
+      <button class="tab" role="tab" id="tabCanvas" aria-selected="false" aria-controls="paneCanvas">Canvas &amp; chức năng</button>
+      <button class="tab" role="tab" id="tabDesign" aria-selected="false" aria-controls="paneDesign">Thiết kế AI</button>
+      <button class="tab" role="tab" id="tabFound" aria-selected="false" aria-controls="paneFound">Thành lập</button>
+    </div>
+    <div class="pane" id="paneOrg" role="tabpanel"></div>
+    <div class="pane" id="paneCanvas" role="tabpanel" hidden></div>
+    <div class="pane" id="paneDesign" role="tabpanel" hidden></div>
+    <div class="pane" id="paneFound" role="tabpanel" hidden></div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+"use strict";
+/* ============ DỮ LIỆU (nguồn: tài liệu "MdFlex — Lộ trình triển khai vận hành doanh nghiệp", tab Kế hoạch nhân sự) ============ */
+const STAGES=[
+  {key:"F", name:"Thành lập", sub:"Ngày 1", cost:122, costNote:"chỉ CTO, chưa tính CEO",
+   gate:"Pháp nhân, tài khoản, hợp đồng lao động mẫu và cơ cấu 5 phòng được ban hành. Có quyết định đầu tư và đặc tả sản phẩm để bắt đầu tuyển.",
+   hire:"CEO và CTO (đề xuất đội sáng lập). CTO là vị trí đầu tiên trong thứ tự tuyển."},
+  {key:"G0", name:"G0", sub:"N0", cost:916,
+   gate:"HIS, EMR, PMS chạy ổn trên môi trường thật; đủ nhân sự chủ chốt; pháp lý công ty, bảng giá, mẫu hợp đồng xong; CEO chốt chỉ tiêu năm đầu.",
+   hire:"Giai đoạn Chuẩn bị tuyển 21 người theo thứ tự: CTO; chuyên gia y tế; PO/BA; Tech Lead; 6 lập trình viên; 2 QA; DevOps; KTT; Trưởng NS-HC; VP Sales (trước N0 2–3 tháng); Trưởng MKT; 1 chuyên viên triển khai; 1 NV kinh doanh; 1 chuyên viên MKT."},
+  {key:"G1", name:"G1", sub:"N0+3 tháng", cost:1123,
+   gate:"3–5 phòng khám dùng thử ổn định; quy trình triển khai 90 ngày đã chạy trên khách thật; có case study đầu tiên.",
+   hire:"+7: Trưởng nhóm triển khai & hỗ trợ; 2 hỗ trợ cấp 1; quản lý đối tác; 1 NV kinh doanh; 1 chuyên viên MKT; hành chính – pháp chế. Kích hoạt khi sản phẩm qua G0 và có khách thử nghiệm đầu tiên."},
+  {key:"G2", name:"G2", sub:"N0+12 tháng", cost:1841,
+   gate:"Đạt chỉ tiêu năm đầu CEO đặt tại G0 (tham khảo: 25–30 khách hàng, ~20 tỷ, 10 đối tác, 30% doanh thu qua đối tác).",
+   hire:"+21: Tech Lead thứ 2, DevOps thứ 2, 4 hỗ trợ, 2 triển khai, 2 CS, 2 NV kinh doanh, 1 quản lý đối tác, PO, chuyên gia y tế, 2 lập trình viên, 1 QA, 1 MKT, kế toán viên, tuyển dụng. Kích hoạt khi qua G1."},
+  {key:"G3", name:"G3", sub:"N0+24 tháng", cost:2674,
+   gate:"Đạt chỉ tiêu năm thứ hai (tham khảo: 80–100 khách hàng, 25–30 đối tác, 45% doanh thu qua đối tác).",
+   hire:"+24: VP Customer Success, trưởng nhóm hỗ trợ, 2 hỗ trợ, 3 triển khai, 2 CS, 3 NV kinh doanh, 1 quản lý đối tác, 4 lập trình viên, 1 QA, PO, chuyên gia y tế, 2 MKT, kế toán viên, hành chính – pháp chế. Kích hoạt khi doanh thu định kỳ đủ trả lương."}
+];
+const DEPTS=[
+ {id:"kd",name:"Kinh doanh",head:"VP Sales",headN:[0,1,1,1,1],color:"--c-kd",
+  mission:"Bán trực tiếp; quản lý đối tác phân phối; Customer Success: đón khách, kiểm tra định kỳ, gia hạn, bán thêm.",
+  outputs:"Pipeline tuần; dự báo doanh thu tháng; báo cáo sức khoẻ khách hàng quý.",
+  kpi:"Số khách hàng và doanh thu năm đầu (tham khảo 25–30 khách, ~20 tỷ); % doanh thu qua đối tác (tham khảo 30%); số đối tác (tham khảo 10 tại N0+9).",
+  teams:[
+   {name:"Bán hàng trực tiếp",roles:[["Nhân viên kinh doanh",[0,1,2,4,7]]]},
+   {name:"Đối tác & kênh",roles:[["Quản lý đối tác",[0,0,1,2,3]]]},
+   {name:"Customer Success",proposed:true,roles:[["VP Customer Success",[0,0,0,0,1]],["Chuyên viên CS",[0,0,0,2,4]]]}]},
+ {id:"mkt",name:"Marketing – Truyền thông",short:"Marketing",head:"Trưởng phòng Marketing",headN:[0,1,1,1,1],color:"--c-mkt",
+  mission:"Website MDflex.com, SEO, nội dung, quảng cáo số; sự kiện, webinar; case study khách hàng.",
+  outputs:"Kế hoạch nội dung tháng; báo cáo lead tuần; case study.",
+  kpi:"Số lead đạt chuẩn chuyển Kinh doanh; chi phí mỗi lead; số case study từ khách thử nghiệm (tham khảo 5).",
+  split:true,
+  teams:[
+   {name:"Digital & SEO",roles:[["Chuyên viên marketing",[0,1,1,1,2]]]},
+   {name:"Nội dung & sự kiện",roles:[["Chuyên viên marketing",[0,0,1,1,2]]]},
+   {name:"Thương hiệu & PR",roles:[["Chuyên viên marketing",[0,0,0,1,1]]]}]},
+ {id:"pt",name:"Phát triển phần mềm",short:"Phát triển PM",head:"CTO",headN:[1,1,1,1,1],color:"--c-pt",
+  mission:"Hoàn thiện sản phẩm đến N0; phát triển theo sprint 2 tuần; QA và tuân thủ; cloud, bảo mật; triển khai 90 ngày; hỗ trợ 24/7 ba cấp.",
+  outputs:"Bản phát hành mỗi sprint; tiến độ triển khai từng khách hàng; báo cáo sự cố.",
+  kpi:"Sản phẩm đạt tiêu chí N0 (HIS, EMR, PMS); module AI sau N0; % khách go-live đúng 90 ngày; thời gian xử lý sự cố theo cấp.",
+  teams:[
+   {name:"Sản phẩm & y khoa",roles:[["PO / BA",[0,1,1,2,3]],["Chuyên gia y tế",[0,1,1,2,3]]]},
+   {name:"Dev · QA · DevOps",roles:[["Tech Lead",[0,1,1,2,2]],["Lập trình viên",[0,6,6,8,12]],["QA / Tester",[0,2,2,3,4]],["DevOps",[0,1,1,2,2]]]},
+   {name:"Triển khai & hỗ trợ",proposed:true,roles:[["Trưởng nhóm triển khai & hỗ trợ",[0,0,1,1,1]],["Trưởng nhóm hỗ trợ",[0,0,0,0,1]],["Chuyên viên triển khai",[0,1,1,3,6]],["Hỗ trợ cấp 1",[0,0,2,5,6]],["Hỗ trợ cấp 2",[0,0,0,1,2]]]}]},
+ {id:"kt",name:"Kế toán",head:"Kế toán trưởng",headN:[0,1,1,1,1],color:"--c-kt",
+  mission:"Hạch toán, thuế, hoá đơn; công nợ theo 5 dòng doanh thu; ngân sách và dòng tiền.",
+  outputs:"Báo cáo tài chính tháng; dự báo dòng tiền 13 tuần; báo cáo theo dòng doanh thu.",
+  kpi:"Biên lợi nhuận gộp (tham khảo 75–80%); CAC (≤ 150 triệu); số ngày thu tiền; EBITDA (15–20% năm thứ 3).",
+  split:true,
+  teams:[
+   {name:"Tổng hợp & thuế",roles:[["Kế toán viên",[0,0,0,1,1]]]},
+   {name:"Công nợ & hoá đơn",roles:[["Kế toán viên",[0,0,0,0,1]]]},
+   {name:"Kế hoạch tài chính",kiem:"Kế toán trưởng kiêm",roles:[]}]},
+ {id:"ns",name:"Nhân sự – Hành chính",short:"NS–HC",head:"Trưởng phòng NS–HC",headN:[0,1,1,1,1],color:"--c-ns",
+  mission:"Tuyển dụng, đào tạo; lương, phúc lợi; hành chính 2 văn phòng; pháp chế: hồ sơ pháp lý công ty, thương hiệu, hợp đồng.",
+  outputs:"Báo cáo tuyển dụng tuần; bảng lương tháng; danh mục hồ sơ pháp lý.",
+  kpi:"Đủ nhân sự chủ chốt trước N0; chi phí nhân sự ≤ 45% tổng chi (tham khảo); tỷ lệ nghỉ việc; hồ sơ pháp lý đúng hạn.",
+  teams:[
+   {name:"Tuyển dụng, đào tạo",roles:[["Chuyên viên tuyển dụng",[0,0,0,1,1]]]},
+   {name:"Lương & phúc lợi",kiem:"Trưởng phòng kiêm",roles:[]},
+   {name:"Hành chính, pháp chế",proposed:true,roles:[["Hành chính – pháp chế",[0,0,1,1,2]]]}]}
+];
+const FLOWS=[
+ ["mkt","kd","Lead đạt chuẩn","Tên cơ sở y tế, quy mô, nhu cầu, nguồn lead","Liên hệ trong 1 ngày làm việc"],
+ ["kd","kt","Hợp đồng đã ký","Hợp đồng, lịch thanh toán, dòng doanh thu","Hoá đơn đợt 1 trong 2 ngày"],
+ ["kd","pt","Hợp đồng đã ký","Module mua, mốc go-live, đầu mối khách hàng","Kế hoạch triển khai 90 ngày trong 5 ngày"],
+ ["pt","kd","Go-live","Biên bản nghiệm thu, tài khoản, tình trạng đào tạo","CS gọi kiểm tra trong 7 ngày"],
+ ["kd","pt","Yêu cầu tính năng","Mô tả, khách hàng, giá trị hợp đồng","Xếp lịch trong sprint kế tiếp"],
+ ["kd","mkt","Khách hàng thành công","Đồng ý làm case study, số liệu trước/sau","Xuất bản trong 30 ngày"],
+ ["*","ns","Nhu cầu nhân sự","Vị trí, mô tả công việc, ngày cần người","Kế hoạch tuyển trong 3 ngày"],
+ ["*","kt","Đề nghị chi","Khoản chi, dòng ngân sách, chứng từ","Duyệt hoặc trả lời trong 2 ngày"]
+];
+const FOUND=[
+ {id:"p1",title:"Pháp nhân",when:"Tuần 1–4",items:[
+  ["Chọn loại hình doanh nghiệp","Đề xuất công ty cổ phần vì Canvas dự kiến gọi vốn 50–100 tỷ; chốt cổ đông sáng lập, tỷ lệ góp vốn, vốn điều lệ.","CEO"],
+  ["Soạn điều lệ và hồ sơ đăng ký","Ngành nghề gợi ý: 6201 lập trình máy vi tính, 6202 tư vấn và quản trị hệ thống, 6209 dịch vụ CNTT khác, 6311 xử lý dữ liệu và cho thuê hạ tầng, 4651 bán buôn máy tính và phần mềm.","CEO + luật sư"],
+  ["Nộp đăng ký doanh nghiệp tại TP.HCM","Nhận giấy chứng nhận, mã số doanh nghiệp đồng thời là mã số thuế; công bố thông tin.","CEO"],
+  ["Mở tài khoản ngân hàng, chữ ký số, hoá đơn điện tử","Đăng ký phương pháp tính thuế, kê khai thuế ban đầu, thông báo tài khoản với cơ quan thuế.","KTT / dịch vụ kế toán"],
+  ["Thuê trụ sở TP.HCM","Hợp đồng thuê đứng tên công ty; văn phòng Hà Nội để sau G2.","CEO"]]},
+ {id:"p2",title:"Tài sản trí tuệ và tuân thủ",when:"Tháng 1–2",items:[
+  ["Đăng ký nhãn hiệu MdFlex","Nộp đơn tại Cục Sở hữu trí tuệ; giữ tên miền MDflex.com đứng tên công ty.","NS–HC (pháp chế)"],
+  ["Hợp đồng lao động mẫu có điều khoản quyền tác giả phần mềm","Mã nguồn do nhân viên viết thuộc về công ty; kèm thoả thuận bảo mật (NDA).","NS–HC + luật sư"],
+  ["Quy chế bảo vệ dữ liệu cá nhân","Dữ liệu sức khoẻ bệnh nhân là dữ liệu nhạy cảm: phân loại dữ liệu, đánh giá tác động xử lý, quy trình xử lý sự cố.","CTO + pháp chế"],
+  ["Rà yêu cầu pháp lý cho sản phẩm HIS/EMR","Quy định của Bộ Y tế về hồ sơ bệnh án điện tử, liên thông dữ liệu BHYT, và xác định phần mềm có thuộc diện trang thiết bị y tế hay không.","CTO + chuyên gia y tế + luật sư"],
+  ["Kiểm tra điều kiện ưu đãi thuế doanh nghiệp phần mềm","Để tính đúng chi phí thuế trong kế hoạch tài chính.","KTT"]]},
+ {id:"p3",title:"Bộ máy và quy chế nội bộ",when:"Tháng 1–3",items:[
+  ["Quyết định ban hành cơ cấu tổ chức","5 phòng, 15 tổ; ba tổ nét đứt (Customer Success, Triển khai & hỗ trợ, Hành chính – pháp chế) chờ CEO chốt vị trí.","CEO"],
+  ["Quy chế chức năng, nhiệm vụ từng phòng","Người chịu trách nhiệm, nhiệm vụ, đầu ra định kỳ, KPI — lấy từ bảng 5 phòng.","CEO + trưởng phòng"],
+  ["Thẻ vị trí cho 21 vị trí giai đoạn Chuẩn bị","Vai trò, đầu vào/đầu ra, tiêu chí nghiệm thu, quyền hạn, SLA, cách leo thang, KPI.","Trưởng phòng + NS–HC"],
+  ["Quy chế tài chính và phân quyền duyệt chi","Hạn mức duyệt theo cấp; phiếu Đề nghị chi duyệt trong 2 ngày.","CEO + KTT"],
+  ["Quy chế lương, thưởng, hoa hồng kinh doanh","Thay các mức lương giả định bằng mức thật; chốt cơ chế hoa hồng.","CEO + KTT + NS–HC"],
+  ["Nội quy lao động","Bắt buộc bằng văn bản và đăng ký với cơ quan lao động khi công ty có từ 10 lao động.","NS–HC"],
+  ["Đăng ký BHXH, BHYT, BHTN cho người lao động","Doanh nghiệp đóng 21,5% lương, đã tính trong kế hoạch chi phí.","NS–HC"]]},
+ {id:"p4",title:"Hệ thống vận hành",when:"Tháng 2 → N0",items:[
+  ["Bảng phiếu chung và Trợ lý điều phối AI","Đổi config/don-vi.json của app ceo-intake sang 5 phòng MdFlex; mọi việc là một phiếu có người làm, hạn, tiêu chí nghiệm thu.","CEO + CTO"],
+  ["Nhịp họp cố định","Bản tin sáng hằng ngày; họp liên phòng thứ Hai 30 phút; demo cuối sprint; rà tài chính hằng tháng; chốt mục tiêu đầu quý.","Trợ lý điều phối"],
+  ["8 quy trình bàn giao liên phòng","Đầu vào bắt buộc và hạn nhận cho từng điểm bàn giao (xem bảng Luồng bàn giao).","Trưởng phòng"],
+  ["Công cụ nền: email tên miền, lưu trữ tài liệu, phần mềm kế toán, chấm công","Phân quyền theo phòng; dữ liệu mức Đỏ không đưa ra dịch vụ AI bên ngoài.","CTO + NS–HC"],
+  ["Bảng giá, mẫu hợp đồng khách hàng, cam kết hỗ trợ","Trước N0+12 chỉ cam kết hỗ trợ giờ hành chính cộng trực sự cố nghiêm trọng.","VP Sales + pháp chế"]]},
+ {id:"p5",title:"Đến cổng G0",when:"N0",items:[
+  ["Tuyển đủ 21 người theo thứ tự ưu tiên","Không tuyển theo lịch cứng; mỗi đợt có điều kiện kích hoạt.","NS–HC"],
+  ["Định nghĩa \"sản phẩm hoàn thành\" và ngày N0 dự kiến","Tiêu chí nghiệm thu HIS, EMR, PMS trên môi trường thật.","CEO + CTO"],
+  ["CEO chốt chỉ tiêu năm đầu","Giữ số tham khảo Canvas hay đặt lại.","CEO"],
+  ["Chốt khách thử nghiệm","VP Sales vào trước N0 khoảng 2–3 tháng để có 3–5 phòng khám dùng thử.","VP Sales"]]}
+];
+
+/* ============ TIỆN ÍCH ============ */
+const $=s=>document.querySelector(s);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let stage=1, selected=null, hlSet=null;
+function teamN(t,s){return t.roles.reduce((a,r)=>a+r[1][s],0)}
+function deptN(d,s){return d.headN[s]+d.teams.reduce((a,t)=>a+teamN(t,s),0)}
+function totalN(s){return 1+DEPTS.reduce((a,d)=>a+deptN(d,s),0)}
+const fmtCost=m=>m>=1000?("~"+(m/1000).toFixed(2).replace(".",",")+" tỷ"):("~"+m+" triệu");
+const deptById=id=>DEPTS.find(d=>d.id===id);
+
+/* ============ SCENE ============ */
+const canvas=$("#scene"), wrap=$("#wrap"), labelsEl=$("#labels");
+let renderer;
+try{renderer=new THREE.WebGLRenderer({canvas,antialias:true});}catch(e){
+  wrap.insertAdjacentHTML("beforeend",'<div class="note" style="position:absolute;left:16px;right:16px;top:45%">Trình duyệt không mở được WebGL nên không vẽ được mô hình 3D. Bảng bên phải vẫn dùng được.</div>');
+}
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(34,1,0.5,400);
+camera.position.set(-30,46,58);
+let controls=null;
+if(renderer){
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  controls=new THREE.OrbitControls(camera,canvas);
+  controls.target.set(0,3,0); controls.enableDamping=true; controls.dampingFactor=.08;
+  controls.minDistance=18; controls.maxDistance=110; controls.maxPolarAngle=Math.PI*0.47;
+  controls.autoRotateSpeed=0.6;
+}
+const hemi=new THREE.HemisphereLight(0xffffff,0x8899aa,0.75); scene.add(hemi);
+const sun=new THREE.DirectionalLight(0xffffff,0.75); sun.position.set(26,46,18); sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048); Object.assign(sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:1,far:120});
+sun.shadow.bias=-0.0006; scene.add(sun);
+
+const C=()=>({bg:css("--scene-bg"),plinth:css("--plinth"),edge:css("--plinth-edge"),bld:css("--building"),road:css("--road"),ai:css("--ai"),ceo:css("--c-ceo")});
+const mats={};
+function M(key,opts){ if(!mats[key]) mats[key]=new THREE.MeshStandardMaterial(Object.assign({roughness:.85,metalness:0,transparent:true},opts||{})); return mats[key]; }
+
+// Plinth (bệ mô hình)
+const plinth=new THREE.Mesh(new THREE.CylinderGeometry(31,31.6,1.2,96),M("plinth")); plinth.position.y=-0.6; plinth.receiveShadow=true; scene.add(plinth);
+const plinthRim=new THREE.Mesh(new THREE.CylinderGeometry(31.7,32.2,0.5,96),M("edge")); plinthRim.position.y=-1.3; scene.add(plinthRim);
+const ring=new THREE.Mesh(new THREE.RingGeometry(9.6,10.6,96),M("road")); ring.rotation.x=-Math.PI/2; ring.position.y=0.01; ring.receiveShadow=true; scene.add(ring);
+
+// Lõi trung tâm: Trợ lý điều phối + CEO
+const core=new THREE.Group(); scene.add(core);
+const coreBase=new THREE.Mesh(new THREE.CylinderGeometry(3.4,3.6,3.2,8),M("bld")); coreBase.position.y=1.6; coreBase.castShadow=coreBase.receiveShadow=true; core.add(coreBase);
+const coreBand=new THREE.Mesh(new THREE.CylinderGeometry(3.42,3.42,0.5,8),M("ai",{emissiveIntensity:.55})); coreBand.position.y=2.4; core.add(coreBand);
+const ceoBlock=new THREE.Mesh(new THREE.CylinderGeometry(2.1,2.4,2.6,8),M("bld")); ceoBlock.position.y=4.5; ceoBlock.castShadow=true; core.add(ceoBlock);
+const ceoCap=new THREE.Mesh(new THREE.CylinderGeometry(2.12,2.12,0.35,8),M("ceo")); ceoCap.position.y=5.9; core.add(ceoCap);
+coreBase.userData={kind:"core"}; ceoBlock.userData={kind:"core"};
+// Vòng AI
+const aiGroup=new THREE.Group(); scene.add(aiGroup);
+const halo=new THREE.Mesh(new THREE.TorusGeometry(5.2,0.08,8,120),M("aiGlow",{emissiveIntensity:1,opacity:.9})); halo.rotation.x=Math.PI/2; halo.position.y=3.3; aiGroup.add(halo);
+const halo2=new THREE.Mesh(new THREE.TorusGeometry(6.4,0.04,8,120),M("aiGlow")); halo2.rotation.x=Math.PI/2; halo2.position.y=3.0; aiGroup.add(halo2);
+// Kiểm soát viên (QA độc lập) — khối nhỏ cạnh lõi
+const qa=new THREE.Mesh(new THREE.OctahedronGeometry(0.9),M("aiGlow")); qa.position.set(-6.6,2.2,-1.2); aiGroup.add(qa);
+
+// Phòng ban
+const R_MAIN=15, R_TEAM=22.4;
+const people={bodies:null,heads:null,max:140};
+const pickables=[];
+DEPTS.forEach((d,i)=>{
+  const ang=-Math.PI/2 + i*(2*Math.PI/5) + Math.PI/5*0;
+  const u=new THREE.Vector3(Math.cos(ang),0,Math.sin(ang)), t=new THREE.Vector3(-Math.sin(ang),0,Math.cos(ang));
+  d.u=u; d.t=t; d.ang=ang;
+  d.group=new THREE.Group(); scene.add(d.group);
+  const pos=u.clone().multiplyScalar(R_MAIN); d.pos=pos;
+  // đường nối từ lõi
+  const roadLen=R_MAIN-4.2-3.2;
+  const road=new THREE.Mesh(new THREE.BoxGeometry(roadLen,0.04,1.1),M("road"));
+  road.position.copy(u.clone().multiplyScalar(4.2+roadLen/2)); road.position.y=0.02; road.rotation.y=-ang; road.receiveShadow=true; scene.add(road);
+  // toà nhà phòng
+  const mat=new THREE.MeshStandardMaterial({roughness:.85,transparent:true}); d.mat=mat;
+  const main=new THREE.Mesh(new THREE.BoxGeometry(5.6,1,5.6),mat); main.castShadow=main.receiveShadow=true;
+  main.position.copy(pos); main.rotation.y=-ang; main.userData={kind:"dept",d}; d.group.add(main); d.main=main; pickables.push(main);
+  const capMat=new THREE.MeshStandardMaterial({roughness:.6,transparent:true}); d.capMat=capMat;
+  const cap=new THREE.Mesh(new THREE.BoxGeometry(5.7,0.32,5.7),capMat); cap.position.copy(pos); cap.rotation.y=-ang; cap.castShadow=true; d.group.add(cap); d.cap=cap;
+  d.h=1; d.hTarget=1;
+  // cửa sổ (sọc ngang) dùng chung màu phòng
+  // tổ
+  d.teams.forEach((tm,j)=>{
+    const off=(j-1)*5.2;
+    const tp=u.clone().multiplyScalar(R_TEAM).add(t.clone().multiplyScalar(off)); tm.pos=tp;
+    const tmat=new THREE.MeshStandardMaterial({roughness:.85,transparent:true}); tm.mat=tmat;
+    const m=new THREE.Mesh(new THREE.BoxGeometry(3.4,1,3.4),tmat); m.position.copy(tp); m.rotation.y=-ang; m.castShadow=m.receiveShadow=true;
+    m.userData={kind:"team",d,tm}; d.group.add(m); tm.mesh=m; pickables.push(m);
+    const wire=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(3.4,1,3.4)),new THREE.LineDashedMaterial({dashSize:.35,gapSize:.25,transparent:true}));
+    wire.position.copy(tp); wire.rotation.y=-ang; d.group.add(wire); tm.wire=wire;
+    const stripe=new THREE.Mesh(new THREE.BoxGeometry(3.45,0.18,3.45),capMat); stripe.position.copy(tp); stripe.rotation.y=-ang; d.group.add(stripe); tm.stripe=stripe;
+    tm.h=1; tm.hTarget=1;
+    // lối nhỏ từ phòng ra tổ
+    const a=pos.clone(), b=tp.clone(); const len=a.distanceTo(b)-4.6; const mid=a.clone().lerp(b,.5);
+    const path=new THREE.Mesh(new THREE.BoxGeometry(len,0.03,0.5),M("road")); path.position.copy(mid); path.position.y=0.015;
+    path.rotation.y=-Math.atan2(b.z-a.z,b.x-a.x); path.receiveShadow=true; scene.add(path);
+  });
+  // Trưởng phòng AI — khối lơ lửng
+  const agent=new THREE.Mesh(new THREE.OctahedronGeometry(0.55),M("aiGlow")); agent.userData.base=pos.clone(); aiGroup.add(agent); d.agent=agent;
+});
+
+// Con người (instanced)
+const bodyGeo=new THREE.CylinderGeometry(0.17,0.22,0.62,10); bodyGeo.translate(0,0.31,0);
+const headGeo=new THREE.SphereGeometry(0.17,12,10); headGeo.translate(0,0.82,0);
+const pMat=new THREE.MeshStandardMaterial({roughness:.7});
+people.bodies=new THREE.InstancedMesh(bodyGeo,pMat,people.max); people.heads=new THREE.InstancedMesh(headGeo,pMat,people.max);
+people.bodies.castShadow=people.heads.castShadow=true;
+if(people.bodies.instanceColor===null){ people.bodies.setColorAt(0,new THREE.Color()); people.heads.setColorAt(0,new THREE.Color()); }
+scene.add(people.bodies,people.heads);
+const pState=[]; // {x,z,y,target,scale,color}
+
+function layoutPeople(){
+  const list=[];
+  const ceoC=C().ceo;
+  list.push({x:0,z:0,y:6.08,col:ceoC,key:"ceo"});
+  DEPTS.forEach(d=>{
+    const col=css(d.color);
+    if(d.headN[stage]){ const p=d.pos.clone().add(d.u.clone().multiplyScalar(-3.6)); list.push({x:p.x,z:p.z,y:0,col,key:d.id+"-head"}); }
+    d.teams.forEach((tm,j)=>{
+      const n=teamN(tm,stage);
+      for(let k=0;k<n;k++){
+        const row=Math.floor(k/5), c=k%5;
+        const p=tm.pos.clone().add(d.u.clone().multiplyScalar(2.5+row*0.62)).add(d.t.clone().multiplyScalar((c-2)*0.6));
+        list.push({x:p.x,z:p.z,y:0,col,key:d.id+"-"+j+"-"+k});
+      }
+    });
+  });
+  // giữ vị trí cũ theo key để người cũ không nhảy
+  const prev=new Map(pState.map(p=>[p.key,p]));
+  pState.length=0;
+  list.forEach(p=>{ const o=prev.get(p.key); pState.push(Object.assign(p,{s:o?o.s:0})); });
+  return list.length;
+}
+const _m=new THREE.Matrix4(), _q=new THREE.Quaternion(), _v=new THREE.Vector3(), _sc=new THREE.Vector3(), _c=new THREE.Color();
+function drawPeople(dt){
+  const n=Math.min(pState.length,people.max);
+  for(let i=0;i<n;i++){
+    const p=pState[i]; p.s+= (1-p.s)*Math.min(1,dt*(reduce?60:5));
+    const dim=p.key!=="ceo" && (selected? !p.key.startsWith(selected.id+"-") : (hlSet? !hlSet.has(p.key.split("-")[0]) : false));
+    _v.set(p.x,p.y,p.z); _sc.setScalar(Math.max(.001,p.s)); _m.compose(_v,_q,_sc);
+    people.bodies.setMatrixAt(i,_m); people.heads.setMatrixAt(i,_m);
+    _c.set(p.col); if(dim) _c.lerp(new THREE.Color(C().plinth),.7);
+    people.bodies.setColorAt(i,_c); people.heads.setColorAt(i,_c);
+  }
+  people.bodies.count=people.heads.count=n;
+  people.bodies.instanceMatrix.needsUpdate=people.heads.instanceMatrix.needsUpdate=true;
+  if(people.bodies.instanceColor){people.bodies.instanceColor.needsUpdate=people.heads.instanceColor.needsUpdate=true;}
+}
+
+// Luồng bàn giao (cung + hạt chạy)
+const flowGroup=new THREE.Group(); scene.add(flowGroup);
+const flowObjs=[];
+function buildFlows(){
+  flowGroup.clear(); flowObjs.length=0;
+  FLOWS.forEach((f,fi)=>{
+    const sources=f[0]==="*"?DEPTS.filter(d=>d.id!==f[1]).map(d=>d.id):[f[0]];
+    sources.forEach((sid,si)=>{
+      const a=deptById(sid), b=deptById(f[1]); const support=f[0]==="*";
+      const lift=fi===4?2.5:0; // tách 2 luồng KD→PT trùng nhau
+      const pa=a.pos.clone(); pa.y=a.h+0.6; const pb=b.pos.clone(); pb.y=b.h+0.6;
+      const mid=pa.clone().lerp(pb,.5); mid.y=Math.max(pa.y,pb.y)+(support?3:6)+lift;
+      const curve=new THREE.QuadraticBezierCurve3(pa,mid,pb);
+      const col=new THREE.Color(css(a.color));
+      const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(48)),new THREE.LineBasicMaterial({color:col,transparent:true,opacity:support?.22:.55}));
+      flowGroup.add(line);
+      const dot=new THREE.Mesh(new THREE.SphereGeometry(support?.16:.24,10,8),new THREE.MeshBasicMaterial({color:col,transparent:true}));
+      flowGroup.add(dot);
+      flowObjs.push({curve,dot,line,off:(fi*0.17+si*0.21)%1,speed:support?.09:.16,a:sid,b:f[1]});
+    });
+  });
+}
+
+/* ============ NHÃN HTML ============ */
+const labels=[];
+function addLabel(html,getPos,cls,extra){ const el=document.createElement("div"); el.className="lbl "+(cls||""); el.innerHTML=html; labelsEl.appendChild(el); const L=Object.assign({el,getPos},extra||{}); labels.push(L); return L; }
+addLabel("CEO",()=>new THREE.Vector3(0,7.4,0),"",{core:true}).el.style.setProperty("--c","var(--c-ceo)");
+const aiLbl=addLabel("Trợ lý điều phối (AI)",()=>new THREE.Vector3(0,3.4,3.8),"ai team");
+const qaLbl=addLabel("Kiểm soát viên (AI)",()=>qa.position.clone().add(new THREE.Vector3(-2.5,3.4,0)),"ai team");
+DEPTS.forEach(d=>{
+  d.lbl=addLabel("",()=>d.pos.clone().setY(d.h+1.1),"",{d});
+  d.lbl.el.style.setProperty("--c","var("+d.color+")");
+  d.teams.forEach(tm=>{ tm.lbl=addLabel("",()=>tm.pos.clone().setY(tm.h+0.9),"team",{d,tm}); tm.lbl.el.style.setProperty("--c","var("+d.color+")"); });
+});
+function refreshLabels(){
+  DEPTS.forEach(d=>{
+    d.lbl.el.innerHTML=esc(d.short||d.name)+"<small>"+deptN(d,stage)+"</small>";
+    d.teams.forEach(tm=>{ const n=teamN(tm,stage); tm.lbl.el.innerHTML=esc(tm.name)+"<small>"+(tm.kiem?"kiêm":n)+"</small>"; });
+  });
+}
+const _p=new THREE.Vector3();
+function placeLabels(){
+  const w=wrap.clientWidth,h=wrap.clientHeight;
+  labels.forEach(L=>{
+    let show=true;
+    if(L.tm) show=!!selected && selected===L.d;
+    if(L===aiLbl||L===qaLbl) show=aiGroup.visible;
+    _p.copy(L.getPos()).project(camera);
+    if(_p.z>1) show=false;
+    L.el.hidden=!show; if(!show) return;
+    L.el.style.left=((_p.x+1)/2*w)+"px"; L.el.style.top=((1-_p.y)/2*h)+"px";
+    L.el.classList.toggle("dim",!!L.d && (selected? L.d!==selected : (!!hlSet && !hlSet.has(L.d.id))));
+  });
+}
+
+/* ============ TRẠNG THÁI THEO MỐC ============ */
+function applyStage(){
+  DEPTS.forEach(d=>{
+    const n=deptN(d,stage); d.hTarget=n?1.6+Math.sqrt(n)*1.05:0.5;
+    d.teams.forEach(tm=>{ const k=teamN(tm,stage); tm.empty=k===0; tm.hTarget=k?0.7+Math.sqrt(k)*0.95:(tm.kiem?0.7:0.9); });
+  });
+  layoutPeople(); refreshLabels(); renderStats(); renderStages(); renderOrg();
+}
+function applyTheme(){
+  const c=C();
+  scene.background=new THREE.Color(c.bg);
+  M("plinth").color.set(c.plinth); M("edge").color.set(c.edge); M("road").color.set(c.road); M("bld").color.set(c.bld);
+  M("ceo").color.set(c.ceo); M("ai").color.set(c.ai); M("ai").emissive.set(c.ai);
+  M("aiGlow").color.set(c.ai); M("aiGlow").emissive.set(c.ai); M("aiGlow").emissiveIntensity=.8;
+  const dark=document.documentElement.dataset.theme==="dark"||(document.documentElement.dataset.theme!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);
+  hemi.intensity=dark?.55:.75; sun.intensity=dark?.55:.75;
+  DEPTS.forEach(d=>{
+    const dc=css(d.color);
+    d.mat.color.set(c.bld); d.mat.emissive.set(dc); d.mat.emissiveIntensity=dark?.08:0;
+    d.capMat.color.set(dc); d.capMat.emissive.set(dc); d.capMat.emissiveIntensity=dark?.35:0;
+    d.teams.forEach(tm=>{ tm.mat.color.set(c.bld); tm.mat.emissive.set(dc); tm.mat.emissiveIntensity=dark?.06:0; tm.wire.material.color.set(dc); });
+  });
+  buildFlows(); flowGroup.visible=$("#tFlow").getAttribute("aria-pressed")==="true";
+  layoutPeople();
+  renderLegend();
+}
+function setDim(){
+  DEPTS.forEach(d=>{
+    const on=selected?selected===d:(!hlSet||hlSet.has(d.id)); const op=on?1:.28;
+    d.mat.opacity=op; d.capMat.opacity=op;
+    d.teams.forEach(tm=>{ const ghost=tm.empty&&!tm.kiem; tm.mat.opacity=ghost?0.0:op; tm.wire.visible=ghost; tm.wire.material.opacity=on?.9:.25; tm.stripe.visible=!ghost; });
+  });
+  flowObjs.forEach(f=>{ const on=selected?(f.a===selected.id||f.b===selected.id):(!hlSet||(hlSet.has(f.a)&&hlSet.has(f.b))); f.line.material.opacity=on?(f.speed<.1?.22:.55):.06; f.dot.visible=on; });
+}
+
+/* ============ UI ============ */
+function renderStages(){
+  $("#stages").innerHTML=STAGES.map((s,i)=>`<button class="stage" data-i="${i}" aria-pressed="${i===stage}">${esc(s.name)}<small>${esc(s.sub)} · ${totalN(i)} người</small></button>`).join("");
+}
+$("#stages").addEventListener("click",e=>{const b=e.target.closest(".stage"); if(!b) return; stage=+b.dataset.i; applyStage(); setDim();});
+function renderStats(){
+  const s=STAGES[stage];
+  $("#stats").innerHTML=`<div class="stat"><b>${totalN(stage)}</b><span>người</span></div>
+   <div class="stat"><b>${fmtCost(s.cost)}</b><span>chi phí NS/tháng</span></div>
+   <div class="stat"><b>${s.name}</b><span>${esc(s.sub)}</span></div>`;
+}
+function renderLegend(){
+  $("#legend").innerHTML=DEPTS.map(d=>`<span><i style="background:var(${d.color})"></i>${esc(d.short||d.name)}</span>`).join("")+
+   `<span><i style="background:var(--ai)"></i>Lớp AI</span><span><i style="border:1px dashed var(--faint)"></i>Tổ chưa có người</span>`;
+}
+function renderOrg(){
+  const el=$("#paneOrg"), s=STAGES[stage];
+  if(!selected){
+    const rows=DEPTS.map(d=>`<tr class="deptrow" data-id="${d.id}"><td><span class="sw" style="background:var(${d.color})"></span>${esc(d.name)}</td><td>${esc(d.head)}</td>${[0,1,2,3,4].map(i=>`<td class="n" ${i===stage?'style="font-weight:600"':''}>${deptN(d,i)}</td>`).join("")}</tr>`).join("");
+    el.innerHTML=`<h2>Cơ cấu MdFlex tại ${esc(s.name)}</h2>
+      <p class="sub">${esc(s.sub)} · ${totalN(stage)} người · chi phí nhân sự ${fmtCost(s.cost)}/tháng${s.costNote?" ("+esc(s.costNote)+")":""}, đã gồm bảo hiểm 21,5%.</p>
+      <div class="gate"><b>${stage===0?"ĐIỀU KIỆN BẮT ĐẦU TUYỂN":"TIÊU CHÍ QUA CỔNG "+esc(s.name)}</b><br>${esc(s.gate)}</div>
+      <h3>Tuyển để đạt mốc này</h3><p style="font-size:13px">${esc(s.hire)}</p>
+      <h3>Số người theo phòng</h3>
+      <div style="overflow-x:auto"><table><thead><tr><th>Phòng</th><th>Phụ trách</th>${STAGES.map((x,i)=>`<th class="n" ${i===stage?'style="color:var(--accent)"':''}>${esc(x.name)}</th>`).join("")}</tr></thead>
+      <tbody>${rows}<tr><td>CEO</td><td></td>${[0,1,2,3,4].map(()=>`<td class="n">1</td>`).join("")}</tr>
+      <tr><td><b>Tổng</b></td><td></td>${[0,1,2,3,4].map(i=>`<td class="n"><b>${totalN(i)}</b></td>`).join("")}</tr></tbody></table></div>
+      <h3>Cách vận hành</h3>
+      <ul class="plain" style="font-size:13px">
+        <li>CEO không giao thẳng cho tổ: mục tiêu đi qua <b>Trợ lý điều phối (AI)</b> thành phiếu cho trưởng phòng.</li>
+        <li>Mục tiêu chảy năm → quý → tháng → tuần → bản tin sáng. Việc không nối được lên mục tiêu năm thì không làm.</li>
+        <li><b>Kiểm soát viên (AI)</b> độc lập, chỉ đọc, báo thẳng CEO.</li>
+        <li>Hai phòng không thống nhất: Trợ lý mở phiếu Đề xuất, CEO quyết trong 2 ngày làm việc.</li>
+      </ul>
+      <h3>Luồng bàn giao giữa các phòng</h3>${flowTable(FLOWS)}
+      ${stage===1?`<div class="note">Ở N0 có 7 quản lý cho 14 người làm chuyên môn (2:1). Trước G1 các trưởng phòng phải trực tiếp làm chuyên môn; thuê ngoài kế toán đến G1 đưa tổng về 20 người.</div>`:""}
+      ${stage===0?`<div class="note">Đội sáng lập CEO + CTO là đề xuất. Anh có thể đổi nếu thực tế công ty bắt đầu với người khác.</div>`:""}`;
+    el.querySelectorAll(".deptrow").forEach(r=>r.addEventListener("click",()=>select(deptById(r.dataset.id))));
+    return;
+  }
+  const d=selected;
+  const teamRows=d.teams.map(tm=>{
+    const roles=tm.roles.length?tm.roles.map(r=>`<tr><td style="padding-left:16px">${esc(r[0])}</td>${r[1].map((v,i)=>`<td class="n" ${i===stage?'style="font-weight:600"':''}>${v||"·"}</td>`).join("")}</tr>`).join(""):`<tr><td style="padding-left:16px;color:var(--quiet)" colspan="6">${esc(tm.kiem||"")}</td></tr>`;
+    return `<tr><td colspan="6"><b>${esc(tm.name)}</b>${tm.proposed?'<span class="tag">đề xuất gán, chờ CEO chốt</span>':""}</td></tr>${roles}`;
+  }).join("");
+  const myFlows=FLOWS.filter(f=>f[0]===d.id||f[1]===d.id||f[0]==="*");
+  el.innerHTML=`<button class="back" id="backBtn">← Toàn công ty</button>
+    <h2><span class="sw" style="background:var(${d.color});width:12px;height:12px"></span>${esc(d.name)}</h2>
+    <p class="sub">${esc(d.head)} · ${deptN(d,stage)} người tại ${esc(STAGES[stage].name)} (${esc(STAGES[stage].sub)})</p>
+    <p><a class="btn primary" style="text-decoration:none;display:inline-block" href="/phong.html?id=${d.id}">Mở trang làm việc của phòng →</a></p>
+    <dl class="kv"><dt>Nhiệm vụ</dt><dd>${esc(d.mission)}</dd><dt>Đầu ra</dt><dd>${esc(d.outputs)}</dd><dt>KPI</dt><dd>${esc(d.kpi)}</dd></dl>
+    <h3>Tổ và vị trí</h3>
+    <div style="overflow-x:auto"><table><thead><tr><th>Vị trí</th>${STAGES.map((x,i)=>`<th class="n" ${i===stage?'style="color:var(--accent)"':''}>${esc(x.name)}</th>`).join("")}</tr></thead>
+    <tbody><tr><td><b>${esc(d.head)}</b> (trưởng phòng)</td>${d.headN.map((v,i)=>`<td class="n" ${i===stage?'style="font-weight:600"':''}>${v||"·"}</td>`).join("")}</tr>${teamRows}</tbody></table></div>
+    ${d.split?`<p class="sub" style="margin-top:8px">Chia chuyên viên giữa 3 tổ là đề xuất; tài liệu gốc chỉ có tổng số theo phòng.</p>`:""}
+    <h3>Bàn giao liên quan</h3>${flowTable(myFlows)}
+    <h3>Lớp AI của phòng</h3>
+    <p style="font-size:13px">Trưởng phòng AI nhận phiếu từ Trợ lý điều phối, chia cho chuyên viên AI của từng tổ, ký bàn giao sang phòng khác. Quy định nạp theo 3 tầng: Hiến chương chung › Quy chế phòng › Thẻ vị trí.</p>`;
+  $("#backBtn").addEventListener("click",()=>select(null));
+}
+function flowTable(list){
+  const nm=id=>id==="*"?"Mọi phòng":(deptById(id).short||deptById(id).name);
+  return `<div style="overflow-x:auto"><table><thead><tr><th>Bàn giao</th><th>Từ → đến</th><th>Hạn</th></tr></thead><tbody>${list.map(f=>`<tr><td>${esc(f[2])}<br><small style="color:var(--quiet)">${esc(f[3])}</small></td><td style="white-space:nowrap">${esc(nm(f[0]))} → ${esc(nm(f[1]))}</td><td>${esc(f[4])}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function select(d){
+  selected=d||null; hlSet=null; activeBlock=null; if(CANVAS) renderCanvas(); setDim(); renderOrg(); showTab("org");
+  if(controls){ focusTarget = d? d.pos.clone().multiplyScalar(1.2).setY(2) : new THREE.Vector3(0,3,0); }
+}
+let focusTarget=null;
+
+/* Tab Thành lập */
+const STORE="mdflex3d-found";
+let done={}; try{done=JSON.parse(localStorage.getItem(STORE)||"{}")||{};}catch(e){done={};}
+function renderFound(){
+  const all=FOUND.reduce((a,p)=>a+p.items.length,0), ok=Object.values(done).filter(Boolean).length;
+  $("#paneFound").innerHTML=`<h2>Thành lập MdFlex từ ngày đầu</h2>
+   <p class="sub">${all} việc, xếp theo thứ tự làm, từ pháp nhân đến cổng G0. Đánh dấu chỉ lưu trên trình duyệt này.</p>
+   <div class="progress" aria-hidden="true"><i style="width:${Math.round(ok/all*100)}%"></i></div>
+   <p class="sub">${ok}/${all} việc đã xong</p>
+   <div class="note">Mã ngành, thủ tục và quy định nêu ở đây là danh mục gợi ý. Cần luật sư hoặc kế toán xác nhận trước khi nộp hồ sơ.</div>
+   ${FOUND.map(p=>`<div class="phase"><h4>${esc(p.title)}<span>${esc(p.when)}</span></h4>${p.items.map((it,k)=>{const id=p.id+"-"+k;return `<div class="check"><input type="checkbox" id="${id}" ${done[id]?"checked":""}><label for="${id}">${esc(it[0])} <span class="owner">· ${esc(it[2])}</span><small>${esc(it[1])}</small></label></div>`}).join("")}</div>`).join("")}`;
+}
+$("#paneFound").addEventListener("change",e=>{ if(e.target.type!=="checkbox") return; done[e.target.id]=e.target.checked; try{localStorage.setItem(STORE,JSON.stringify(done));}catch(_){} renderFound(); });
+
+
+function toggle(btn,fn){ btn.addEventListener("click",()=>{ const on=btn.getAttribute("aria-pressed")!=="true"; btn.setAttribute("aria-pressed",on); fn(on); }); }
+toggle($("#tAI"),on=>{aiGroup.visible=on; coreBand.visible=on;});
+toggle($("#tFlow"),on=>{flowGroup.visible=on;});
+toggle($("#tSpin"),on=>{ if(controls) controls.autoRotate=on; });
+
+/* ============ CHỌN BẰNG CHUỘT ============ */
+const ray=new THREE.Raycaster(), ndc=new THREE.Vector2(); let downAt=null;
+canvas.addEventListener("pointerdown",e=>{downAt=[e.clientX,e.clientY]; canvas.style.cursor="grabbing";});
+canvas.addEventListener("pointerup",e=>{
+  canvas.style.cursor="grab";
+  if(!downAt||Math.hypot(e.clientX-downAt[0],e.clientY-downAt[1])>5) return;
+  const hit=pick(e); if(hit){ const ud=hit.object.userData; if(ud.kind==="dept"||ud.kind==="team") select(ud.d); else select(null);} else select(null);
+});
+canvas.addEventListener("pointermove",e=>{ if(downAt&&e.buttons) return; const hit=pick(e); canvas.style.cursor=hit?"pointer":"grab"; });
+function pick(e){ const r=canvas.getBoundingClientRect(); ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1); ray.setFromCamera(ndc,camera); const h=ray.intersectObjects(pickables.concat([coreBase,ceoBlock]),false); return h[0]||null; }
+
+/* ============ VÒNG LẶP ============ */
+function resize(){ const w=wrap.clientWidth,h=wrap.clientHeight; if(renderer) renderer.setSize(w,h,false); camera.aspect=w/Math.max(1,h); camera.updateProjectionMatrix();
+  const narrow=w<620; camera.fov=narrow?46:34; camera.updateProjectionMatrix(); }
+new ResizeObserver(resize).observe(wrap);
+let last=performance.now(), tAcc=0;
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now; tAcc+=dt;
+  const k=reduce?1:Math.min(1,dt*4);
+  DEPTS.forEach(d=>{
+    d.h+=(d.hTarget-d.h)*k; d.main.scale.y=d.h; d.main.position.y=d.h/2; d.cap.position.y=d.h+0.16;
+    d.teams.forEach(tm=>{ tm.h+=(tm.hTarget-tm.h)*k; tm.mesh.scale.y=tm.h; tm.mesh.position.y=tm.h/2; tm.wire.scale.y=tm.h; tm.wire.position.y=tm.h/2; tm.stripe.position.y=tm.h+0.09; });
+    if(d.agent){ d.agent.position.set(d.pos.x,d.h+2.6+(reduce?0:Math.sin(tAcc*1.6+d.ang)*.25),d.pos.z); d.agent.rotation.y+=reduce?0:dt; }
+  });
+  if(!reduce){ halo.rotation.z+=dt*.25; halo2.rotation.z-=dt*.15; qa.rotation.y+=dt*.8; }
+  if(flowGroup.visible) flowObjs.forEach(f=>{ const tt=(f.off+(reduce?0:tAcc*f.speed))%1; f.dot.position.copy(f.curve.getPoint(tt)); });
+  drawPeople(dt);
+  if(controls){
+    if(focusTarget){ controls.target.lerp(focusTarget,reduce?1:.08); if(controls.target.distanceTo(focusTarget)<.05) focusTarget=null; }
+    controls.update();
+  }
+  if(renderer) renderer.render(scene,camera);
+  placeLabels();
+  requestAnimationFrame(frame);
+}
+
+/* ============ CANVAS 9 THÀNH TỐ (config/canvas.json) ============ */
+let CANVAS=null, activeBlock=null;
+const DNAME=id=>{const d=deptById(id);return d?(d.short||d.name):id};
+const DCODE={kd:"KD",mkt:"MKT",pt:"PTPM",kt:"KT",ns:"NS–HC"};
+async function loadCanvas(){ try{ const r=await fetch("/api/canvas"); if(!r.ok) throw 0; CANVAS=await r.json(); if(!CANVAS) throw 0; }catch(e){ CANVAS=null; } renderCanvas(); }
+function ownerChips(b){ return `<div class="owners"><span class="owner-chip a" style="--c:var(${deptById(b.chu_tri).color})" title="Chủ trì: ${esc(deptById(b.chu_tri).name)}">${DCODE[b.chu_tri]}</span>${b.phoi_hop.map(id=>`<span class="owner-chip" style="--c:var(${deptById(id).color})" title="Phối hợp: ${esc(deptById(id).name)}">${DCODE[id]}</span>`).join("")}</div>`; }
+function renderCanvas(){
+  const el=$("#paneCanvas");
+  if(!CANVAS){ el.innerHTML=`<h2>Business Model Canvas</h2><div class="note err">Không tải được config/canvas.json. Mở trang qua máy chủ: chạy node server.js trong apps/mo-hinh-3d rồi vào http://localhost:3200.</div>`; return; }
+  const c=CANVAS, blocks=c.thanh_to, order=["kd","mkt","pt","kt","ns"];
+  const byNo=[...blocks].sort((a,b)=>a.so-b.so);
+  const detail=activeBlock?blocks.find(b=>b.id===activeBlock):null;
+  el.innerHTML=`<h2>Canvas, tầm nhìn và chức năng</h2>
+   <p class="sub">9 thành tố của mô hình kinh doanh, mỗi thành tố có đúng một phòng chủ trì. Bấm một ô để làm sáng các phòng phụ trách trên mô hình 3D.</p>
+   <div class="vision"><h4>Tầm nhìn</h4><p>${esc(c.tam_nhin.noi_dung)}<small>${esc(c.tam_nhin.trang_thai)}</small></p><h4>Sứ mệnh</h4><p>${esc(c.su_menh.noi_dung)}<small>${esc(c.su_menh.trang_thai)}</small></p></div>
+   <h3>Mục tiêu theo cổng</h3>
+   <div class="goals">${c.muc_tieu.map(g=>`<div class="goal"><b>${esc(g.moc)}</b>${esc(g.noi_dung)}</div>`).join("")}</div>
+   <h3>Business Model Canvas</h3>
+   <div class="bmc">${blocks.map(b=>`<button class="bmc-cell c-${b.vi_tri} ${activeBlock===b.id?"on":""}" data-b="${b.id}" aria-pressed="${activeBlock===b.id}"><h4><em>${b.so}</em>${esc(b.ten)}</h4>${ownerChips(b)}</button>`).join("")}</div>
+   <p class="sub" style="font-size:12px">Nhãn đặc = phòng chủ trì, nhãn viền = phòng phối hợp. KD Kinh doanh · MKT Marketing · PTPM Phát triển phần mềm · KT Kế toán · NS–HC Nhân sự – Hành chính. Số là thứ tự điền Canvas.</p>
+   ${detail?`<div class="block-detail"><h4>${esc(detail.ten)}${detail.suy_ra?'<span class="badge">suy ra, cần đối chiếu Canvas gốc</span>':""}</h4><ul class="plain" style="font-size:14px">${detail.noi_dung.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><p style="font-size:14px;margin-top:8px"><b>Chủ trì:</b> ${esc(deptById(detail.chu_tri).name)} · <b>Phối hợp:</b> ${detail.phoi_hop.map(id=>esc(deptById(id).name)).join(", ")}</p></div>`:""}
+   <h3>Ma trận trách nhiệm: phòng × thành tố</h3>
+   <div style="overflow-x:auto"><table class="matrix"><thead><tr><th>Phòng</th>${byNo.map(b=>`<th class="v">${b.so}. ${esc(b.ten)}</th>`).join("")}</tr></thead><tbody>
+   ${order.map(id=>`<tr><td style="white-space:nowrap"><span class="sw" style="background:var(${deptById(id).color})"></span>${esc(DNAME(id))}</td>${byNo.map(b=>b.chu_tri===id?'<td class="a">A</td>':(b.phoi_hop.includes(id)?'<td class="p">P</td>':'<td></td>')).join("")}</tr>`).join("")}
+   </tbody></table></div>
+   <p class="sub" style="font-size:12px;margin-top:4px">A = chủ trì, chịu trách nhiệm cuối · P = phối hợp.</p>
+   <h3>Chức năng, nhiệm vụ của 5 phòng</h3>
+   ${order.map(id=>{const f=c.chuc_nang[id],d=deptById(id);const owns=byNo.filter(b=>b.chu_tri===id).map(b=>b.ten);return `<div class="fn" style="--c:var(${d.color})"><h4>${esc(d.name)}</h4><p><b>Chức năng.</b> ${esc(f.chuc_nang)}</p><ul>${f.nhiem_vu.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="goal-line">Chủ trì thành tố: ${esc(owns.join(", ")||"không có")} · Mục tiêu: ${esc(f.muc_tieu)}</div></div>`}).join("")}
+   <p class="sub" style="font-size:12px">Nguồn: ${esc(c.nguon)}</p>`;
+  el.querySelectorAll(".bmc-cell").forEach(btn=>btn.addEventListener("click",()=>{
+    const id=btn.dataset.b; activeBlock=activeBlock===id?null:id;
+    const b=blocks.find(x=>x.id===activeBlock);
+    hlSet=b?new Set([b.chu_tri,...b.phoi_hop]):null; selected=null; setDim(); renderOrg(); renderCanvas();
+  }));
+}
+
+/* ============ THIẾT KẾ AI (Perplexity qua máy chủ localhost) ============ */
+let BRAND=null, STATUS=null, lastResult=null, history=[], applied=null;
+const EXAMPLES=[
+  "Thanh trên cùng: làm logo và nút chọn mốc nổi bật thương hiệu hơn, trạng thái đang chọn rõ ràng khi trình chiếu",
+  "Thẻ thống kê trên mô hình: số to, dễ đọc từ xa khi trình chiếu trong phòng họp",
+  "Bảng thông tin bên phải: tăng phân cấp tiêu đề, bảng số dễ quét hơn, đúng thang chữ thương hiệu",
+  "Lưới Canvas: phân biệt rõ nửa phía khách hàng và nửa phía vận hành, ô chủ trì dễ nhận ra"
+];
+async function loadDesign(){
+  try{
+    const [s,b,h]=await Promise.all([fetch("/api/trang-thai"),fetch("/api/thuong-hieu"),fetch("/api/thiet-ke")]);
+    if(!s.ok||!b.ok) throw 0; STATUS=await s.json(); BRAND=await b.json(); history=h.ok?await h.json():[];
+  }catch(e){ STATUS=null; }
+  renderDesign();
+}
+function renderDesign(){
+  const el=$("#paneDesign");
+  if(!STATUS||!BRAND){ el.innerHTML=`<h2>Thiết kế giao diện bằng AI</h2><div class="note err">Tab này cần máy chủ localhost. Chạy <code>node server.js</code> trong apps/mo-hinh-3d rồi mở http://localhost:3200.</div>`; return; }
+  const sw=BRAND.bang_mau.filter(m=>!/^dark-|^white|^surface|^border/.test(m.token)).map(m=>`<div class="swatch"><i style="background:${esc(m.hex)}"></i><span>${esc(m.token)}<br>${esc(m.hex.toUpperCase())}</span></div>`).join("");
+  el.innerHTML=`<h2>Thiết kế giao diện bằng AI</h2>
+   <p class="sub">Yêu cầu được gửi tới Perplexity kèm bộ nhận diện MdFlex. Kết quả là CSS áp thử ngay trên trang này và được kiểm tra tự động theo quy tắc thương hiệu.</p>
+   <div class="status ${STATUS.coKhoa?"on":""}"><i></i>${STATUS.coKhoa?`Đã kết nối Perplexity · model ${esc(STATUS.model)}`:"Chưa có khoá PERPLEXITY_API_KEY trên máy chủ — xem README để đặt khoá"}</div>
+   <h3>Bộ nhận diện gửi kèm</h3>
+   <div class="palette">${sw}</div>
+   <p style="font-size:12px;color:var(--quiet)">Chữ: ${esc(BRAND.chu.display)} cho tiêu đề · ${esc(BRAND.chu.body)} cho nội dung · ${esc(BRAND.chu.mono)} cho số. Bo góc nút 8px, thẻ 12px. Khoảng cách bội số 4px.</p>
+   <h3>Yêu cầu thiết kế</h3>
+   <form id="dForm" novalidate>
+     <div class="field"><label for="dVung">Vùng giao diện</label><select id="dVung">${Object.entries(STATUS.vung).map(([k,v])=>`<option value="${esc(k)}">${esc(v)}</option>`).join("")}</select></div>
+     <div class="field"><label for="dYeuCau">Mô tả yêu cầu</label><textarea id="dYeuCau" placeholder="Ví dụ: làm nút chọn mốc to hơn, trạng thái đang chọn rõ ràng khi trình chiếu"></textarea><small>Gợi ý nhanh</small><div class="examples">${EXAMPLES.map((x,i)=>`<button type="button" data-ex="${i}">${esc(x.split(":")[0])}</button>`).join("")}</div></div>
+     <div class="btnrow"><button class="btn primary" id="dSend" type="submit" ${STATUS.coKhoa?"":"disabled"}>Gửi yêu cầu thiết kế</button></div>
+     <div id="dMsg" aria-live="polite"></div>
+   </form>
+   <div id="dResult"></div>
+   <h3>Lịch sử thiết kế</h3>
+   <div id="dHist">${history.length?`<table><thead><tr><th>Số</th><th>Yêu cầu</th><th class="n">Vi phạm</th></tr></thead><tbody>${history.map(h=>`<tr class="deptrow" data-so="${esc(h.so)}" tabindex="0"><td class="n">${esc(h.so)}</td><td>${esc(String(h.yeu_cau).slice(0,90))}</td><td class="n">${(h.kiem_tra&&h.kiem_tra.viPham.length)||0}</td></tr>`).join("")}</tbody></table>`:'<p class="sub">Chưa có bản thiết kế nào. Mỗi bản được lưu ở data/thiet-ke/TK###.json.</p>'}</div>`;
+  $("#dForm").addEventListener("submit",sendDesign);
+  el.querySelectorAll("[data-ex]").forEach(b=>b.addEventListener("click",()=>{const t=$("#dYeuCau"); t.value=EXAMPLES[+b.dataset.ex]; t.focus();}));
+  el.querySelectorAll("#dHist [data-so]").forEach(r=>{const open=()=>{const h=history.find(x=>x.so===r.dataset.so); if(h){lastResult=h; renderResult(); $("#dResult").scrollIntoView({block:"nearest"});}}; r.addEventListener("click",open); r.addEventListener("keydown",e=>{if(e.key==="Enter")open();});});
+  if(lastResult) renderResult();
+}
+async function sendDesign(e){
+  e.preventDefault();
+  const yc=$("#dYeuCau").value.trim(), msg=$("#dMsg"), btn=$("#dSend");
+  if(yc.length<10){ msg.innerHTML='<div class="note err">Mô tả yêu cầu ít nhất 10 ký tự.</div>'; return; }
+  btn.disabled=true; msg.innerHTML='<p class="sub"><span class="spinner"></span>Đang gửi tới Perplexity, thường mất 20–60 giây.</p>';
+  const dark=document.documentElement.dataset.theme==="dark"||(document.documentElement.dataset.theme!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);
+  try{
+    const r=await fetch("/api/thiet-ke",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({yeu_cau:yc,vung:$("#dVung").value,che_do:dark?"toi":"sang"})});
+    const j=await r.json().catch(()=>({error:"Máy chủ trả về dữ liệu không đọc được."}));
+    if(!r.ok) throw new Error(j.error||("Lỗi "+r.status));
+    lastResult=j; history.unshift(j); renderDesign();
+    $("#dMsg").innerHTML='<div class="note ok">Đã nhận thiết kế '+esc(j.so)+'. Bấm "Áp dụng thử trên trang" để xem.</div>';
+  }catch(err){ msg.innerHTML=`<div class="note err">${esc(err.message)}</div>`; btn.disabled=!STATUS.coKhoa; }
+}
+function renderResult(){
+  const r=lastResult, el=$("#dResult"); if(!el||!r) return;
+  const k=r.kiem_tra||{viPham:[],canhBao:[]};
+  const src=(r.nguon||[]).filter(n=>/^https?:\/\//i.test(n.url));
+  el.innerHTML=`<div class="result"><h4>${esc(r.so)} · ${esc((STATUS&&STATUS.vung[r.vung])||r.vung)}<span>${esc(r.model||"")} · ${Math.round((r.thoi_gian_ms||0)/1000)} giây</span></h4>
+   <p>${esc(r.tom_tat)}</p>
+   ${r.thay_doi&&r.thay_doi.length?`<ul class="plain" style="font-size:14px">${r.thay_doi.map(t=>`<li><b>${esc(t.thanh_phan)}:</b> ${esc(t.mo_ta)}</li>`).join("")}</ul>`:""}
+   <h3>Kiểm tra tự động theo bộ nhận diện</h3>
+   ${k.viPham.length?`<div class="note err"><b>${k.viPham.length} vi phạm</b><ul class="plain">${k.viPham.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:'<div class="note ok">Không có vi phạm về màu, font và cỡ chữ.</div>'}
+   ${k.canhBao.length?`<div class="note"><b>${k.canhBao.length} lưu ý</b><ul class="plain">${k.canhBao.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
+   ${r.tu_kiem&&r.tu_kiem.length?`<h3>AI tự kiểm</h3><table><tbody>${r.tu_kiem.map(t=>`<tr><td>${esc(t.quy_tac)}</td><td class="${t.dat?"pass":"fail"}">${t.dat?"Đạt":"Chưa đạt"}</td><td>${esc(t.ghi_chu)}</td></tr>`).join("")}</tbody></table>`:""}
+   ${r.cau_hoi&&r.cau_hoi.length?`<h3>Cần anh xác nhận</h3><ul class="plain" style="font-size:14px">${r.cau_hoi.map(q=>`<li>${esc(q)}</li>`).join("")}</ul>`:""}
+   <h3>CSS đề xuất</h3><pre class="code">${esc(r.css)}</pre>
+   <div class="btnrow"><button class="btn primary" id="dApply" type="button">${applied===r.so?"Đang áp dụng "+esc(r.so):"Áp dụng thử trên trang"}</button><button class="btn" id="dUndo" type="button" ${applied?"":"disabled"}>Gỡ thiết kế thử</button><button class="btn" id="dCopy" type="button">Sao chép CSS</button></div>
+   ${src.length?`<h3>Nguồn Perplexity dẫn</h3><ul class="plain" style="font-size:12px">${src.map(n=>`<li><a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a></li>`).join("")}</ul>`:""}
+  </div>`;
+  $("#dApply").addEventListener("click",()=>{ let s=document.getElementById("ai-css"); if(!s){s=document.createElement("style");s.id="ai-css";document.head.appendChild(s);} s.textContent=r.css; applied=r.so; renderResult(); });
+  $("#dUndo").addEventListener("click",()=>{ const s=document.getElementById("ai-css"); if(s) s.remove(); applied=null; renderResult(); });
+  $("#dCopy").addEventListener("click",async ev=>{ const b=ev.currentTarget; try{await navigator.clipboard.writeText(r.css); b.textContent="Đã sao chép";}catch(_){ const pre=$("#dResult pre"); const rg=document.createRange(); rg.selectNodeContents(pre); const sel=getSelection(); sel.removeAllRanges(); sel.addRange(rg); b.textContent="Đã chọn, nhấn Ctrl+C"; } });
+}
+
+/* ============ TAB ============ */
+const TABS={org:["#tabOrg","#paneOrg"],canvas:["#tabCanvas","#paneCanvas"],design:["#tabDesign","#paneDesign"],found:["#tabFound","#paneFound"]};
+function showTab(which){ Object.entries(TABS).forEach(([k,[t,p]])=>{ $(t).setAttribute("aria-selected",String(k===which)); $(p).hidden=k!==which; }); }
+Object.entries(TABS).forEach(([k,[t]])=>$(t).addEventListener("click",()=>showTab(k)));
+loadCanvas(); loadDesign();
+
+/* Theo dõi đổi theme */
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{applyTheme();setDim();});
+new MutationObserver(()=>{applyTheme();setDim();}).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+/* Khởi động */
+applyTheme(); applyStage(); renderFound(); setDim(); resize();
+// dựng flows lần nữa khi chiều cao toà nhà đã ổn định
+setTimeout(()=>{buildFlows(); flowGroup.visible=$("#tFlow").getAttribute("aria-pressed")==="true"; setDim();}, reduce?0:1400);
+document.querySelectorAll(".stage").forEach(()=>{});
+requestAnimationFrame(frame);
+// đổi mốc thì luồng bám theo chiều cao mới
+$("#stages").addEventListener("click",()=>setTimeout(()=>{buildFlows(); flowGroup.visible=$("#tFlow").getAttribute("aria-pressed")==="true"; setDim();}, reduce?0:1200));
+})();
+</script>
+
+</body>
+</html>

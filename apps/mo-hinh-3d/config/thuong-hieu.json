@@ -1,0 +1,56 @@
+{
+  "nguon": "MdFlex — Chiến lược ứng dụng nội dung, phiên bản 1.0 tháng 3/2026: Phần 2 và Phụ lục A–B (bản trên Perplexity Computer)",
+  "ten": "MdFlex",
+  "khau_hieu": "Phần mềm y tế cho phòng khám",
+  "bang_mau": [
+    { "token": "primary", "hex": "#149078", "dung": "Nút chính, tiêu đề nhấn, icon active, viền focus" },
+    { "token": "primary-dark", "hex": "#0d6b56", "dung": "Hover của primary, link đã xem" },
+    { "token": "primary-light", "hex": "#e8f5f1", "dung": "Nền nhẹ, nền mục đang chọn, nền chip" },
+    { "token": "accent", "hex": "#f48c0c", "dung": "CTA thứ cấp, điểm nhấn, huy hiệu thông báo" },
+    { "token": "accent-light", "hex": "#fef3e2", "dung": "Nền thẻ cảnh báo, nền điểm nhấn" },
+    { "token": "navy", "hex": "#1a1a2e", "dung": "Chữ chính và tiêu đề trên nền sáng" },
+    { "token": "gray-dark", "hex": "#444444", "dung": "Chữ phụ, mô tả" },
+    { "token": "gray-mid", "hex": "#666666", "dung": "Chú thích, thời gian, placeholder" },
+    { "token": "success", "hex": "#22c55e", "dung": "Bình thường, xác nhận thành công" },
+    { "token": "warning", "hex": "#f59e0b", "dung": "Cảnh báo nhẹ, cần chú ý" },
+    { "token": "error", "hex": "#ef4444", "dung": "Nguy hiểm, lỗi, khẩn cấp" },
+    { "token": "info", "hex": "#3b82f6", "dung": "Thông tin tham khảo, hướng dẫn" },
+    { "token": "white", "hex": "#ffffff", "dung": "Nền chế độ sáng" },
+    { "token": "surface", "hex": "#f5f5f5", "dung": "Bề mặt, thẻ ở chế độ sáng" },
+    { "token": "border", "hex": "#e0e0e0", "dung": "Viền ở chế độ sáng" },
+    { "token": "dark-bg", "hex": "#0f172a", "dung": "Nền chế độ tối (không dùng #000000)" },
+    { "token": "dark-surface", "hex": "#1e293b", "dung": "Thẻ, modal ở chế độ tối" },
+    { "token": "dark-border", "hex": "#334155", "dung": "Viền ở chế độ tối" },
+    { "token": "dark-primary", "hex": "#2dd4a8", "dung": "Primary ở chế độ tối" },
+    { "token": "dark-accent", "hex": "#fbb040", "dung": "Accent ở chế độ tối" },
+    { "token": "dark-text", "hex": "#f1f5f9", "dung": "Chữ chính ở chế độ tối" }
+  ],
+  "che_do_toi": [
+    { "thanh_phan": "Nền", "sang": "#FFFFFF", "toi": "#0F172A" },
+    { "thanh_phan": "Bề mặt / thẻ", "sang": "#F5F5F5", "toi": "#1E293B" },
+    { "thanh_phan": "Primary", "sang": "#149078", "toi": "#2DD4A8" },
+    { "thanh_phan": "Accent", "sang": "#F48C0C", "toi": "#FBB040" },
+    { "thanh_phan": "Chữ chính", "sang": "#1A1A2E", "toi": "#F1F5F9" },
+    { "thanh_phan": "Viền", "sang": "#E0E0E0", "toi": "#334155" }
+  ],
+  "chu": {
+    "display": "DM Sans",
+    "body": "Inter",
+    "mono": "JetBrains Mono",
+    "thang": [
+      "Display XL 48px/700", "Display L 36px/600", "Heading 1 28px/700", "Heading 2 22px/600", "Heading 3 18px/500",
+      "Body 16px/400", "Body Small 14px/400", "Caption 12px/400", "Code 14px/400 JetBrains Mono"
+    ]
+  },
+  "khoang_cach": [4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96, 128],
+  "bo_goc": { "nút": "8px", "thẻ / panel": "12px", "ô nhập": "8px", "modal": "16px", "huy hiệu": "999px", "ảnh đại diện": "50%" },
+  "quy_tac": [
+    "Màu ngữ nghĩa: xanh lá = bình thường, vàng = cần chú ý, đỏ = nguy hiểm. Không bao giờ dùng ngược.",
+    "WCAG AA: tương phản 4.5:1 cho chữ thường, 3:1 cho chữ lớn. Vùng bấm tối thiểu 44x44px.",
+    "Icon dùng một bộ duy nhất (Lucide hoặc Phosphor), nét 1.5–2px.",
+    "Thẻ cảnh báo bo 12px, có viền trái 4px màu nhấn.",
+    "Hiệu ứng chuyển động vi mô không quá 300ms.",
+    "Không dùng màu ngoài bảng màu, kể cả gradient và lớp phủ.",
+    "Chỉ 4 độ đậm chữ: 400, 500, 600, 700."
+  ]
+}

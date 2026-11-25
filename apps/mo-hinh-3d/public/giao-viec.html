@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Giao việc · MdFlex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Token theo config/thuong-hieu.json */
+:root{
+  --bg:#ffffff; --surface:#f5f5f5; --line:#e0e0e0; --ink:#1a1a2e; --quiet:#444444;
+  --accent:#149078; --accent-hover:#0d6b56; --accent-soft:#e8f5f1; --accent-ink:#ffffff;
+  --brand-accent:#f48c0c; --brand-accent-soft:#fef3e2;
+  --ok:#22c55e; --warn:#f59e0b; --err:#ef4444;
+  --c-kd:#149078; --c-mkt:#f48c0c; --c-pt:#3b82f6; --c-kt:#0d6b56; --c-ns:#444444;
+  --f-display:"DM Sans",system-ui,"Segoe UI",sans-serif;
+  --f-body:"Inter",system-ui,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --r-btn:8px; --r-card:12px; --r-modal:16px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f172a; --surface:#1e293b; --line:#334155; --ink:#f1f5f9; --quiet:#e0e0e0;
+  --accent:#2dd4a8; --accent-hover:#149078; --accent-soft:#1e293b; --accent-ink:#0f172a;
+  --brand-accent:#fbb040; --brand-accent-soft:#1e293b;
+  --c-kd:#2dd4a8; --c-mkt:#fbb040; --c-pt:#3b82f6; --c-kt:#149078; --c-ns:#e0e0e0; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0f172a; --surface:#1e293b; --line:#334155; --ink:#f1f5f9; --quiet:#e0e0e0;
+  --accent:#2dd4a8; --accent-hover:#149078; --accent-soft:#1e293b; --accent-ink:#0f172a;
+  --brand-accent:#fbb040; --brand-accent-soft:#1e293b;
+  --c-kd:#2dd4a8; --c-mkt:#fbb040; --c-pt:#3b82f6; --c-kt:#149078; --c-ns:#e0e0e0; color-scheme:dark;}
+
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+*{box-sizing:border-box}
+h1,h2,h3{font-family:var(--f-display);line-height:1.2}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:var(--r-btn);background:var(--ink);color:var(--bg);font-family:var(--f-mono);font-weight:600;font-size:12px;flex:none}
+.brand h1{margin:0;font-size:18px;font-weight:700}
+.brand span{font-size:12px;color:var(--quiet)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:40px;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--bg);cursor:pointer;text-decoration:none;font-weight:500;color:var(--ink)}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn.big{min-height:48px;font-size:16px;padding:12px 24px;width:100%}
+.btn.small{min-height:32px;padding:4px 8px;font-size:12px}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.wrap{max-width:1440px;margin:0 auto;padding:24px max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px))}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:24px;align-items:start}
+.card{border:1px solid var(--line);border-radius:var(--r-card);padding:24px}
+.card h2{margin:0 0 4px;font-size:22px}
+.sub{font-size:12px;color:var(--quiet);margin:0 0 16px}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:16px;min-width:0}
+.field>span{font-size:12px;color:var(--quiet);font-weight:600}
+.field small{font-size:12px;color:var(--quiet)}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--bg);padding:12px;min-height:44px}
+.field textarea{resize:vertical;min-height:96px}
+#muc_tieu{font-size:18px;font-family:var(--f-display);font-weight:600}
+#dau_vao{min-height:200px}
+.row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.drop{border:2px dashed var(--line);border-radius:var(--r-card);padding:24px;text-align:center;background:var(--surface);cursor:pointer;margin-bottom:8px}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop b{display:block;font-family:var(--f-display);font-size:16px;margin-bottom:4px}
+.files{list-style:none;margin:0 0 16px;padding:0;display:flex;flex-direction:column;gap:8px}
+.files li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:var(--r-btn);padding:8px 12px}
+.files .nm{font-weight:600;overflow-wrap:anywhere}
+.files .meta{display:block;font-size:12px;color:var(--quiet)}
+.files details{grid-column:1/-1}
+.files pre{white-space:pre-wrap;font-family:var(--f-mono);font-size:12px;background:var(--surface);border-radius:var(--r-btn);padding:8px;max-height:200px;overflow:auto;margin:8px 0 0}
+.seg{display:flex;border:1px solid var(--line);border-radius:var(--r-btn);overflow:hidden}
+.seg button{flex:1;min-height:44px;border:0;background:var(--bg);cursor:pointer;font-weight:500}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.depts{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:4px 12px;border:1px solid var(--line);border-radius:999px;cursor:pointer;background:var(--bg)}
+.chip input{width:16px;height:16px;accent-color:var(--accent);margin:0}
+.chip:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.dot{display:inline-block;width:12px;height:12px;border-radius:999px;background:var(--dept,var(--quiet));flex:none}
+.dept-kd{--dept:var(--c-kd)} .dept-mkt{--dept:var(--c-mkt)} .dept-pt{--dept:var(--c-pt)} .dept-kt{--dept:var(--c-kt)} .dept-ns{--dept:var(--c-ns)}
+aside.side{position:sticky;top:16px;display:flex;flex-direction:column;gap:16px}
+.rank{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.rank li{border:1px solid var(--line);border-radius:var(--r-btn);padding:8px 12px}
+.rank li.top{border-color:var(--accent);background:var(--accent-soft)}
+.rank .h{display:flex;gap:8px;align-items:center;font-weight:600}
+.rank .h b{margin-left:auto;font-family:var(--f-mono)}
+.rank .k{font-size:12px;color:var(--quiet)}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{position:relative;padding:0 0 16px 40px;counter-increment:s}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:999px;background:var(--accent-soft);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:12px;font-weight:600}
+.steps li::after{content:"";position:absolute;left:13px;top:28px;bottom:0;border-left:1px dashed var(--line)}
+.steps li:last-child::after{display:none}
+.steps b{display:block}
+.steps span{font-size:12px;color:var(--quiet)}
+.steps .auto{font-size:12px;color:var(--accent);font-weight:600}
+.err{color:var(--err);font-size:12px;min-height:18px;margin:8px 0}
+.mono{font-family:var(--f-mono)}
+section.list{margin-top:32px}
+section.list h2{font-size:22px;margin:0 0 4px}
+.tree{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.tree>li{border:1px solid var(--line);border-radius:var(--r-card);padding:16px}
+.tree .top{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tree h3{margin:4px 0 8px;font-size:16px;flex-basis:100%}
+.tag{display:inline-block;font-size:12px;padding:0 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.tag.st{background:var(--surface)}
+.tag.done{border-color:var(--ok)} .tag.warn{border-color:var(--warn)} .tag.err{border-color:var(--err);color:var(--err)}
+.sub-tree{list-style:none;margin:8px 0 0;padding:0 0 0 16px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:4px;font-size:12px}
+.sub-tree li{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.prog{height:6px;border-radius:999px;background:var(--line);overflow:hidden;flex:1;min-width:120px;max-width:240px}
+.prog i{display:block;height:100%;background:var(--accent)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:var(--r-btn);max-width:calc(100vw - 32px);z-index:10}
+.toast.err{background:var(--err);color:#ffffff}
+@media (max-width:1100px){ .layout{grid-template-columns:1fr} aside.side{position:static} }
+@media (max-width:700px){ .row,.row2{grid-template-columns:1fr} .card{padding:16px} }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo" aria-hidden="true">CEO</div>
+    <div><h1>Giao việc</h1><span>CEO giao · Trợ lý điều phối tự nhận, chọn phòng · Trưởng phòng AI tự chia cho chuyên viên</span></div>
+  </div>
+  <div class="tools">
+    <a class="btn" href="/ceo.html">Bảng CEO</a>
+    <a class="btn" href="/phong.html">Phòng làm việc</a>
+    <a class="btn" href="/">Mô hình công ty</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <form id="form" class="layout" novalidate>
+    <div class="card">
+      <h2>Yêu cầu mới</h2>
+      <p class="sub">Viết như giao cho một trưởng phòng. Có tệp yêu cầu thì kéo thả vào; tệp .txt, .md, .csv, .json, .docx được đọc để hệ thống chọn phòng.</p>
+
+      <label class="field"><span>Mục tiêu</span>
+        <input id="muc_tieu" name="muc_tieu" required placeholder="Ví dụ: Tuyển đủ 2 lập trình viên trước ngày 15/12" autocomplete="off">
+        <small>Một câu, đo được.</small></label>
+
+      <label class="field"><span>Mô tả, bối cảnh, đầu vào</span>
+        <textarea id="dau_vao" name="dau_vao" placeholder="Bối cảnh, dữ liệu có sẵn, ai liên quan, điều cần tránh…"></textarea></label>
+
+      <span class="field" style="margin-bottom:4px"><span>Tệp yêu cầu</span></span>
+      <div class="drop" id="drop" role="button" tabindex="0" aria-label="Kéo thả tệp hoặc bấm để chọn tệp">
+        <b>Kéo thả tệp vào đây, hoặc bấm để chọn</b>
+        <span class="sub" style="margin:0">.docx, .pdf, .xlsx, .pptx, .txt, .md, .csv, .json, .png, .jpg · tối đa 10 MB mỗi tệp, 5 tệp</span>
+      </div>
+      <input type="file" id="file" multiple hidden accept=".txt,.md,.csv,.json,.pdf,.docx,.xlsx,.pptx,.png,.jpg,.jpeg">
+      <ul class="files" id="files"></ul>
+
+      <div class="row2">
+        <label class="field"><span>Kết quả cần nhận (đầu ra)</span>
+          <textarea id="dau_ra" name="dau_ra" required placeholder="Ví dụ: Danh sách ứng viên đạt, lịch phỏng vấn"></textarea></label>
+        <label class="field"><span>Tiêu chí nghiệm thu (mỗi dòng một tiêu chí)</span>
+          <textarea id="tieu_chi" name="tieu_chi" required placeholder="Ví dụ: Ít nhất 5 ứng viên đạt yêu cầu&#10;Có lịch phỏng vấn trước 10/12"></textarea></label>
+      </div>
+
+      <div class="row">
+        <div class="field"><span>Ưu tiên</span>
+          <div class="seg" role="group" aria-label="Ưu tiên" id="uu">
+            <button type="button" data-v="P1" aria-pressed="false">P1 · 2 giờ</button>
+            <button type="button" data-v="P2" aria-pressed="true">P2 · 1 ngày</button>
+            <button type="button" data-v="P3" aria-pressed="false">P3 · 3 ngày</button>
+          </div></div>
+        <label class="field"><span>Hạn (để trống = theo ưu tiên)</span><input type="datetime-local" id="han" name="han"></label>
+        <label class="field"><span>Cổng CEO duyệt</span><select id="cong" name="cong"><option>Không có</option></select></label>
+      </div>
+
+      <div class="row2">
+        <label class="field"><span>Mức dữ liệu</span>
+          <select id="muc_du_lieu"><option value="Xanh">Xanh · công khai</option><option value="Vàng" selected>Vàng · nội bộ</option><option value="Đỏ">Đỏ · nhạy cảm, không gửi cho AI bên ngoài</option></select></label>
+        <div class="field"><span>Chuyên viên AI</span>
+          <label class="chip" style="border-radius:8px"><input type="checkbox" id="ai_lam_ngay"><span id="aiNote">Cho Claude làm ngay sau khi giao</span></label></div>
+      </div>
+
+      <div class="field"><span>Phòng phụ trách</span>
+        <div class="depts" id="depts"></div>
+        <small>Không chọn phòng nào thì Trợ lý điều phối tự chọn theo nội dung.</small></div>
+    </div>
+
+    <aside class="side">
+      <div class="card">
+        <h2 style="font-size:18px">Hệ thống sẽ giao cho</h2>
+        <p class="sub" id="routeNote">Gõ mục tiêu hoặc thả tệp để xem đề xuất.</p>
+        <ul class="rank" id="rank"></ul>
+      </div>
+      <div class="card">
+        <h2 style="font-size:18px">Luồng tự động</h2>
+        <ol class="steps" id="steps"></ol>
+        <p class="err" id="err" role="alert"></p>
+        <button class="btn primary big" id="send" type="submit">Giao việc</button>
+      </div>
+    </aside>
+  </form>
+
+  <section class="list" aria-labelledby="hList">
+    <h2 id="hList">Việc CEO đã giao</h2>
+    <p class="sub">Tiến độ cộng dồn tự động: chuyên viên xong → Trưởng phòng nghiệm thu → Trợ lý gom kết quả → chờ CEO nghiệm thu.</p>
+    <ul class="tree" id="tree"></ul>
+  </section>
+</div>
+
+<script>
+(async function(){
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(m,err){ const t=document.createElement("div"); t.className="toast"+(err?" err":""); t.setAttribute("role","status"); t.textContent=m; document.body.appendChild(t); setTimeout(()=>t.remove(),4000); }
+async function api(u,o){ const r=await fetch(u,o); const j=await r.json().catch(()=>({})); if(!r.ok) throw new Error(j.error||("Lỗi "+r.status)); return j; }
+const kb=n=>n>=1048576?(n/1048576).toFixed(1)+" MB":Math.max(1,Math.round(n/1024))+" KB";
+
+let CFG; try{ CFG=await api("/api/phong"); }catch(e){ document.body.innerHTML='<p style="padding:24px">Không đọc được /api/phong: '+esc(e.message)+'</p>'; return; }
+const PH=Object.fromEntries(CFG.phong.map(p=>[p.id,p]));
+const TEN={}; CFG.vi_tri_chung.forEach(v=>TEN[v.ma]=v.ten); CFG.phong.forEach(p=>{ TEN[p.truong_phong.ai.ma]=p.truong_phong.ai.ten; p.to.forEach(t=>t.ai.forEach(a=>TEN[a.ma]=a.ten)); });
+let AI={coKhoa:false}; try{ AI=await api("/api/ai"); }catch(_){}
+if(AI.coKhoa){ $("#ai_lam_ngay").checked=true; $("#aiNote").textContent=`Cho Claude (${AI.model}) làm ngay sau khi giao`; }
+else { $("#ai_lam_ngay").disabled=true; $("#aiNote").textContent="Chưa có khoá Claude (ANTHROPIC_API_KEY); chuyên viên AI chỉ nhận phiếu"; }
+$("#muc_du_lieu").addEventListener("change",()=>{ if($("#muc_du_lieu").value==="Đỏ") $("#ai_lam_ngay").checked=false; });
+$("#cong").innerHTML+=CFG.cong_ceo.map(c=>`<option>${esc(c)}</option>`).join("");
+$("#depts").innerHTML=CFG.phong.map(p=>`<label class="chip dept-${p.id}"><input type="checkbox" value="${p.id}"><span class="dot"></span>${esc(p.ten_ngan)}</label>`).join("");
+
+const S={uu:"P2",tep:[],xh:[],dang:0};
+$("#uu").addEventListener("click",e=>{ const b=e.target.closest("button[data-v]"); if(!b) return; S.uu=b.dataset.v; document.querySelectorAll("#uu button").forEach(x=>x.setAttribute("aria-pressed",String(x===b))); });
+const chonPhong=()=>[...document.querySelectorAll("#depts input:checked")].map(i=>i.value);
+
+// ---------- Tệp ----------
+const drop=$("#drop"), fileIn=$("#file");
+drop.addEventListener("click",()=>fileIn.click());
+drop.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fileIn.click(); } });
+["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop",e=>taiLen([...e.dataTransfer.files]));
+fileIn.addEventListener("change",()=>{ taiLen([...fileIn.files]); fileIn.value=""; });
+const docB64=f=>new Promise((ok,err)=>{ const r=new FileReader(); r.onload=()=>ok(String(r.result).split(",")[1]||""); r.onerror=()=>err(new Error("Không đọc được tệp "+f.name)); r.readAsDataURL(f); });
+async function taiLen(list){
+  for(const f of list){
+    if(S.tep.length+S.dang>=5){ toast("Tối đa 5 tệp",true); break; }
+    if(f.size>10*1048576){ toast(f.name+": vượt 10 MB",true); continue; }
+    S.dang++; veTep();
+    try{
+      const t=await api("/api/tep",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({ten:f.name,du_lieu:await docB64(f)})});
+      S.tep.push(t);
+      if(!$("#dau_vao").value.trim()) $("#dau_vao").value="Xem tệp đính kèm: "+t.ten;
+      if(!$("#muc_tieu").value.trim()&&t.van_ban){ const dong=t.van_ban.split("\n").map(s=>s.trim()).find(Boolean); if(dong) $("#muc_tieu").value=dong.slice(0,160); }
+    }catch(e){ toast(f.name+": "+e.message,true); }
+    S.dang--; veTep(); xemTruoc();
+  }
+}
+function veTep(){
+  $("#files").innerHTML=S.tep.map((t,i)=>`<li><div><span class="nm">${esc(t.ten)}</span><span class="meta">${kb(t.kich_thuoc)} · ${t.doc_duoc?"đã đọc nội dung để chọn phòng":"lưu kèm phiếu, hệ thống không đọc nội dung"}</span></div>
+    <button type="button" class="btn small" data-bo="${i}" aria-label="Bỏ tệp ${esc(t.ten)}">Bỏ</button>
+    ${t.van_ban?`<details><summary>Xem nội dung đã đọc</summary><pre>${esc(t.van_ban)}</pre></details>`:""}</li>`).join("")
+    +(S.dang?`<li><span class="meta">Đang tải ${S.dang} tệp…</span></li>`:"");
+}
+$("#files").addEventListener("click",e=>{ const b=e.target.closest("[data-bo]"); if(!b) return; S.tep.splice(Number(b.dataset.bo),1); veTep(); xemTruoc(); });
+
+// ---------- Xem trước định tuyến ----------
+const duLieu=()=>({ muc_tieu:$("#muc_tieu").value, dau_vao:$("#dau_vao").value, dau_ra:$("#dau_ra").value,
+  tieu_chi:$("#tieu_chi").value.split("\n").map(s=>s.trim()).filter(Boolean), tep:S.tep.map(t=>({id:t.id,ten:t.ten,kich_thuoc:t.kich_thuoc})) });
+let hen=null;
+function xemTruoc(){ clearTimeout(hen); hen=setTimeout(async()=>{ try{ S.xh=(await api("/api/giao-viec/xem-truoc",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(duLieu())})).xep_hang; }catch(_){ S.xh=[]; } veLuong(); },350); }
+["muc_tieu","dau_vao","dau_ra","tieu_chi"].forEach(id=>$("#"+id).addEventListener("input",xemTruoc));
+$("#depts").addEventListener("change",veLuong);
+$("#cong").addEventListener("change",veLuong);
+
+function veLuong(){
+  const chon=chonPhong(), top=S.xh[0];
+  const dsGiao=chon.length?chon.map(id=>S.xh.find(x=>x.phong===id)).filter(Boolean):(top&&top.diem>0?[top]:[]);
+  $("#routeNote").textContent=chon.length?"CEO đã chọn phòng; hệ thống chọn chuyên viên trong phòng.":
+    top&&top.diem>0?"Trợ lý điều phối chọn phòng khớp nhiều từ khoá nhất. Chọn phòng ở bên trái để đổi.":"Chưa đủ thông tin để tự chọn phòng. Viết rõ hơn hoặc chọn phòng.";
+  $("#rank").innerHTML=S.xh.slice(0,3).filter(x=>x.diem>0||chon.includes(x.phong)).map(x=>`<li class="${dsGiao.includes(x)?"top":""}">
+    <div class="h dept-${x.phong}"><span class="dot"></span>${esc(x.ten)}<b>${x.diem} điểm</b></div>
+    <div class="k">${x.khop.length?"Khớp: "+esc(x.khop.join(", ")):"Không khớp từ khoá"}</div>
+    <div class="k">→ ${esc(x.chuyen_vien.ma)} · ${esc(x.chuyen_vien.ten)}${x.chuyen_vien.mac_dinh?" (mặc định, Trưởng phòng xem lại)":""}</div></li>`).join("")||`<li class="k">Chưa có đề xuất.</li>`;
+  const tp=dsGiao.map(x=>x.truong_phong).join(", ")||"Trưởng phòng AI", cv=dsGiao.map(x=>x.chuyen_vien.ma).join(", ")||"chuyên viên AI";
+  const cong=$("#cong").value;
+  $("#steps").innerHTML=[
+    ["CEO giao việc","Phiếu gốc gửi Trợ lý điều phối (TL-DP)",""],
+    ["Trợ lý điều phối tiếp nhận","Chọn phòng: "+(dsGiao.map(x=>x.ten).join(", ")||"chưa xác định"),"tự động"],
+    ["Trưởng phòng AI tiếp nhận",tp+" nhận và chia việc","tự động"],
+    ["Chuyên viên tiếp nhận",cv+" nhận phiếu, sẵn sàng làm","tự động"],
+    ["Làm và nộp nghiệm thu","Chuyên viên làm theo tiêu chí, Trưởng phòng nghiệm thu"+(cong!=="Không có"?` · dừng chờ CEO duyệt (${cong})`:""),""],
+    ["Cộng dồn kết quả","Phiếu Trưởng phòng và phiếu gốc tự chuyển khi mọi phiếu con xong","tự động"],
+    ["CEO nghiệm thu","Trên Bảng CEO hoặc danh sách bên dưới",""]
+  ].map(([b,s,a])=>`<li><b>${esc(b)}</b><span>${esc(s)}</span>${a?`<div class="auto">${a}</div>`:""}</li>`).join("");
+}
+
+// ---------- Gửi ----------
+$("#form").addEventListener("submit",async e=>{
+  e.preventDefault(); $("#err").textContent="";
+  const d=duLieu();
+  const thieu=[[!d.muc_tieu.trim(),"Mục tiêu"],[!d.dau_ra.trim(),"Kết quả cần nhận"],[!d.tieu_chi.length,"Tiêu chí nghiệm thu"]].filter(x=>x[0]).map(x=>x[1]);
+  if(thieu.length){ $("#err").textContent="Còn thiếu: "+thieu.join(", ")+"."; return; }
+  if(S.dang){ $("#err").textContent="Đang tải tệp, đợi xong rồi giao."; return; }
+  const han=$("#han").value;
+  const body={...d, dau_vao:d.dau_vao.trim()||"Không có", uu_tien:S.uu, cong:$("#cong").value, phong:chonPhong(), han:han?new Date(han).toISOString():"",
+    muc_du_lieu:$("#muc_du_lieu").value, ai_lam_ngay:$("#ai_lam_ngay").checked};
+  $("#send").disabled=true;
+  try{
+    const r=await api("/api/giao-viec",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+    toast(`Đã giao ${r.goc} → ${r.dinh_tuyen.map(id=>PH[id].ten_ngan).join(", ")} · ${r.phieu.length} phiếu tự tạo${r.ai_chay&&r.ai_chay.length?" · Claude đang làm "+r.ai_chay.join(", "):""}`);
+    $("#form").reset(); S.tep=[]; S.xh=[]; S.uu="P2"; document.querySelectorAll("#uu button").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.v==="P2")));
+    veTep(); veLuong(); await veDanhSach(); $("#hList").scrollIntoView({behavior:"smooth"});
+  }catch(err){ $("#err").textContent=err.message; }
+  finally{ $("#send").disabled=false; }
+});
+
+// ---------- Việc CEO đã giao ----------
+const lop=t=>t==="Xong"?"done":t==="Vướng"||t==="Chờ CEO duyệt"?"warn":"";
+async function veDanhSach(){
+  let L; try{ L=await api("/api/phieu"); }catch(e){ return; }
+  const goc=L.filter(x=>x.nguoi_giao==="CEO"&&x.nguoi_nhan==="TL-DP").sort((a,b)=>b.tao_luc.localeCompare(a.tao_luc));
+  const con=ma=>L.filter(x=>x.phieu_cha===ma);
+  $("#tree").innerHTML=goc.length?goc.map(g=>{
+    const c=con(g.ma), la=[].concat(...c.map(x=>{ const l=con(x.ma); return l.length?l:[x]; }));
+    const xong=la.filter(x=>x.trang_thai==="Xong").length;
+    return `<li><div class="top"><span class="mono">${esc(g.ma)}</span><span class="tag st ${lop(g.trang_thai)}">${esc(g.trang_thai)}</span><span class="tag">${esc(g.uu_tien)}</span>
+      ${g.qua_han&&g.trang_thai!=="Xong"?`<span class="tag err">Quá hạn</span>`:""}<span class="sub" style="margin:0">Hạn ${new Date(g.han).toLocaleString("vi-VN",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"})}</span>
+      <h3>${esc(g.muc_tieu)}</h3>
+      <div class="prog" role="img" aria-label="${xong}/${la.length} phiếu thực hiện đã xong"><i style="width:${la.length?Math.round(xong/la.length*100):0}%"></i></div><span class="sub" style="margin:0">${xong}/${la.length} phiếu thực hiện xong</span>
+      ${g.tep&&g.tep.length?`<span class="sub" style="margin:0">· ${g.tep.map(t=>`<a href="/api/tep/${esc(t.id)}/${encodeURIComponent(t.ten)}">${esc(t.ten)}</a>`).join(", ")}</span>`:""}</div>
+      <ul class="sub-tree">${c.map(x=>`<li class="dept-${esc(x.phong)}"><span class="dot"></span><span class="mono">${esc(x.ma)}</span>${esc(PH[x.phong]?.ten_ngan||"")} · ${esc(x.nguoi_nhan)}<span class="tag st ${lop(x.trang_thai)}">${esc(x.trang_thai)}</span>
+        ${con(x.ma).map(l=>`→ <a class="mono" href="/phong.html?id=${esc(l.phong)}">${esc(l.ma)}</a> ${esc(l.nguoi_nhan)} <span class="tag st ${lop(l.trang_thai)}">${esc(l.trang_thai)}</span>`).join(" ")}</li>`).join("")}</ul>
+      ${g.trang_thai==="Chờ nghiệm thu"?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center"><input aria-label="Lý do trả lại ${esc(g.ma)}" data-ly="${esc(g.ma)}" placeholder="Lý do nếu trả lại" style="flex:1;min-width:200px;min-height:40px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--bg)">
+        <button type="button" class="btn primary" data-hd="nghiem_thu" data-ma="${esc(g.ma)}">Nghiệm thu đạt</button><button type="button" class="btn" data-hd="tra_lai" data-ma="${esc(g.ma)}">Trả lại</button></div>`:""}</li>`;
+  }).join(""):`<li class="sub" style="border:0;padding:0">Chưa giao việc nào.</li>`;
+}
+$("#tree").addEventListener("click",async e=>{
+  const b=e.target.closest("[data-hd]"); if(!b) return;
+  const ma=b.dataset.ma, ly=document.querySelector(`[data-ly="${CSS.escape(ma)}"]`);
+  b.disabled=true;
+  try{ await api(`/api/phieu/${ma}/hanh-dong`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({hanh_dong:b.dataset.hd,ai:"CEO",ly_do:ly?ly.value:""})}); toast(ma+": đã cập nhật"); await veDanhSach(); }
+  catch(err){ toast(err.message,true); b.disabled=false; }
+});
+
+veLuong(); veTep(); await veDanhSach();
+setInterval(()=>{ if(!document.activeElement||!document.activeElement.closest("#tree")) veDanhSach(); },30000);
+})();
+</script>
+</body>
+</html>

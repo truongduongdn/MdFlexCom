@@ -1,0 +1,1330 @@
+{
+  "nguon": "Sinh từ public/index.html (DEPTS, FLOWS) và config/canvas.json ngày 24/11/2026. Thẻ vị trí AI là ĐỀ XUẤT, chờ Trưởng phòng và CEO duyệt.",
+  "moc": [
+    "Thành lập",
+    "G0",
+    "G1",
+    "G2",
+    "G3"
+  ],
+  "quy_dinh_chung": "HC-v1.0",
+  "sla": {
+    "nhan_phut": 15,
+    "P1_gio": 2,
+    "P2_gio": 24,
+    "P3_gio": 72,
+    "canh_bao_ty_le": 0.8,
+    "tra_lai_toi_da": 2
+  },
+  "cong_ceo": [
+    "Đăng công khai",
+    "Gửi ra ngoài doanh nghiệp",
+    "Chi tiền, đặt mua, ký với bên thứ ba",
+    "Xoá hoặc ghi đè dữ liệu gốc",
+    "Đổi quy định hoặc quyền"
+  ],
+  "vi_tri_chung": [
+    {
+      "ma": "CEO",
+      "ten": "CEO (người thật)"
+    },
+    {
+      "ma": "TL-DP",
+      "ten": "Trợ lý điều phối (AI)"
+    },
+    {
+      "ma": "KSV",
+      "ten": "Kiểm soát viên (AI)"
+    }
+  ],
+  "phong": [
+    {
+      "id": "kd",
+      "ma": "KD",
+      "ten": "Kinh doanh",
+      "ten_ngan": "Kinh doanh",
+      "tang": "T02",
+      "tu_khoa": [
+        "kinh doanh",
+        "bán hàng",
+        "bán",
+        "báo giá",
+        "hợp đồng khách",
+        "ký hợp đồng",
+        "doanh thu",
+        "pipeline",
+        "khách hàng",
+        "đối tác",
+        "đại lý",
+        "phân phối",
+        "hoa hồng",
+        "gia hạn",
+        "bán thêm",
+        "customer success",
+        "chăm sóc khách",
+        "rời bỏ",
+        "chuỗi bệnh viện"
+      ],
+      "quy_che": "QC-KD-v1.0 (nháp)",
+      "truong_phong": {
+        "nguoi_that": "VP Sales",
+        "so_nguoi": [
+          0,
+          1,
+          1,
+          1,
+          1
+        ],
+        "ai": {
+          "ma": "KD-TP",
+          "ten": "Trưởng phòng Kinh doanh (AI)",
+          "nhiem_vu": "Nhận phiếu cấp phòng, chia cho chuyên viên, nghiệm thu, ký bàn giao sang phòng khác",
+          "quyen": "Duyệt hoặc trả lại đầu ra; mở Đề xuất lên Trợ lý điều phối"
+        }
+      },
+      "chuc_nang": "Biến giá trị của MdFlex thành doanh thu và giữ khách hàng dài hạn.",
+      "nhiem_vu": [
+        "Xác định và ưu tiên phân khúc: phòng khám đa khoa trước, chuyên khoa sau, chuỗi từ năm 2",
+        "Bán trực tiếp hai nhịp: nhanh cho phòng khám, dài hạn 6–12 tháng cho chuỗi",
+        "Tuyển, đào tạo và quản lý đối tác phân phối",
+        "Customer Success: đón khách sau go-live, kiểm tra định kỳ, gia hạn, bán thêm module",
+        "Lập pipeline tuần và dự báo doanh thu tháng cùng Kế toán",
+        "Chuyển yêu cầu tính năng của khách sang Phát triển PM kèm giá trị hợp đồng"
+      ],
+      "muc_tieu": "Đạt chỉ tiêu khách hàng, doanh thu và tỷ lệ qua đối tác tại G2, G3",
+      "su_menh": "Bán trực tiếp; quản lý đối tác phân phối; Customer Success: đón khách, kiểm tra định kỳ, gia hạn, bán thêm.",
+      "dau_ra": "Pipeline tuần; dự báo doanh thu tháng; báo cáo sức khoẻ khách hàng quý.",
+      "kpi": "Số khách hàng và doanh thu năm đầu (tham khảo 25–30 khách, ~20 tỷ); % doanh thu qua đối tác (tham khảo 30%); số đối tác (tham khảo 10 tại N0+9).",
+      "to": [
+        {
+          "ten": "Bán hàng trực tiếp",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Nhân viên kinh doanh",
+              "so_nguoi": [
+                0,
+                1,
+                2,
+                4,
+                7
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "KD-BH-01",
+              "ten": "Chuyên viên AI Bán hàng",
+              "tu_khoa": [
+                "lead",
+                "báo giá",
+                "bán",
+                "khách hàng mới",
+                "chấm điểm"
+              ],
+              "nhiem_vu": [
+                "Chấm điểm và xếp ưu tiên lead nhận từ Marketing",
+                "Soạn nháp báo giá theo bảng giá đang hiệu lực"
+              ],
+              "dau_vao": "Lead đạt chuẩn, bảng giá, ghi chú cuộc gọi",
+              "dau_ra": "Lead đã chấm điểm; nháp báo giá chờ nhân viên kinh doanh duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Mỗi lead có điểm và lý do",
+                "Báo giá đúng bảng giá đang hiệu lực"
+              ],
+              "cong_cu_duoc_phep": [
+                "doc_crm",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_email_khach",
+                "ky_hop_dong",
+                "doi_gia"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "KD-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Đối tác & kênh",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Quản lý đối tác",
+              "so_nguoi": [
+                0,
+                0,
+                1,
+                2,
+                3
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "KD-DT-01",
+              "ten": "Chuyên viên AI Đối tác",
+              "tu_khoa": [
+                "đối tác",
+                "đại lý",
+                "phân phối",
+                "hoa hồng"
+              ],
+              "nhiem_vu": [
+                "Theo dõi pipeline và hoa hồng của đối tác",
+                "Soạn tài liệu đào tạo đối tác"
+              ],
+              "dau_vao": "Danh sách đối tác, hợp đồng đối tác",
+              "dau_ra": "Báo cáo đối tác tuần; bộ tài liệu đào tạo nháp",
+              "tieu_chi_nghiem_thu": [
+                "Số liệu khớp CRM",
+                "Có ngày cập nhật"
+              ],
+              "cong_cu_duoc_phep": [
+                "doc_crm",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_ra_ngoai",
+                "cam_ket_hoa_hong"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "KD-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Customer Success",
+          "de_xuat": true,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "VP Customer Success",
+              "so_nguoi": [
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            },
+            {
+              "ten": "Chuyên viên CS",
+              "so_nguoi": [
+                0,
+                0,
+                0,
+                2,
+                4
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "KD-CS-01",
+              "ten": "Chuyên viên AI Customer Success",
+              "tu_khoa": [
+                "customer success",
+                "chăm sóc",
+                "gia hạn",
+                "go-live",
+                "sức khoẻ khách hàng",
+                "rời bỏ",
+                "bán thêm"
+              ],
+              "nhiem_vu": [
+                "Lập lịch kiểm tra sau go-live: 7 ngày, 30 ngày, hằng quý",
+                "Tính điểm sức khoẻ khách hàng, cảnh báo nguy cơ rời bỏ"
+              ],
+              "dau_vao": "Biên bản go-live, nhật ký hỗ trợ",
+              "dau_ra": "Lịch chăm sóc; báo cáo sức khoẻ khách hàng",
+              "tieu_chi_nghiem_thu": [
+                "Cảnh báo kèm bằng chứng",
+                "Không dùng dữ liệu bệnh nhân"
+              ],
+              "cong_cu_duoc_phep": [
+                "doc_crm",
+                "doc_ticket",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_tin_khach",
+                "doc_du_lieu_benh_nhan"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "KD-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mkt",
+      "ma": "MKT",
+      "ten": "Marketing – Truyền thông",
+      "ten_ngan": "Marketing",
+      "tang": "T03",
+      "tu_khoa": [
+        "marketing",
+        "truyền thông",
+        "website",
+        "seo",
+        "quảng cáo",
+        "từ khoá",
+        "nội dung",
+        "bài viết",
+        "viết bài",
+        "webinar",
+        "sự kiện",
+        "hội thảo",
+        "case study",
+        "thương hiệu",
+        "nhận diện",
+        "logo",
+        "pr",
+        "báo chí",
+        "thông cáo",
+        "mạng xã hội",
+        "fanpage",
+        "lead",
+        "chiến dịch"
+      ],
+      "quy_che": "QC-MKT-v1.0 (nháp)",
+      "truong_phong": {
+        "nguoi_that": "Trưởng phòng Marketing",
+        "so_nguoi": [
+          0,
+          1,
+          1,
+          1,
+          1
+        ],
+        "ai": {
+          "ma": "MKT-TP",
+          "ten": "Trưởng phòng Marketing (AI)",
+          "nhiem_vu": "Nhận phiếu cấp phòng, chia cho chuyên viên, nghiệm thu, ký bàn giao sang phòng khác",
+          "quyen": "Duyệt hoặc trả lại đầu ra; mở Đề xuất lên Trợ lý điều phối"
+        }
+      },
+      "chuc_nang": "Tạo nhận biết thương hiệu MdFlex và nguồn khách tiềm năng đạt chuẩn cho Kinh doanh.",
+      "nhiem_vu": [
+        "Vận hành website MDflex.com, SEO, quảng cáo số theo bộ nhận diện",
+        "Sản xuất nội dung chứng minh giá trị bằng số liệu ROI",
+        "Tổ chức sự kiện, webinar cho phòng khám và đối tác",
+        "Làm case study từ khách thử nghiệm (tham khảo 5 case)",
+        "Giữ nhận diện thương hiệu nhất quán trên mọi điểm tiếp xúc"
+      ],
+      "muc_tieu": "Đủ lead đạt chuẩn để Kinh doanh đạt chỉ tiêu; có case study đầu tiên tại G1",
+      "su_menh": "Website MDflex.com, SEO, nội dung, quảng cáo số; sự kiện, webinar; case study khách hàng.",
+      "dau_ra": "Kế hoạch nội dung tháng; báo cáo lead tuần; case study.",
+      "kpi": "Số lead đạt chuẩn chuyển Kinh doanh; chi phí mỗi lead; số case study từ khách thử nghiệm (tham khảo 5).",
+      "to": [
+        {
+          "ten": "Digital & SEO",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Chuyên viên marketing",
+              "so_nguoi": [
+                0,
+                1,
+                1,
+                1,
+                2
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "MKT-DS-01",
+              "ten": "Chuyên viên AI Digital & SEO",
+              "tu_khoa": [
+                "seo",
+                "website",
+                "quảng cáo",
+                "từ khoá",
+                "chiến dịch",
+                "lead",
+                "kênh"
+              ],
+              "nhiem_vu": [
+                "Nghiên cứu từ khoá, đề xuất bài SEO",
+                "Báo cáo hiệu quả kênh và chi phí mỗi lead"
+              ],
+              "dau_vao": "Mục tiêu chiến dịch, số liệu kênh",
+              "dau_ra": "Kế hoạch từ khoá; báo cáo lead tuần",
+              "tieu_chi_nghiem_thu": [
+                "Số liệu có nguồn và ngày",
+                "Đúng bộ nhận diện"
+              ],
+              "cong_cu_duoc_phep": [
+                "web_search",
+                "doc_analytics",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "dang_bai",
+                "chi_tien_quang_cao"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "MKT-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Nội dung & sự kiện",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Chuyên viên marketing",
+              "so_nguoi": [
+                0,
+                0,
+                1,
+                1,
+                2
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "MKT-ND-01",
+              "ten": "Chuyên viên AI Nội dung",
+              "tu_khoa": [
+                "nội dung",
+                "bài viết",
+                "viết bài",
+                "webinar",
+                "case study",
+                "kịch bản",
+                "sự kiện"
+              ],
+              "nhiem_vu": [
+                "Soạn nháp bài viết, kịch bản webinar, case study",
+                "Kiểm tra số liệu ROI trước khi chuyển duyệt"
+              ],
+              "dau_vao": "Chủ đề, dữ liệu khách đã đồng ý công bố",
+              "dau_ra": "Bản nháp nội dung chờ Trưởng phòng duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Mọi số liệu có nguồn",
+                "Case study có xác nhận đồng ý của khách"
+              ],
+              "cong_cu_duoc_phep": [
+                "web_search",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "dang_bai",
+                "gui_ra_ngoai"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "MKT-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Thương hiệu & PR",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Chuyên viên marketing",
+              "so_nguoi": [
+                0,
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "MKT-TH-01",
+              "ten": "Chuyên viên AI Thương hiệu",
+              "tu_khoa": [
+                "thương hiệu",
+                "nhận diện",
+                "logo",
+                "pr",
+                "báo chí",
+                "thông cáo",
+                "ấn phẩm"
+              ],
+              "nhiem_vu": [
+                "Rà soát ấn phẩm theo bộ nhận diện",
+                "Soạn nháp thông cáo báo chí"
+              ],
+              "dau_vao": "Ấn phẩm, config/thuong-hieu.json",
+              "dau_ra": "Bảng kiểm thương hiệu; nháp thông cáo",
+              "tieu_chi_nghiem_thu": [
+                "Màu, font, logo đúng quy định",
+                "Không có thông tin chưa công bố"
+              ],
+              "cong_cu_duoc_phep": [
+                "doc_tai_lieu",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "dang_bai",
+                "gui_bao_chi"
+              ],
+              "sla": "4 giờ",
+              "bao_cao_cho": "MKT-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pt",
+      "ma": "PTPM",
+      "ten": "Phát triển phần mềm",
+      "ten_ngan": "Phát triển PM",
+      "tang": "T04",
+      "tu_khoa": [
+        "phần mềm",
+        "sản phẩm",
+        "tính năng",
+        "lỗi",
+        "bug",
+        "his",
+        "emr",
+        "lis",
+        "pms",
+        "pacs",
+        "sprint",
+        "phát hành",
+        "user story",
+        "kiểm thử",
+        "qa",
+        "test",
+        "devops",
+        "cloud",
+        "máy chủ",
+        "bảo mật",
+        "triển khai",
+        "go-live",
+        "tích hợp",
+        "ticket",
+        "hỗ trợ kỹ thuật",
+        "sự cố",
+        "module ai",
+        "tuân thủ"
+      ],
+      "quy_che": "QC-PTPM-v1.0 (nháp)",
+      "truong_phong": {
+        "nguoi_that": "CTO",
+        "so_nguoi": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "ai": {
+          "ma": "PTPM-TP",
+          "ten": "Trưởng phòng Phát triển PM (AI)",
+          "nhiem_vu": "Nhận phiếu cấp phòng, chia cho chuyên viên, nghiệm thu, ký bàn giao sang phòng khác",
+          "quyen": "Duyệt hoặc trả lại đầu ra; mở Đề xuất lên Trợ lý điều phối"
+        }
+      },
+      "chuc_nang": "Tạo ra và giữ chất lượng của giá trị đề xuất: sản phẩm tích hợp, tuân thủ, triển khai nhanh.",
+      "nhiem_vu": [
+        "Hoàn thiện HIS, EMR, PMS đạt tiêu chí N0; phát triển LIS, PACS, module AI sau N0",
+        "Phát triển theo sprint 2 tuần, QA và kiểm tra tuân thủ quy định y tế",
+        "Vận hành cloud, bảo mật, bảo vệ dữ liệu bệnh nhân",
+        "Triển khai cho khách trong 90 ngày, tích hợp thiết bị y tế",
+        "Hỗ trợ 3 cấp; 24/7 từ N0+12 tháng",
+        "Chuyên gia y tế bảo đảm sản phẩm đúng nghiệp vụ lâm sàng"
+      ],
+      "muc_tieu": "Qua cổng G0 đúng hạn; % khách go-live đúng 90 ngày; thời gian xử lý sự cố theo cấp",
+      "su_menh": "Hoàn thiện sản phẩm đến N0; phát triển theo sprint 2 tuần; QA và tuân thủ; cloud, bảo mật; triển khai 90 ngày; hỗ trợ 24/7 ba cấp.",
+      "dau_ra": "Bản phát hành mỗi sprint; tiến độ triển khai từng khách hàng; báo cáo sự cố.",
+      "kpi": "Sản phẩm đạt tiêu chí N0 (HIS, EMR, PMS); module AI sau N0; % khách go-live đúng 90 ngày; thời gian xử lý sự cố theo cấp.",
+      "to": [
+        {
+          "ten": "Sản phẩm & y khoa",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "PO / BA",
+              "so_nguoi": [
+                0,
+                1,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "ten": "Chuyên gia y tế",
+              "so_nguoi": [
+                0,
+                1,
+                1,
+                2,
+                3
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "PTPM-SP-01",
+              "ten": "Chuyên viên AI Sản phẩm",
+              "tu_khoa": [
+                "sản phẩm",
+                "tính năng",
+                "user story",
+                "yêu cầu",
+                "y khoa",
+                "tuân thủ",
+                "quy định y tế"
+              ],
+              "nhiem_vu": [
+                "Viết user story và tiêu chí nghiệm thu từ yêu cầu khách",
+                "Đối chiếu quy định y tế với tính năng"
+              ],
+              "dau_vao": "Yêu cầu tính năng, ý kiến chuyên gia y tế",
+              "dau_ra": "User story; danh sách điểm tuân thủ cần kiểm",
+              "tieu_chi_nghiem_thu": [
+                "Tiêu chí nghiệm thu đo được",
+                "Ghi rõ văn bản quy định căn cứ"
+              ],
+              "cong_cu_duoc_phep": [
+                "doc_tai_lieu",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "doi_uu_tien_sprint",
+                "doc_du_lieu_benh_nhan"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "PTPM-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Dev · QA · DevOps",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Tech Lead",
+              "so_nguoi": [
+                0,
+                1,
+                1,
+                2,
+                2
+              ]
+            },
+            {
+              "ten": "Lập trình viên",
+              "so_nguoi": [
+                0,
+                6,
+                6,
+                8,
+                12
+              ]
+            },
+            {
+              "ten": "QA / Tester",
+              "so_nguoi": [
+                0,
+                2,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "ten": "DevOps",
+              "so_nguoi": [
+                0,
+                1,
+                1,
+                2,
+                2
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "PTPM-QA-01",
+              "ten": "Chuyên viên AI QA",
+              "tu_khoa": [
+                "kiểm thử",
+                "test",
+                "qa",
+                "lỗi",
+                "bug",
+                "phát hành",
+                "build"
+              ],
+              "nhiem_vu": [
+                "Sinh ca kiểm thử từ user story",
+                "Tổng hợp kết quả kiểm thử và lỗi theo bản phát hành"
+              ],
+              "dau_vao": "User story, bản build",
+              "dau_ra": "Bộ ca kiểm thử; báo cáo kiểm thử",
+              "tieu_chi_nghiem_thu": [
+                "Phủ mọi tiêu chí nghiệm thu",
+                "Lỗi có bước tái hiện"
+              ],
+              "cong_cu_duoc_phep": [
+                "doc_repo",
+                "chay_kiem_thu_moi_truong_thu",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "trien_khai_production",
+                "sua_du_lieu_goc"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "PTPM-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Triển khai & hỗ trợ",
+          "de_xuat": true,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Trưởng nhóm triển khai & hỗ trợ",
+              "so_nguoi": [
+                0,
+                0,
+                1,
+                1,
+                1
+              ]
+            },
+            {
+              "ten": "Trưởng nhóm hỗ trợ",
+              "so_nguoi": [
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            },
+            {
+              "ten": "Chuyên viên triển khai",
+              "so_nguoi": [
+                0,
+                1,
+                1,
+                3,
+                6
+              ]
+            },
+            {
+              "ten": "Hỗ trợ cấp 1",
+              "so_nguoi": [
+                0,
+                0,
+                2,
+                5,
+                6
+              ]
+            },
+            {
+              "ten": "Hỗ trợ cấp 2",
+              "so_nguoi": [
+                0,
+                0,
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "PTPM-HT-01",
+              "ten": "Chuyên viên AI Hỗ trợ & triển khai",
+              "tu_khoa": [
+                "triển khai",
+                "go-live",
+                "ticket",
+                "hỗ trợ",
+                "sự cố",
+                "tích hợp"
+              ],
+              "nhiem_vu": [
+                "Phân loại ticket hỗ trợ cấp 1, gợi ý cách xử lý",
+                "Theo dõi kế hoạch triển khai 90 ngày của từng khách"
+              ],
+              "dau_vao": "Ticket, kế hoạch triển khai",
+              "dau_ra": "Ticket đã phân loại; báo cáo tiến độ triển khai",
+              "tieu_chi_nghiem_thu": [
+                "Ticket P1 báo ngay Trưởng nhóm",
+                "Tiến độ ghi theo bước x/y"
+              ],
+              "cong_cu_duoc_phep": [
+                "doc_ticket",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "truy_cap_he_thong_khach",
+                "doc_du_lieu_benh_nhan"
+              ],
+              "sla": "2 giờ",
+              "bao_cao_cho": "PTPM-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kt",
+      "ma": "KT",
+      "ten": "Kế toán",
+      "ten_ngan": "Kế toán",
+      "tang": "T05",
+      "tu_khoa": [
+        "kế toán",
+        "thuế",
+        "hoá đơn",
+        "hóa đơn",
+        "công nợ",
+        "thu tiền",
+        "ngân sách",
+        "dòng tiền",
+        "chi phí",
+        "tài chính",
+        "lợi nhuận",
+        "cac",
+        "ltv",
+        "ebitda",
+        "báo cáo tài chính",
+        "thanh toán",
+        "sổ sách",
+        "chứng từ",
+        "đề nghị chi"
+      ],
+      "quy_che": "QC-KT-v1.0 (nháp)",
+      "truong_phong": {
+        "nguoi_that": "Kế toán trưởng",
+        "so_nguoi": [
+          0,
+          1,
+          1,
+          1,
+          1
+        ],
+        "ai": {
+          "ma": "KT-TP",
+          "ten": "Trưởng phòng Kế toán (AI)",
+          "nhiem_vu": "Nhận phiếu cấp phòng, chia cho chuyên viên, nghiệm thu, ký bàn giao sang phòng khác",
+          "quyen": "Duyệt hoặc trả lại đầu ra; mở Đề xuất lên Trợ lý điều phối"
+        }
+      },
+      "chuc_nang": "Giữ sức khoẻ tài chính: kiểm soát chi phí, dòng tiền và đo hiệu quả mô hình kinh doanh.",
+      "nhiem_vu": [
+        "Hạch toán, thuế, hoá đơn",
+        "Theo dõi công nợ và doanh thu riêng 5 dòng: license, triển khai, bảo trì, module, phần cứng",
+        "Lập ngân sách quý theo cơ cấu chi phí Canvas",
+        "Dự báo dòng tiền 13 tuần, cảnh báo khi chu kỳ bán dài làm căng dòng tiền",
+        "Đo biên lợi nhuận gộp, CAC, LTV, số ngày thu tiền"
+      ],
+      "muc_tieu": "Biên lợi nhuận gộp 75–80%, CAC ≤ 150 triệu, đủ tiền vận hành qua giai đoạn Ra mắt",
+      "su_menh": "Hạch toán, thuế, hoá đơn; công nợ theo 5 dòng doanh thu; ngân sách và dòng tiền.",
+      "dau_ra": "Báo cáo tài chính tháng; dự báo dòng tiền 13 tuần; báo cáo theo dòng doanh thu.",
+      "kpi": "Biên lợi nhuận gộp (tham khảo 75–80%); CAC (≤ 150 triệu); số ngày thu tiền; EBITDA (15–20% năm thứ 3).",
+      "to": [
+        {
+          "ten": "Tổng hợp & thuế",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Kế toán viên",
+              "so_nguoi": [
+                0,
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "KT-TH-01",
+              "ten": "Chuyên viên AI Tổng hợp & thuế",
+              "tu_khoa": [
+                "thuế",
+                "sổ sách",
+                "chứng từ",
+                "đối chiếu",
+                "kê khai"
+              ],
+              "nhiem_vu": [
+                "Đối chiếu chứng từ với sổ sách",
+                "Nhắc lịch kê khai thuế"
+              ],
+              "dau_vao": "Chứng từ, sổ sách",
+              "dau_ra": "Bảng đối chiếu; lịch thuế tháng",
+              "tieu_chi_nghiem_thu": [
+                "Chênh lệch có giải thích",
+                "Không tự hạch toán"
+              ],
+              "cong_cu_duoc_phep": [
+                "doc_so_sach",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "chi_tien",
+                "ky_xac_nhan",
+                "sua_so_sach"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "KT-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Công nợ & hoá đơn",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Kế toán viên",
+              "so_nguoi": [
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "KT-CN-01",
+              "ten": "Chuyên viên AI Công nợ & hoá đơn",
+              "tu_khoa": [
+                "hoá đơn",
+                "hóa đơn",
+                "công nợ",
+                "thu tiền",
+                "thanh toán"
+              ],
+              "nhiem_vu": [
+                "Lập nháp hoá đơn theo lịch thanh toán hợp đồng",
+                "Theo dõi tuổi nợ theo 5 dòng doanh thu"
+              ],
+              "dau_vao": "Hợp đồng đã ký, lịch thanh toán",
+              "dau_ra": "Nháp hoá đơn chờ KTT duyệt; báo cáo tuổi nợ",
+              "tieu_chi_nghiem_thu": [
+                "Đúng dòng doanh thu",
+                "Hoá đơn đợt 1 trong 2 ngày"
+              ],
+              "cong_cu_duoc_phep": [
+                "doc_so_sach",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "phat_hanh_hoa_don",
+                "gui_email_khach"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "KT-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Kế hoạch tài chính",
+          "de_xuat": false,
+          "kiem": "Kế toán trưởng kiêm",
+          "vi_tri": [],
+          "ai": [
+            {
+              "ma": "KT-KH-01",
+              "ten": "Chuyên viên AI Kế hoạch tài chính",
+              "tu_khoa": [
+                "dòng tiền",
+                "ngân sách",
+                "cac",
+                "ltv",
+                "lợi nhuận",
+                "dự báo",
+                "chi phí"
+              ],
+              "nhiem_vu": [
+                "Cập nhật dự báo dòng tiền 13 tuần",
+                "Tính CAC, LTV, biên lợi nhuận gộp"
+              ],
+              "dau_vao": "Pipeline, ngân sách, số liệu chi",
+              "dau_ra": "Dự báo dòng tiền; bảng chỉ số tài chính",
+              "tieu_chi_nghiem_thu": [
+                "Ghi rõ giả định",
+                "Cảnh báo khi dòng tiền dưới ngưỡng"
+              ],
+              "cong_cu_duoc_phep": [
+                "doc_so_sach",
+                "doc_crm",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "chi_tien",
+                "doi_ngan_sach"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "KT-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ns",
+      "ma": "NSHC",
+      "ten": "Nhân sự – Hành chính",
+      "ten_ngan": "NS–HC",
+      "tang": "T06",
+      "tu_khoa": [
+        "nhân sự",
+        "tuyển",
+        "tuyển dụng",
+        "ứng viên",
+        "phỏng vấn",
+        "jd",
+        "mô tả công việc",
+        "đào tạo",
+        "onboarding",
+        "lương",
+        "phúc lợi",
+        "bảo hiểm",
+        "nghỉ việc",
+        "hành chính",
+        "văn phòng",
+        "pháp chế",
+        "pháp lý",
+        "giấy phép",
+        "đăng ký kinh doanh",
+        "điều lệ",
+        "nhãn hiệu",
+        "hợp đồng lao động",
+        "hợp đồng mẫu"
+      ],
+      "quy_che": "QC-NSHC-v1.0 (nháp)",
+      "truong_phong": {
+        "nguoi_that": "Trưởng phòng NS–HC",
+        "so_nguoi": [
+          0,
+          1,
+          1,
+          1,
+          1
+        ],
+        "ai": {
+          "ma": "NSHC-TP",
+          "ten": "Trưởng phòng NS–HC (AI)",
+          "nhiem_vu": "Nhận phiếu cấp phòng, chia cho chuyên viên, nghiệm thu, ký bàn giao sang phòng khác",
+          "quyen": "Duyệt hoặc trả lại đầu ra; mở Đề xuất lên Trợ lý điều phối"
+        }
+      },
+      "chuc_nang": "Bảo đảm nguồn lực con người, pháp lý và hành chính để công ty vận hành đúng luật và đúng tiến độ.",
+      "nhiem_vu": [
+        "Tuyển đủ người theo thứ tự ưu tiên và điều kiện kích hoạt của từng giai đoạn",
+        "Đào tạo, đánh giá, giữ chân nhân sự chủ chốt",
+        "Quản lý lương, phúc lợi, bảo hiểm; giữ chi phí nhân sự ≤ 45% tổng chi",
+        "Pháp chế: hồ sơ pháp lý công ty, nhãn hiệu, hợp đồng khách hàng và đối tác",
+        "Hành chính trụ sở TP.HCM và văn phòng Hà Nội"
+      ],
+      "muc_tieu": "Đủ 21 nhân sự trước N0; hồ sơ pháp lý đúng hạn; tỷ lệ nghỉ việc thấp",
+      "su_menh": "Tuyển dụng, đào tạo; lương, phúc lợi; hành chính 2 văn phòng; pháp chế: hồ sơ pháp lý công ty, thương hiệu, hợp đồng.",
+      "dau_ra": "Báo cáo tuyển dụng tuần; bảng lương tháng; danh mục hồ sơ pháp lý.",
+      "kpi": "Đủ nhân sự chủ chốt trước N0; chi phí nhân sự ≤ 45% tổng chi (tham khảo); tỷ lệ nghỉ việc; hồ sơ pháp lý đúng hạn.",
+      "to": [
+        {
+          "ten": "Tuyển dụng, đào tạo",
+          "de_xuat": false,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Chuyên viên tuyển dụng",
+              "so_nguoi": [
+                0,
+                0,
+                0,
+                1,
+                1
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "NSHC-TD-01",
+              "ten": "Chuyên viên AI Tuyển dụng",
+              "tu_khoa": [
+                "tuyển",
+                "ứng viên",
+                "phỏng vấn",
+                "jd",
+                "mô tả công việc",
+                "đào tạo"
+              ],
+              "nhiem_vu": [
+                "Soạn mô tả công việc theo vị trí và giai đoạn",
+                "Sàng lọc hồ sơ theo tiêu chí đã duyệt"
+              ],
+              "dau_vao": "Phiếu nhu cầu nhân sự, tiêu chí tuyển",
+              "dau_ra": "JD nháp; danh sách ứng viên đạt tiêu chí",
+              "tieu_chi_nghiem_thu": [
+                "Đúng thứ tự ưu tiên tuyển",
+                "Không dùng tiêu chí phân biệt đối xử"
+              ],
+              "cong_cu_duoc_phep": [
+                "doc_tai_lieu",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "gui_thu_ung_vien",
+                "moi_phong_van"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "NSHC-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Lương & phúc lợi",
+          "de_xuat": false,
+          "kiem": "Trưởng phòng kiêm",
+          "vi_tri": [],
+          "ai": [
+            {
+              "ma": "NSHC-LP-01",
+              "ten": "Chuyên viên AI Lương & phúc lợi",
+              "tu_khoa": [
+                "lương",
+                "phúc lợi",
+                "bảo hiểm",
+                "chấm công"
+              ],
+              "nhiem_vu": [
+                "Kiểm tra bảng lương nháp theo chính sách",
+                "Theo dõi tỷ lệ chi phí nhân sự trên tổng chi"
+              ],
+              "dau_vao": "Chấm công, chính sách lương (chỉ thông tin mô tả)",
+              "dau_ra": "Bảng kiểm lương; báo cáo chi phí nhân sự",
+              "tieu_chi_nghiem_thu": [
+                "Chỉ dùng số tổng hợp",
+                "Dữ liệu cá nhân không vào ngữ cảnh"
+              ],
+              "cong_cu_duoc_phep": [
+                "doc_tong_hop_nhan_su",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "doc_luong_ca_nhan",
+                "chi_tien"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "NSHC-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        },
+        {
+          "ten": "Hành chính, pháp chế",
+          "de_xuat": true,
+          "kiem": null,
+          "vi_tri": [
+            {
+              "ten": "Hành chính – pháp chế",
+              "so_nguoi": [
+                0,
+                0,
+                1,
+                1,
+                2
+              ]
+            }
+          ],
+          "ai": [
+            {
+              "ma": "NSHC-PC-01",
+              "ten": "Chuyên viên AI Hành chính & pháp chế",
+              "tu_khoa": [
+                "pháp lý",
+                "pháp chế",
+                "hợp đồng",
+                "giấy phép",
+                "đăng ký",
+                "nhãn hiệu",
+                "hành chính",
+                "văn phòng"
+              ],
+              "nhiem_vu": [
+                "Theo dõi danh mục hồ sơ pháp lý và hạn gia hạn",
+                "Soạn nháp hợp đồng theo mẫu đã duyệt"
+              ],
+              "dau_vao": "Danh mục hồ sơ, mẫu hợp đồng",
+              "dau_ra": "Lịch hạn pháp lý; nháp hợp đồng chờ duyệt",
+              "tieu_chi_nghiem_thu": [
+                "Nhắc trước 30 ngày",
+                "Chỉ dùng mẫu đang hiệu lực"
+              ],
+              "cong_cu_duoc_phep": [
+                "doc_tai_lieu",
+                "ghi_tep_nhap"
+              ],
+              "cam": [
+                "ky_hop_dong",
+                "nop_ho_so"
+              ],
+              "sla": "1 ngày",
+              "bao_cao_cho": "NSHC-TP",
+              "kpi": [
+                "ty_le_dung_sla",
+                "ty_le_dat_nghiem_thu_lan_dau"
+              ],
+              "de_xuat": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ban_giao": [
+    {
+      "tu": "mkt",
+      "den": "kd",
+      "ten": "Lead đạt chuẩn",
+      "noi_dung": "Tên cơ sở y tế, quy mô, nhu cầu, nguồn lead",
+      "cam_ket": "Liên hệ trong 1 ngày làm việc"
+    },
+    {
+      "tu": "kd",
+      "den": "kt",
+      "ten": "Hợp đồng đã ký",
+      "noi_dung": "Hợp đồng, lịch thanh toán, dòng doanh thu",
+      "cam_ket": "Hoá đơn đợt 1 trong 2 ngày"
+    },
+    {
+      "tu": "kd",
+      "den": "pt",
+      "ten": "Hợp đồng đã ký",
+      "noi_dung": "Module mua, mốc go-live, đầu mối khách hàng",
+      "cam_ket": "Kế hoạch triển khai 90 ngày trong 5 ngày"
+    },
+    {
+      "tu": "pt",
+      "den": "kd",
+      "ten": "Go-live",
+      "noi_dung": "Biên bản nghiệm thu, tài khoản, tình trạng đào tạo",
+      "cam_ket": "CS gọi kiểm tra trong 7 ngày"
+    },
+    {
+      "tu": "kd",
+      "den": "pt",
+      "ten": "Yêu cầu tính năng",
+      "noi_dung": "Mô tả, khách hàng, giá trị hợp đồng",
+      "cam_ket": "Xếp lịch trong sprint kế tiếp"
+    },
+    {
+      "tu": "kd",
+      "den": "mkt",
+      "ten": "Khách hàng thành công",
+      "noi_dung": "Đồng ý làm case study, số liệu trước/sau",
+      "cam_ket": "Xuất bản trong 30 ngày"
+    },
+    {
+      "tu": "*",
+      "den": "ns",
+      "ten": "Nhu cầu nhân sự",
+      "noi_dung": "Vị trí, mô tả công việc, ngày cần người",
+      "cam_ket": "Kế hoạch tuyển trong 3 ngày"
+    },
+    {
+      "tu": "*",
+      "den": "kt",
+      "ten": "Đề nghị chi",
+      "noi_dung": "Khoản chi, dòng ngân sách, chứng từ",
+      "cam_ket": "Duyệt hoặc trả lời trong 2 ngày"
+    }
+  ]
+}

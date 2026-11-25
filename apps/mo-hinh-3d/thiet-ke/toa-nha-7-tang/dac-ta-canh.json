@@ -1,0 +1,285 @@
+{
+  "ten": "Toà nhà vận hành MdFlexCom",
+  "phien_ban": "02 · BẢN NHÁP · CHỜ DUYỆT",
+  "tham_chieu_thuong_hieu": "https://www.perplexity.ai/computer/a/0a26bf9b-31fe-440c-b1ae-c3b381d23ff9",
+  "gia_dinh": "Bố trí văn phòng minh hoạ; kích thước là đơn vị mô hình, không phải mét. Không suy ra sức chứa hoặc chỉ tiêu thi công.",
+  "toa_do": {
+    "x": "ngang",
+    "y": "cao",
+    "z": "trước",
+    "rong": 10.4,
+    "sau": 7.3,
+    "cao_tang": 2.35,
+    "cao_khi_tach_tang": 3.55
+  },
+  "che_do": [
+    "Mặt cắt",
+    "Ngoại thất",
+    "Tách tầng",
+    "Từng tầng"
+  ],
+  "moc_nhan_su_ke_hoach": {
+    "nguon": "Brief MdFlexCom 24/11/2026",
+    "thanh_lap": 2,
+    "G0": 21,
+    "G1": 28,
+    "G2": 49,
+    "G3": 73,
+    "ghi_chu": "Không phải số thực tế hay sức chứa."
+  },
+  "bang_mau": {
+    "ngay": {
+      "stage": "#E8F5F1",
+      "tile": "#FFFFFF",
+      "room": "#F5F5F5",
+      "cream": "#FEF3E2",
+      "mint": "#E8F5F1",
+      "frame": "#0D6B56",
+      "teal": "#149078",
+      "amber": "#F48C0C",
+      "edge": "#666666",
+      "ink": "#1A1A2E",
+      "steel": "#E0E0E0",
+      "glass": "#E8F5F1"
+    },
+    "dem": {
+      "stage": "#0F172A",
+      "tile": "#1E293B",
+      "room": "#1E293B",
+      "cream": "#334155",
+      "mint": "#334155",
+      "frame": "#2DD4A8",
+      "teal": "#2DD4A8",
+      "amber": "#FBB040",
+      "edge": "#334155",
+      "ink": "#F1F5F9",
+      "steel": "#334155",
+      "glass": "#334155"
+    }
+  },
+  "nhan": {
+    "tieu_de": "DM Sans",
+    "noi_dung": "Inter",
+    "so": "JetBrains Mono",
+    "co_toi_thieu_px": 12,
+    "logo_mau": "assets/mdflex-logo-ngay.jpg",
+    "logo_trang": "assets/mdflex-logo-dem.png"
+  },
+  "bo_cuc": {
+    "chung": "Hạt nhân thang đứng ở phía sau; lối tiếp cận các khu làm việc từ trục giữa. Mặt cắt bỏ hai mặt gần camera, không phản ánh thiết kế kết cấu.",
+    "khu_a": [
+      -2.7,
+      1.16
+    ],
+    "khu_b": [
+      2.64,
+      1.14
+    ],
+    "khu_c": [
+      1.94,
+      -2
+    ],
+    "truc_thang": [
+      -3.28,
+      -2.25
+    ]
+  },
+  "tang": [
+    {
+      "id": "T01",
+      "ten": "Sảnh & demo sản phẩm",
+      "vai_tro": "Tiếp đón · trình diễn",
+      "mau": "amber",
+      "hinh": "lobby",
+      "mo_ta": "Điểm đón khách và trình diễn HIS, EMR, LIS, PMS, PACS bằng dữ liệu giả lập. Đây là văn phòng phần mềm, không phải khu khám bệnh.",
+      "khu": [
+        [
+          "Đón tiếp",
+          "Quầy lễ tân và khu chờ khách."
+        ],
+        [
+          "Trình diễn",
+          "Bàn demo và màn hình hệ thống."
+        ],
+        [
+          "Tiếp khách",
+          "Phòng trao đổi riêng cho đoàn tham quan."
+        ]
+      ]
+    },
+    {
+      "id": "T02",
+      "ten": "Kinh doanh",
+      "vai_tro": "VP Sales · khách hàng",
+      "mau": "amber",
+      "hinh": "sales",
+      "mo_ta": "Không gian giao tiếp với khách hàng, từ tiếp nhận lead đến triển khai và chăm sóc sau go-live.",
+      "khu": [
+        [
+          "Bán hàng trực tiếp",
+          "Cụm bàn tư vấn và xử lý lead."
+        ],
+        [
+          "Đối tác & kênh",
+          "Phòng họp đối tác, ký hiệu là khu B."
+        ],
+        [
+          "Customer Success",
+          "Bàn trao đổi trạng thái triển khai và hỗ trợ khách hàng."
+        ]
+      ]
+    },
+    {
+      "id": "T03",
+      "ten": "Marketing – Truyền thông",
+      "vai_tro": "Nội dung · tăng trưởng",
+      "mau": "amber",
+      "hinh": "marketing",
+      "mo_ta": "Kết hợp bàn làm việc mở và một studio nhỏ. Tầng này chuyển lead cho Kinh doanh và tiếp nhận chất liệu case study sau go-live.",
+      "khu": [
+        [
+          "Digital & SEO",
+          "Cụm bàn nghiên cứu và quản lý chiến dịch."
+        ],
+        [
+          "Nội dung & sự kiện",
+          "Studio nội dung, có phông và bàn sản xuất."
+        ],
+        [
+          "Thương hiệu & PR",
+          "Bàn rà soát ấn phẩm và tài liệu thương hiệu."
+        ]
+      ]
+    },
+    {
+      "id": "T04",
+      "ten": "Phát triển phần mềm",
+      "vai_tro": "CTO · sản phẩm",
+      "mau": "teal",
+      "hinh": "engineering",
+      "mo_ta": "Sàn làm việc kỹ thuật với các bàn mô phỏng hai màn hình, cụm làm sản phẩm và không gian hỗ trợ triển khai.",
+      "khu": [
+        [
+          "Sản phẩm & y khoa",
+          "Cụm làm rõ yêu cầu và quy trình nghiệp vụ."
+        ],
+        [
+          "Dev · QA · DevOps",
+          "Bàn kỹ thuật hai màn hình và giá thiết bị mô hình."
+        ],
+        [
+          "Triển khai & hỗ trợ",
+          "Bàn hướng dẫn và xử lý bàn giao go-live."
+        ]
+      ]
+    },
+    {
+      "id": "T05",
+      "ten": "Kế toán",
+      "vai_tro": "KTT · tài chính",
+      "mau": "frame",
+      "hinh": "finance",
+      "mo_ta": "Vách ngăn cao hơn các tầng mở để minh hoạ yêu cầu riêng tư. Không sử dụng chứng từ, hợp đồng hay số liệu tài chính thật.",
+      "khu": [
+        [
+          "Tổng hợp & thuế",
+          "Cụm bàn làm việc và tủ lưu trữ minh hoạ."
+        ],
+        [
+          "Công nợ & hoá đơn",
+          "Khu làm việc có vách phân tách."
+        ],
+        [
+          "Kế hoạch tài chính",
+          "Phòng họp nhỏ để rà soát kế hoạch."
+        ]
+      ]
+    },
+    {
+      "id": "T06",
+      "ten": "Nhân sự – Hành chính",
+      "vai_tro": "Con người · nội bộ",
+      "mau": "teal",
+      "hinh": "people",
+      "mo_ta": "Kết hợp khu đào tạo, phòng trao đổi riêng và khu hỗ trợ nội bộ. Không hiển thị thông tin nhân sự thật.",
+      "khu": [
+        [
+          "Tuyển dụng & đào tạo",
+          "Bàn phỏng vấn và cụm bàn đào tạo."
+        ],
+        [
+          "Lương & phúc lợi",
+          "Khu trao đổi riêng, có vách ngăn."
+        ],
+        [
+          "Hành chính & pháp chế",
+          "Cụm vận hành, tủ hồ sơ mô hình."
+        ]
+      ]
+    },
+    {
+      "id": "T07",
+      "ten": "Điều hành & giám sát",
+      "vai_tro": "CEO · hai vai trò AI",
+      "mau": "frame",
+      "hinh": "control",
+      "mo_ta": "CEO là người đặt mục tiêu. Trợ lý điều phối nhận và phân phiếu. Kiểm soát viên nằm ở một khu riêng và giám sát độc lập, không nằm dưới quyền điều phối.",
+      "khu": [
+        [
+          "CEO · người thật",
+          "Phòng quyết định và duyệt ưu tiên."
+        ],
+        [
+          "Trợ lý điều phối · AI",
+          "Vòng teal liền, phụ trách phân phiếu."
+        ],
+        [
+          "Kiểm soát viên · AI",
+          "Vòng teal nét đứt, tượng trưng cho vai trò giám sát độc lập."
+        ]
+      ]
+    }
+  ],
+  "dieu_chinh_mau": {
+    "ngay": "2026-11-24",
+    "ly_do": "Đưa về bảng màu thương hiệu (config/thuong-hieu.json)",
+    "danh_sach": [
+      {
+        "che_do": "ngay",
+        "khoa": "room",
+        "cu": "#F9FAFB",
+        "moi": "#F5F5F5"
+      },
+      {
+        "che_do": "ngay",
+        "khoa": "cream",
+        "cu": "#FFF3E0",
+        "moi": "#FEF3E2"
+      },
+      {
+        "che_do": "ngay",
+        "khoa": "frame",
+        "cu": "#0D6B59",
+        "moi": "#0D6B56"
+      },
+      {
+        "che_do": "ngay",
+        "khoa": "edge",
+        "cu": "#9CA3AF",
+        "moi": "#666666"
+      },
+      {
+        "che_do": "ngay",
+        "khoa": "steel",
+        "cu": "#E5E7EB",
+        "moi": "#E0E0E0"
+      },
+      {
+        "che_do": "dem",
+        "khoa": "edge",
+        "cu": "#64748B",
+        "moi": "#334155"
+      }
+    ]
+  }
+}

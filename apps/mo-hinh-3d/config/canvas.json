@@ -1,0 +1,105 @@
+{
+  "nguon": "Bảng 'Bối cảnh từ Business Model Canvas' và 'Chức năng và KPI của 5 phòng' trong tài liệu MdFlex — Lộ trình triển khai vận hành doanh nghiệp; số liệu Canvas là kế hoạch cũ, chỉ để tham khảo.",
+  "tam_nhin": {
+    "noi_dung": "Trở thành nền tảng thông tin y tế tích hợp được các phòng khám tư nhân Việt Nam tin dùng nhất, rồi mở rộng ra Đông Nam Á.",
+    "trang_thai": "đề xuất, chờ CEO chốt"
+  },
+  "su_menh": {
+    "noi_dung": "Giúp phòng khám tư nhân vận hành hiệu quả hơn 40% và tuân thủ pháp lý 100% bằng một hệ thống liền mạch HIS – EMR – LIS – PMS – PACS, triển khai xong trong 90 ngày.",
+    "trang_thai": "đề xuất từ Giá trị đề xuất trong Canvas, chờ CEO chốt"
+  },
+  "muc_tieu": [
+    { "moc": "G0 · N0", "noi_dung": "HIS, EMR, PMS chạy ổn trên môi trường thật; đủ 21 nhân sự chủ chốt; pháp lý, bảng giá, mẫu hợp đồng xong." },
+    { "moc": "G1 · N0+3", "noi_dung": "3–5 phòng khám dùng thử ổn định; quy trình triển khai 90 ngày chạy trên khách thật; có case study đầu tiên." },
+    { "moc": "G2 · N0+12", "noi_dung": "Chỉ tiêu năm đầu (tham khảo): 25–30 khách hàng, ~20 tỷ doanh thu, 10 đối tác, 30% doanh thu qua đối tác." },
+    { "moc": "G3 · N0+24", "noi_dung": "Chỉ tiêu năm thứ hai (tham khảo): 80–100 khách hàng, 25–30 đối tác, 45% doanh thu qua đối tác." }
+  ],
+  "thanh_to": [
+    { "id": "kp", "so": 8, "ten": "Đối tác chính", "vi_tri": "kp",
+      "noi_dung": ["Đối tác phân phối: 10 đối tác tại N0+9 tháng, 25–30 tại G3", "Hãng thiết bị y tế cần tích hợp (máy xét nghiệm, chẩn đoán hình ảnh)", "Nhà cung cấp hạ tầng cloud", "Hiệp hội y tế, phòng khám tham chiếu"],
+      "suy_ra": true, "chu_tri": "kd", "phoi_hop": ["pt", "ns"] },
+    { "id": "ka", "so": 7, "ten": "Hoạt động chính", "vi_tri": "ka",
+      "noi_dung": ["Phát triển sản phẩm theo sprint 2 tuần, QA tuân thủ", "Triển khai cho khách trong 90 ngày", "Hỗ trợ 3 cấp (24/7 từ N0+12)", "Bán hàng trực tiếp và qua đối tác", "Marketing nội dung, case study, sự kiện"],
+      "suy_ra": true, "chu_tri": "pt", "phoi_hop": ["kd", "mkt"] },
+    { "id": "kr", "so": 6, "ten": "Nguồn lực chính", "vi_tri": "kr",
+      "noi_dung": ["CEO, CTO, VP Sales, VP Customer Success", "2–3 chuyên gia y tế", "Đội ngũ 21 người tại N0, 73 người tại G3", "Trụ sở TP.HCM, văn phòng Hà Nội", "Vốn 50–100 tỷ"],
+      "chu_tri": "ns", "phoi_hop": ["pt", "kt"] },
+    { "id": "vp", "so": 2, "ten": "Giá trị đề xuất", "vi_tri": "vp",
+      "noi_dung": ["Hệ thống tích hợp liền mạch HIS, EMR/EHR, LIS, PMS, PACS", "Tuân thủ pháp lý 100%", "Tăng hiệu quả vận hành 40%", "Hoàn vốn cho khách trong 12–18 tháng"],
+      "chu_tri": "pt", "phoi_hop": ["kd", "mkt"] },
+    { "id": "cr", "so": 4, "ten": "Quan hệ khách hàng", "vi_tri": "cr",
+      "noi_dung": ["Customer Success 360°: đón khách, kiểm tra định kỳ, gia hạn, bán thêm", "Hỗ trợ 3 cấp; trước N0+12 chỉ cam kết giờ hành chính", "Triển khai 90 ngày có đầu mối riêng"],
+      "chu_tri": "kd", "phoi_hop": ["pt"] },
+    { "id": "ch", "so": 3, "ten": "Kênh", "vi_tri": "ch",
+      "noi_dung": ["Bán trực tiếp", "Website MDflex.com, SEO, quảng cáo số", "Đối tác phân phối: 30% doanh thu năm 1", "Sự kiện, webinar"],
+      "chu_tri": "kd", "phoi_hop": ["mkt"] },
+    { "id": "cs", "so": 1, "ten": "Phân khúc khách hàng", "vi_tri": "cs",
+      "noi_dung": ["Phòng khám đa khoa tư nhân (cốt lõi)", "Phòng khám chuyên khoa", "Chuỗi bệnh viện từ năm 2; chu kỳ quyết định 6–12 tháng"],
+      "chu_tri": "kd", "phoi_hop": ["mkt", "pt"] },
+    { "id": "co", "so": 9, "ten": "Cơ cấu chi phí", "vi_tri": "co",
+      "noi_dung": ["Nhân sự 45%, công nghệ 20%, marketing & sales 15%, vận hành & R&D 20%", "Chi phí nhân sự ~0,92 tỷ/tháng tại N0 → ~2,67 tỷ/tháng tại G3", "CAC tham khảo 150 triệu"],
+      "chu_tri": "kt", "phoi_hop": ["kd", "mkt", "pt", "ns"] },
+    { "id": "rs", "so": 5, "ten": "Dòng doanh thu", "vi_tri": "rs",
+      "noi_dung": ["License 40%", "Triển khai 25%", "Bảo trì 20% (20% giá license mỗi năm)", "Module thêm 10%", "Phần cứng 5%", "Biên lợi nhuận gộp 75–80%, LTV 2,5 tỷ"],
+      "chu_tri": "kd", "phoi_hop": ["kt"] }
+  ],
+  "chuc_nang": {
+    "kd": {
+      "chuc_nang": "Biến giá trị của MdFlex thành doanh thu và giữ khách hàng dài hạn.",
+      "nhiem_vu": [
+        "Xác định và ưu tiên phân khúc: phòng khám đa khoa trước, chuyên khoa sau, chuỗi từ năm 2",
+        "Bán trực tiếp hai nhịp: nhanh cho phòng khám, dài hạn 6–12 tháng cho chuỗi",
+        "Tuyển, đào tạo và quản lý đối tác phân phối",
+        "Customer Success: đón khách sau go-live, kiểm tra định kỳ, gia hạn, bán thêm module",
+        "Lập pipeline tuần và dự báo doanh thu tháng cùng Kế toán",
+        "Chuyển yêu cầu tính năng của khách sang Phát triển PM kèm giá trị hợp đồng"
+      ],
+      "muc_tieu": "Đạt chỉ tiêu khách hàng, doanh thu và tỷ lệ qua đối tác tại G2, G3"
+    },
+    "mkt": {
+      "chuc_nang": "Tạo nhận biết thương hiệu MdFlex và nguồn khách tiềm năng đạt chuẩn cho Kinh doanh.",
+      "nhiem_vu": [
+        "Vận hành website MDflex.com, SEO, quảng cáo số theo bộ nhận diện",
+        "Sản xuất nội dung chứng minh giá trị bằng số liệu ROI",
+        "Tổ chức sự kiện, webinar cho phòng khám và đối tác",
+        "Làm case study từ khách thử nghiệm (tham khảo 5 case)",
+        "Giữ nhận diện thương hiệu nhất quán trên mọi điểm tiếp xúc"
+      ],
+      "muc_tieu": "Đủ lead đạt chuẩn để Kinh doanh đạt chỉ tiêu; có case study đầu tiên tại G1"
+    },
+    "pt": {
+      "chuc_nang": "Tạo ra và giữ chất lượng của giá trị đề xuất: sản phẩm tích hợp, tuân thủ, triển khai nhanh.",
+      "nhiem_vu": [
+        "Hoàn thiện HIS, EMR, PMS đạt tiêu chí N0; phát triển LIS, PACS, module AI sau N0",
+        "Phát triển theo sprint 2 tuần, QA và kiểm tra tuân thủ quy định y tế",
+        "Vận hành cloud, bảo mật, bảo vệ dữ liệu bệnh nhân",
+        "Triển khai cho khách trong 90 ngày, tích hợp thiết bị y tế",
+        "Hỗ trợ 3 cấp; 24/7 từ N0+12 tháng",
+        "Chuyên gia y tế bảo đảm sản phẩm đúng nghiệp vụ lâm sàng"
+      ],
+      "muc_tieu": "Qua cổng G0 đúng hạn; % khách go-live đúng 90 ngày; thời gian xử lý sự cố theo cấp"
+    },
+    "kt": {
+      "chuc_nang": "Giữ sức khoẻ tài chính: kiểm soát chi phí, dòng tiền và đo hiệu quả mô hình kinh doanh.",
+      "nhiem_vu": [
+        "Hạch toán, thuế, hoá đơn",
+        "Theo dõi công nợ và doanh thu riêng 5 dòng: license, triển khai, bảo trì, module, phần cứng",
+        "Lập ngân sách quý theo cơ cấu chi phí Canvas",
+        "Dự báo dòng tiền 13 tuần, cảnh báo khi chu kỳ bán dài làm căng dòng tiền",
+        "Đo biên lợi nhuận gộp, CAC, LTV, số ngày thu tiền"
+      ],
+      "muc_tieu": "Biên lợi nhuận gộp 75–80%, CAC ≤ 150 triệu, đủ tiền vận hành qua giai đoạn Ra mắt"
+    },
+    "ns": {
+      "chuc_nang": "Bảo đảm nguồn lực con người, pháp lý và hành chính để công ty vận hành đúng luật và đúng tiến độ.",
+      "nhiem_vu": [
+        "Tuyển đủ người theo thứ tự ưu tiên và điều kiện kích hoạt của từng giai đoạn",
+        "Đào tạo, đánh giá, giữ chân nhân sự chủ chốt",
+        "Quản lý lương, phúc lợi, bảo hiểm; giữ chi phí nhân sự ≤ 45% tổng chi",
+        "Pháp chế: hồ sơ pháp lý công ty, nhãn hiệu, hợp đồng khách hàng và đối tác",
+        "Hành chính trụ sở TP.HCM và văn phòng Hà Nội"
+      ],
+      "muc_tieu": "Đủ 21 nhân sự trước N0; hồ sơ pháp lý đúng hạn; tỷ lệ nghỉ việc thấp"
+    }
+  }
+}
