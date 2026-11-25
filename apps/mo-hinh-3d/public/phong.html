@@ -147,6 +147,8 @@ dialog h2{margin:0 0 16px;font-size:20px}
   .stats{margin-left:0}
   .row2{grid-template-columns:1fr}
 }
+.ph-log{border-left:3px solid var(--brand-accent,#f48c0c);padding-left:8px}
+.ph-box{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -418,10 +420,22 @@ function panePhieu(){
       ${nut.some(([h])=>CAN_LY_DO.includes(h))?`<label class="field"><span>Lý do (bắt buộc khi báo vướng hoặc trả lại)</span><textarea id="lyDo"></textarea></label>`:""}
       <div class="actions">${nut.map(([h,t,c])=>`<button class="btn ${c}" data-hd="${h}">${t}</button>`).join("")}</div>`:""}
     ${khoiAI(x)}${khoiQuanLy(x)}
-    <h3>Nhật ký</h3><ol class="log">${x.nhat_ky.slice().reverse().map(n=>`<li><b>${esc(n.hanh_dong)}</b> · <span class="mono">${esc(n.ai)}</span> · ${new Date(n.luc).toLocaleString("vi-VN")}
+    ${khoiPhanHoi(x)}
+    <h3>Nhật ký</h3><ol class="log">${x.nhat_ky.slice().reverse().map(n=>`<li${n.hanh_dong==="Phản hồi"?' class="ph-log"':""}><b>${esc(n.hanh_dong)}${n.loai?" · "+esc(n.loai):""}</b> · <span class="mono">${esc(n.ai)}</span> · ${new Date(n.luc).toLocaleString("vi-VN")}
       ${n.tu?`<br>${esc(n.tu)} → ${esc(n.den)}`:""}${n.ly_do?`<br>Lý do: ${esc(n.ly_do)}`:""}${n.ghi_chu?`<br>${esc(n.ghi_chu)}`:""}<br><span class="note mono">${esc(n.quy_dinh)}</span></li>`).join("")}</ol>`;
 }
 // Chuyên viên AI (Claude): nút làm phiếu, trạng thái, kết quả
+// Phản hồi bằng lời (Buồng điều hành CEO): người nhận, người giao, Trưởng phòng của phòng, CEO, Trợ lý điều phối
+function khoiPhanHoi(x){
+  const v=$("#actor").value, me=DB[v]||{};
+  const lienQuan=v==="CEO"||v==="TL-DP"||v===x.nguoi_nhan||v===x.nguoi_giao||(me.laTP&&me.phong===x.phong);
+  if(!lienQuan) return "";
+  const loai=["Báo cáo tiến độ","Hỏi lại","Khó khăn"].concat(v==="CEO"||v==="TL-DP"?["Trả lời"]:[]);
+  return `<h3>Phản hồi</h3>
+    <div class="ph-box"><label class="field"><span>Loại</span><select id="phLoai">${loai.map(l=>`<option>${l}</option>`).join("")}</select></label>
+    <label class="field"><span>Nội dung (tối đa 2000 ký tự)</span><textarea id="phNoiDung" maxlength="2000"></textarea></label>
+    <div class="actions"><button class="btn primary" data-phan-hoi="${esc(x.ma)}">Gửi phản hồi</button></div></div>`;
+}
 function khoiAI(x){
   if(!CV_AI.has(x.nguoi_nhan)) return "";
   const k=x.ket_qua_ai, dl=x.muc_du_lieu||"Vàng";
@@ -486,6 +500,14 @@ $("#pane").addEventListener("click",async e=>{
     const b=e.target.closest("[data-ailam]"); b.disabled=true;
     try{ await api(`/api/phieu/${x0.ma}/ai-lam`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({ai:$("#actor").value})}); toast(`${x0.ma}: Claude bắt đầu làm`); await taiPhieu(); }
     catch(err){ toast(err.message,true); b.disabled=false; }
+    return;
+  }
+  const ph=e.target.closest("[data-phan-hoi]"); if(ph){
+    const nd=$("#phNoiDung").value.trim(); if(!nd){ toast("Viết nội dung phản hồi trước.",true); return; }
+    ph.disabled=true;
+    try{ await api(`/api/phieu/${ph.dataset.phanHoi}/phan-hoi`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({ai:$("#actor").value,loai:$("#phLoai").value,noi_dung:nd})});
+      toast(`${ph.dataset.phanHoi}: đã gửi phản hồi`); await taiPhieu(); }
+    catch(err){ toast(err.message,true); ph.disabled=false; }
     return;
   }
   const m=e.target.closest("[data-moc]"); if(m){ S.moc=Number(m.dataset.moc); renderPane(); return; }

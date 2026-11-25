@@ -375,6 +375,28 @@ const HANH_DONG = {
   ceo_tra_lai: { tu: ['Chờ CEO duyệt'], den: 'Đang làm', ten: 'CEO trả lại', canLyDo: true },
 };
 
+// Phản hồi bằng lời trên phiếu (Buồng điều hành CEO): ghi nhật ký, không đổi trạng thái
+const LOAI_PHAN_HOI = ['Báo cáo tiến độ', 'Hỏi lại', 'Khó khăn', 'Trả lời'];
+async function phanHoi(req, res, ma) {
+  let b; try { b = await readBody(req); } catch (e) { return send(res, 400, { error: e.message }); }
+  const cfg = phongCfg(); const db = danhBa(cfg);
+  const p = docPhieu(ma);
+  if (!p) return send(res, 404, { error: 'Không tìm thấy phiếu ' + ma + '.' });
+  if (phieuKhacCoCau(p)) return send(res, 409, { error: `Phiếu ${ma} thuộc phòng "${p.phong}" không có trong cơ cấu ${toChuc().ten} đang chạy (CO_CAU). Mở bằng đúng cơ cấu đã tạo phiếu.` });
+  const ai = chu(b.ai), loai = chu(b.loai), noiDung = chu(b.noi_dung);
+  if (!db[ai]) return send(res, 400, { error: 'Vai đang thao tác không có trong danh bạ vị trí.' });
+  if (!LOAI_PHAN_HOI.includes(loai)) return send(res, 400, { error: 'Loại phản hồi phải là: ' + LOAI_PHAN_HOI.join(', ') + '.' });
+  if (!noiDung) return send(res, 400, { error: 'Nội dung phản hồi không được trống.' });
+  if (noiDung.length > 2000) return send(res, 400, { error: 'Nội dung phản hồi tối đa 2000 ký tự.' });
+  const laQuanLy = ai === 'CEO' || ai === 'TL-DP';
+  const lienQuan = laQuanLy || ai === p.nguoi_nhan || ai === p.nguoi_giao || (db[ai].laTP && db[ai].phong === p.phong);
+  if (!lienQuan) return send(res, 403, { error: `Vai ${ai} không liên quan tới phiếu ${ma}.` });
+  if (loai === 'Trả lời' && !laQuanLy) return send(res, 403, { error: 'Chỉ CEO hoặc Trợ lý điều phối dùng loại Trả lời.' });
+  p.nhat_ky.push({ luc: new Date().toISOString(), ai, hanh_dong: 'Phản hồi', loai, ghi_chu: noiDung, quy_dinh: p.quy_dinh.join(', ') });
+  ghiPhieu(p);
+  send(res, 201, kemChiSo(p));
+}
+
 async function hanhDong(req, res, ma) {
   let b; try { b = await readBody(req); } catch (e) { return send(res, 400, { error: e.message }); }
   const cfg = phongCfg(); const db = danhBa(cfg);
@@ -1177,6 +1199,8 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && u === '/api/tai-khoan') return send(res, 200, taiKhoan());
     if (req.method === 'POST' && u === '/api/ai/khoa') return await ganKhoa(req, res);
     if (req.method === 'DELETE' && u === '/api/ai/khoa') return goKhoa(req, res);
+    const mPh = /^\/api\/phieu\/(PH-\d{4,})\/phan-hoi$/.exec(u);
+    if (req.method === 'POST' && mPh) return await phanHoi(req, res, mPh[1]);
     const mHd = /^\/api\/phieu\/(PH-\d{4,})\/hanh-dong$/.exec(u);
     if (req.method === 'POST' && mHd) return await hanhDong(req, res, mHd[1]);
     if (req.method === 'GET' && TOA_NHA[u]) return toaNha(res, TOA_NHA[u]);
