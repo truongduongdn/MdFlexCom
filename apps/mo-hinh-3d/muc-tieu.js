@@ -260,8 +260,66 @@ function taoModuleMucTieu(dep) {
     send(res, 200, chiTiet(mt));
   }
 
+  // ---------- Đánh giá ----------
+  async function danhGia(req, res, ma) {
+    const b = await docBody(req, res); if (!b) return;
+    const mt = doc(ma); if (!mt) return send(res, 404, { error: 'Không tìm thấy mục tiêu ' + ma + '.' });
+    if (chanGhi(res, mt, b, ['Đang triển khai', 'Chờ đánh giá'])) return;
+    if (b.tong_ket !== undefined) {
+      const tk = chu(b.tong_ket); if (!tk) return send(res, 400, { error: 'Tổng kết không được trống.' });
+      mt.tong_ket = tk;
+      nhatKy(mt, 'CEO', 'Tổng kết', tk);
+    } else {
+      const id = chu(b.phong), kq = chu(b.ket_qua), nx = chu(b.nhan_xet), diem = b.diem;
+      if (!mt.don_vi.includes(id)) return send(res, 400, { error: `Đơn vị ${id || '(trống)'} không thuộc mục tiêu ${mt.ma}.` });
+      if (!KET_QUA.includes(kq)) return send(res, 400, { error: 'Kết quả phải là: ' + KET_QUA.join(', ') + '.' });
+      if (!Number.isInteger(diem) || diem < 1 || diem > 5) return send(res, 400, { error: 'Điểm là số nguyên từ 1 đến 5.' });
+      if (kq !== 'Đạt' && !nx) return send(res, 400, { error: `Kết quả "${kq}" cần ghi nhận xét.` });
+      const cu = mt.danh_gia[id];
+      mt.danh_gia[id] = { ket_qua: kq, diem, nhan_xet: nx, luc: new Date().toISOString() };
+      nhatKy(mt, 'CEO', 'Đánh giá đơn vị', `${id}: ${cu ? cu.ket_qua + ' ' + cu.diem + ' → ' : ''}${kq} ${diem}/5`);
+    }
+    if (mt.tong_ket && mt.don_vi.every((id) => mt.danh_gia[id])) {
+      nhatKy(mt, 'CEO', 'Hoàn tất đánh giá', `${mt.trang_thai} → Đã đánh giá`);
+      mt.trang_thai = 'Đã đánh giá';
+    }
+    ghi(mt);
+    send(res, 201, chiTiet(mt));
+  }
+
+  // ---------- Thẻ trưởng phòng (quy tắc chi tiết 4) ----------
+  // ky: tên kỳ để lọc mục tiêu; tu, den: lọc phiếu theo tao_luc. Không có / "tat-ca" thì không lọc.
+  function theTruongPhong({ ky, tu, den } = {}) {
+    const cfg = phongCfg() || { phong: [] }; const db = danhBa(cfg);
+    const locKy = ky && ky !== 'tat-ca' ? ky : null;
+    const coNgay = laNgay(tu) && laNgay(den);
+    const ds = tatCa().filter((mt) => mt.co_cau === CO_CAU && mt.trang_thai !== 'Huỷ' && (!locKy || mt.ky.ten === locKy));
+    const phieu = tatCaPhieu().filter((p) => !coNgay || (p.tao_luc.slice(0, 10) >= tu && p.tao_luc.slice(0, 10) <= den));
+    const now = Date.now(), H = GIO_IM_LANG * 3600e3;
+    return cfg.phong.map((p) => {
+      const mts = ds.filter((mt) => mt.don_vi.includes(p.id));
+      const diem = mts.map((mt) => mt.danh_gia[p.id]).filter(Boolean).map((d) => d.diem);
+      const cua = phieu.filter((x) => x.phong === p.id);
+      const mo = cua.filter((x) => !DONG.includes(x.trang_thai));
+      const xong = cua.filter((x) => x.trang_thai === 'Xong');
+      const ph = phanHoiTrong(cua).filter((r) => db[r.ai] && db[r.ai].phong === p.id);
+      return {
+        phong: p.id, ten: p.ten_ngan, truong_phong: p.truong_phong.nguoi_that, truong_phong_ai: p.truong_phong.ai.ma,
+        so_muc_tieu: mts.length, diem_tb: diem.length ? Math.round(diem.reduce((a, b) => a + b, 0) / diem.length * 10) / 10 : null,
+        ty_le_dung_sla: xong.length ? Math.round(xong.filter((x) => Date.parse(x.xong_luc) <= Date.parse(x.han)).length / xong.length * 100) : null,
+        dang_mo: mo.length, qua_han: mo.filter((x) => kemChiSo(x).qua_han).length, vuong: cua.filter((x) => x.trang_thai === 'Vướng').length,
+        so_phan_hoi: ph.length, phan_hoi_cuoi: ph[0] || null,
+        im_lang: mo.some((x) => now - Date.parse(x.tao_luc) > H) && !(ph[0] && now - Date.parse(ph[0].luc) <= H)
+      };
+    });
+  }
+
   // Trả true nếu đã xử lý
   async function xuLy(req, res, u) {
+    if (u === '/api/truong-phong' && req.method === 'GET') {
+      const q = new URL(req.url, 'http://x').searchParams;
+      send(res, 200, theTruongPhong({ ky: q.get('ky'), tu: q.get('tu'), den: q.get('den') })); return true;
+    }
     if (u === '/api/muc-tieu' && req.method === 'GET') { const all = tatCaPhieu(); send(res, 200, tatCa().map((mt) => chiTiet(mt, all))); return true; }
     if (u === '/api/muc-tieu' && req.method === 'POST') { await tao(req, res); return true; }
     const m = /^\/api\/muc-tieu\/(MT-\d{4,})(?:\/([a-z-]+))?$/.exec(u);
@@ -269,13 +327,13 @@ function taoModuleMucTieu(dep) {
     const [, ma, viec] = m;
     if (!viec && req.method === 'GET') { const mt = doc(ma); mt ? send(res, 200, chiTiet(mt)) : send(res, 404, { error: 'Không tìm thấy mục tiêu ' + ma + '.' }); return true; }
     if (req.method !== 'POST') return false;
-    const ham = { sua, 'tien-do': tienDo, huy, giao, 'gan-phieu': ganPhieu }[viec];
+    const ham = { sua, 'tien-do': tienDo, huy, giao, 'gan-phieu': ganPhieu, 'danh-gia': danhGia }[viec];
     if (!ham) return false;
     await ham(req, res, ma);
     return true;
   }
 
-  return { xuLy, _noiBo: { doc, ghi, tatCa, chu, nhatKy, chanGhi, docBody, laNgay, MO } };
+  return { xuLy, theTruongPhong, _noiBo: { doc, ghi, tatCa, chu, nhatKy, chanGhi, docBody, laNgay, MO } };
 }
 
 module.exports = taoModuleMucTieu;
