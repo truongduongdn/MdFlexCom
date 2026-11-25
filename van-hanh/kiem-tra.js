@@ -358,6 +358,18 @@ async function thuCoCauKhac() {
   }
 }
 
+// Bộ kiểm thử tự động của app Mô hình 3D (apps/mo-hinh-3d/test, node:test, chạy trên bản sao tạm)
+function thuBoKiemThu() {
+  muc('7. Bộ kiểm thử Mô hình 3D (mục tiêu, phản hồi, đánh giá, trang)');
+  const { spawnSync } = require('child_process');
+  const r = spawnSync(process.execPath, ['--test', 'test/**/*.test.js'], { cwd: APPS.m3d.dir, encoding: 'utf8', timeout: 300000 });
+  const out = (r.stdout || '') + (r.stderr || '');
+  const so = (k) => Number((out.match(new RegExp('ℹ ' + k + ' (\\d+)')) || [])[1] || 0);
+  if (r.status === 0 && so('pass') > 0) dat(`${so('pass')} bài kiểm thử đạt`);
+  else loi(`Bộ kiểm thử lỗi: ${so('fail')} bài hỏng / ${so('pass')} đạt. Chạy "node --test \"test/**/*.test.js\"" trong apps/mo-hinh-3d để xem chi tiết.\n` +
+    out.split('\n').filter((l) => /✖/.test(l)).slice(0, 8).join('\n'));
+}
+
 (async () => {
   console.log(`Kiểm tra MdFlex — ${REPO}${NHANH ? ' (nhanh)' : ''}`);
   kiemMoiTruong();
@@ -366,7 +378,7 @@ async function thuCoCauKhac() {
   kiemDuLieu();
   kiemGit();
   await kiemCong();
-  if (!NHANH) { await thuCeo(); await thu3d(); await thuCoCauKhac(); }
+  if (!NHANH) { await thuCeo(); await thu3d(); await thuCoCauKhac(); thuBoKiemThu(); }
   console.log(`\nKết quả: ${soLoi ? soLoi + ' lỗi' : 'đạt'}${soCanhBao ? ', ' + soCanhBao + ' cảnh báo' : ''}.`);
   process.exit(soLoi ? 1 : 0);
 })();

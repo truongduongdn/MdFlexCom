@@ -57,6 +57,16 @@ Trang riêng `/ceo.html`: **bảng điều hành CEO**, lấy số liệu thẳn
 - KPI theo vị trí: đúng SLA (cảnh báo < 90%), đạt lần đầu (cảnh báo < 80%), số lần báo vướng.
 - Bản tin sáng soạn sẵn (hôm qua xong gì, hôm nay đến hạn, cần CEO quyết), có nút sao chép. Chưa tự gửi lúc 07:30.
 
+Trang riêng `/dieu-hanh.html`: **Buồng điều hành CEO**, vòng Mục tiêu → Kế hoạch → Triển khai → Đánh giá (thiết kế: [thiet-ke/buong-dieu-hanh-ceo.md](thiet-ke/buong-dieu-hanh-ceo.md)):
+
+- **Mục tiêu** (`data/muc-tieu/MT-####.json`, không commit): tên, kỳ (tháng/quý/năm), kết quả cần đạt, chỉ số (chỉ tiêu → thực tế), đơn vị tham gia, mức dữ liệu, mốc kế hoạch. Trạng thái Nháp → Đang triển khai → Chờ đánh giá (tự chuyển khi hết kỳ hoặc mọi phiếu gốc đã đóng) → Đã đánh giá; nhánh Huỷ. Sửa, huỷ bắt buộc lý do; mọi thay đổi ghi nhật ký. Chỉ vai CEO ghi.
+- **Triển khai**: "Giao một đợt" tạo phiếu bằng luồng giao việc thường (CEO → Trợ lý → Trưởng phòng → Chuyên viên); phiếu gốc mang `ma_muc_tieu`. Gắn được phiếu gốc CEO đã giao trước đó. Mức dữ liệu của đợt không thấp hơn mục tiêu.
+- **Theo dõi từng đơn vị**: nhận lúc, trạng thái, phiếu thực hiện xong/tổng, quá hạn, vướng, chờ CEO, phản hồi gần nhất, **im lặng** (phiếu mở quá 48 giờ mà 48 giờ qua phòng không phản hồi). CEO trả lời ngay trên trang.
+- **Phản hồi** trên phiếu (`POST /api/phieu/PH-####/phan-hoi`): Báo cáo tiến độ, Hỏi lại, Khó khăn; CEO và Trợ lý thêm Trả lời. Ghi nhật ký, không đổi trạng thái. Trưởng phòng gửi từ chi tiết phiếu trên trang Phòng làm việc.
+- **Đánh giá**: CEO chấm từng đơn vị (Đạt / Đạt một phần / Không đạt, điểm 1–5, nhận xét bắt buộc khi chưa Đạt) và tổng kết.
+- **Thẻ trưởng phòng**: điểm trung bình, số mục tiêu, % đúng SLA, phiếu đang mở, quá hạn, vướng, phản hồi, im lặng — lọc theo kỳ.
+- Liên kết thẳng: `/dieu-hanh.html?mt=MT-0001&tab=trien-khai` (tab: `muc-tieu`, `ke-hoach`, `trien-khai`, `danh-gia`).
+
 Trang riêng `/phong.html?id=kd|mkt|pt|kt|ns`: **trang làm việc của từng phòng** — bảng phiếu việc theo vòng đời, chỉ số SLA, tổ và vị trí theo mốc, thẻ vị trí AI, bàn giao giữa các phòng. Mở từ nút **Phòng làm việc** trên trang chính, từ bảng chi tiết phòng, hoặc từ tầng T02–T06 của toà nhà.
 
 Trang riêng `/toa-nha.html`: toà nhà vận hành 7 tầng (bản nháp 02 của Perplexity), có tách tầng, từng tầng, ngày/đêm. Tệp nguồn và kết quả kiểm màu ở [thiet-ke/toa-nha-7-tang](thiet-ke/toa-nha-7-tang/README.md).
@@ -134,6 +144,15 @@ Hạn chế: chưa có đăng nhập — "vai đang thao tác" chọn trên tran
 | `GET /api/canvas` | Canvas, tầm nhìn, chức năng phòng |
 | `GET /api/thiet-ke` | 30 bản thiết kế gần nhất |
 | `GET /api/phong` | Dữ liệu phòng, tổ, vị trí, thẻ vị trí AI, mẫu bàn giao của cơ cấu đang chạy (MdFlex: `config/phong.json`) |
+| `GET /api/muc-tieu`, `GET /api/muc-tieu/MT-0001` | Mục tiêu kèm `don_vi_chi_tiet`, `phan_hoi`, `tom_tat` |
+| `POST /api/muc-tieu` | CEO tạo: `{ ai, ten, ky:{loai,tu,den}, ket_qua_can_dat, chi_so[], don_vi[], muc_du_lieu, ke_hoach[] }` |
+| `POST /api/muc-tieu/MT-0001/sua` · `/huy` | `{ ai, …, ly_do }` |
+| `POST /api/muc-tieu/MT-0001/tien-do` | `{ ai, ke_hoach?, chi_so? }` — tích mốc, ghi số thực tế |
+| `POST /api/muc-tieu/MT-0001/giao` | Như `/api/giao-viec` + `ai`; `phong` mặc định mọi đơn vị của mục tiêu |
+| `POST /api/muc-tieu/MT-0001/gan-phieu` | `{ ai, ma_phieu }` — gắn phiếu gốc CEO → Trợ lý có sẵn |
+| `POST /api/muc-tieu/MT-0001/danh-gia` | `{ ai, phong, ket_qua, diem, nhan_xet }` hoặc `{ ai, tong_ket }` |
+| `POST /api/phieu/PH-0001/phan-hoi` | `{ ai, loai, noi_dung }` |
+| `GET /api/truong-phong?ky=&tu=&den=` | Thẻ trưởng phòng; `ky` lọc mục tiêu theo tên kỳ, `tu`/`den` lọc phiếu theo ngày tạo |
 | `GET /api/co-cau` | Cơ cấu đang chạy: `id`, `ten`, tệp cấu hình, số phòng, có Canvas không |
 | `GET /co-cau.js` | Script nạp cơ cấu cho các trang (`window.CO_CAU`, màu phòng) |
 | `GET /api/phieu?phong=kd` | Phiếu phòng nhận hoặc gửi đi, kèm `ty_le_sla`, `qua_han` |
@@ -151,6 +170,15 @@ Hạn chế: chưa có đăng nhập — "vai đang thao tác" chọn trên tran
 | `POST /api/giao-viec` | `{ muc_tieu, dau_vao, dau_ra, tieu_chi[], uu_tien, han, cong, phong[], tep[] }` → tạo chuỗi phiếu CEO → Trợ lý → Trưởng phòng → Chuyên viên |
 | `GET /toa-nha/toa-nha-7-tang.glb`, `GET /toa-nha/dac-ta-canh.json` | Mô hình và đặc tả cảnh toà nhà |
 | `POST /api/thiet-ke` | `{ "yeu_cau": "...", "vung": "toan-trang", "che_do": "sang" }` |
+
+## Kiểm thử
+
+```bash
+cd apps/mo-hinh-3d
+node --test "test/**/*.test.js"     # chạy trên bản sao tạm, không đụng data/ thật, không gọi Claude
+```
+
+`van-hanh/kiem-tra.js` (bản đầy đủ) cũng chạy bộ này.
 
 ## Dữ liệu cần CEO xác nhận
 
