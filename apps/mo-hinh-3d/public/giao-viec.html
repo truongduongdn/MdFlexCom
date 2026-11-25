@@ -117,6 +117,17 @@ section.list h2{font-size:22px;margin:0 0 4px}
 .tag{display:inline-block;font-size:12px;padding:0 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
 .tag.st{background:var(--surface)}
 .tag.done{border-color:var(--ok)} .tag.warn{border-color:var(--warn)} .tag.err{border-color:var(--err);color:var(--err)}
+.tag.stop{border-style:dashed;text-decoration:line-through}
+.goiy-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0 12px}
+.goiy{border:1px solid var(--accent);border-radius:var(--r-btn);background:var(--accent-soft);padding:12px;margin-bottom:16px;font-size:13px}
+.goiy h4{margin:12px 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--quiet)}
+.goiy h4:first-of-type{margin-top:4px}
+.goiy pre{white-space:pre-wrap;font:inherit;margin:0;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px}
+.goiy ul{margin:0;padding-left:20px}
+.goiy .act{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.goiy .src{font-size:12px;color:var(--quiet)}
+#routeNote.warn{color:var(--ink);border-left:3px solid var(--warn);padding-left:8px}
+.cho-chon{margin-top:12px;border:1px solid var(--warn);border-radius:8px;padding:12px;font-size:13px}
 .sub-tree{list-style:none;margin:8px 0 0;padding:0 0 0 16px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:4px;font-size:12px}
 .sub-tree li{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .prog{height:6px;border-radius:999px;background:var(--line);overflow:hidden;flex:1;min-width:120px;max-width:240px}
@@ -161,6 +172,12 @@ section.list h2{font-size:22px;margin:0 0 4px}
       </div>
       <input type="file" id="file" multiple hidden accept=".txt,.md,.csv,.json,.pdf,.docx,.xlsx,.pptx,.png,.jpg,.jpeg">
       <ul class="files" id="files"></ul>
+
+      <div class="goiy-bar">
+        <button type="button" class="btn" id="btnGoiY">Gợi ý từ AI</button>
+        <span class="sub" style="margin:0" id="goiYNote">Trợ lý điều phối gợi ý khung mô tả, đầu ra, kết quả cần có và tiêu chí. Gợi ý được thêm vào sau chữ anh viết, không thay.</span>
+      </div>
+      <div id="goiY" aria-live="polite"></div>
 
       <div class="row2">
         <label class="field"><span>Kết quả cần nhận (đầu ra)</span>
@@ -315,9 +332,12 @@ $("#cong").addEventListener("change",veLuong);
 
 function veLuong(){
   const chon=chonPhong(), top=S.xh[0];
-  const dsGiao=chon.length?chon.map(id=>S.xh.find(x=>x.phong===id)).filter(Boolean):(top&&top.diem>0?[top]:[]);
+  const ngang=top&&top.diem>0?S.xh.filter(x=>x.diem===top.diem):[];
+  const dsGiao=chon.length?chon.map(id=>S.xh.find(x=>x.phong===id)).filter(Boolean):(top&&top.diem>0&&ngang.length===1?[top]:[]);
   $("#routeNote").textContent=chon.length?"CEO đã chọn phòng; hệ thống chọn chuyên viên trong phòng.":
+    ngang.length>1?`Các phòng ngang điểm (${ngang.map(x=>x.ten).join(", ")}): Trợ lý không tự giao. Chọn phòng ở bên trái.`:
     top&&top.diem>0?"Trợ lý điều phối chọn phòng khớp nhiều từ khoá nhất. Chọn phòng ở bên trái để đổi.":"Chưa đủ thông tin để tự chọn phòng. Viết rõ hơn hoặc chọn phòng.";
+  $("#routeNote").classList.toggle("warn",!chon.length&&ngang.length>1);
   $("#rank").innerHTML=S.xh.slice(0,3).filter(x=>x.diem>0||chon.includes(x.phong)).map(x=>`<li class="${dsGiao.includes(x)?"top":""}">
     <div class="h dept-${x.phong}"><span class="dot"></span>${esc(x.ten)}<b>${x.diem} điểm</b></div>
     <div class="k">${x.khop.length?"Khớp: "+esc(x.khop.join(", ")):"Không khớp từ khoá"}</div>
@@ -335,6 +355,53 @@ function veLuong(){
   ].map(([b,s,a])=>`<li><b>${esc(b)}</b><span>${esc(s)}</span>${a?`<div class="auto">${a}</div>`:""}</li>`).join("");
 }
 
+// ---------- Gợi ý từ AI: thêm vào sau chữ CEO viết ----------
+let GY=null;
+function themVao(id,tieuDe,noiDung){
+  const el=$("#"+id), cu=el.value.trimEnd();
+  if(cu.includes(noiDung.trim())) return;
+  el.value=(cu?cu+"\n\n":"")+(tieuDe?tieuDe+"\n":"")+noiDung; el.dispatchEvent(new Event("input"));
+}
+function themDong(id,ds){
+  const el=$("#"+id), co=el.value.split("\n").map(s=>s.trim()).filter(Boolean);
+  const moi=ds.map(s=>s.trim()).filter(s=>s&&!co.includes(s));
+  el.value=co.concat(moi).join("\n"); el.dispatchEvent(new Event("input"));
+}
+const GY_AP={
+  mo_ta:()=>themVao("dau_vao","[Gợi ý từ AI · khung mô tả]",GY.mo_ta),
+  dau_ra:()=>themVao("dau_ra","",GY.dau_ra),
+  ket_qua:()=>themVao("dau_ra","Kết quả cần có để đạt mục tiêu:",GY.ket_qua_can_co.map(x=>"- "+x).join("\n")),
+  tieu_chi:()=>themDong("tieu_chi",GY.tieu_chi),
+  uu_tien:()=>{ S.uu=GY.uu_tien; document.querySelectorAll("#uu button").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.v===S.uu))); if(GY.cong&&[...$("#cong").options].some(o=>o.value===GY.cong)){ $("#cong").value=GY.cong; } veLuong(); },
+};
+function veGoiY(r){
+  const g=GY=r.goi_y;
+  $("#goiY").innerHTML=`<div class="goiy">
+    <div class="src">${r.nguon==="claude"?`Claude (${esc(r.model)}) · ≈ ${r.chi_phi_usd} USD`:esc(r.ly_do||"Gợi ý theo mẫu")} · bấm "Thêm" để gán vào phiếu, chữ anh viết giữ nguyên.</div>
+    <h4>Khung mô tả</h4><pre>${esc(g.mo_ta)}</pre><div class="act"><button type="button" class="btn small" data-gy="mo_ta">Thêm vào Mô tả</button></div>
+    <h4>Đầu ra đề xuất</h4><pre>${esc(g.dau_ra)}</pre><div class="act"><button type="button" class="btn small" data-gy="dau_ra">Thêm vào Đầu ra</button></div>
+    <h4>Kết quả cần có để đạt mục tiêu</h4><ul>${g.ket_qua_can_co.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="act"><button type="button" class="btn small" data-gy="ket_qua">Thêm vào Đầu ra</button></div>
+    <h4>Tiêu chí nghiệm thu</h4><ul>${g.tieu_chi.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="act"><button type="button" class="btn small" data-gy="tieu_chi">Thêm vào Tiêu chí</button></div>
+    <h4>Ưu tiên và cổng</h4><p style="margin:0">${esc(g.uu_tien)} · ${esc(g.ly_do_uu_tien)} · Cổng CEO: ${esc(g.cong)}</p><div class="act"><button type="button" class="btn small" data-gy="uu_tien">Áp dụng</button></div>
+    ${g.cau_hoi.length?`<h4>Anh nên trả lời thêm</h4><ul>${g.cau_hoi.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+    <div class="act" style="margin-top:12px"><button type="button" class="btn primary small" data-gy="tat_ca">Thêm tất cả</button><button type="button" class="btn small" data-gy="dong">Đóng gợi ý</button></div></div>`;
+}
+$("#btnGoiY").addEventListener("click",async()=>{
+  const d=duLieu(); const b=$("#btnGoiY");
+  if(!d.muc_tieu.trim()&&!d.dau_vao.trim()){ $("#goiYNote").textContent="Viết mục tiêu hoặc mô tả trước, Trợ lý mới gợi ý được."; $("#muc_tieu").focus(); return; }
+  b.disabled=true; b.textContent=AI.coKhoa?"Claude đang gợi ý…":"Đang gợi ý…";
+  try{ veGoiY(await api("/api/giao-viec/goi-y",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({...d,muc_du_lieu:$("#muc_du_lieu").value})})); }
+  catch(err){ toast(err.message,true); }
+  finally{ b.disabled=false; b.textContent="Gợi ý từ AI"; }
+});
+$("#goiY").addEventListener("click",e=>{
+  const b=e.target.closest("[data-gy]"); if(!b||!GY) return;
+  const k=b.dataset.gy;
+  if(k==="dong"){ $("#goiY").innerHTML=""; GY=null; return; }
+  if(k==="tat_ca"){ ["mo_ta","dau_ra","ket_qua","tieu_chi","uu_tien"].forEach(x=>GY_AP[x]()); toast("Đã thêm gợi ý vào phiếu. Anh xem lại trước khi giao."); return; }
+  GY_AP[k](); b.textContent="Đã thêm"; b.disabled=true;
+});
+
 // ---------- Gửi ----------
 $("#form").addEventListener("submit",async e=>{
   e.preventDefault(); $("#err").textContent="";
@@ -349,20 +416,21 @@ $("#form").addEventListener("submit",async e=>{
   try{
     const r=await api("/api/giao-viec",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
     toast(`Đã giao ${r.goc} → ${r.dinh_tuyen.map(id=>PH[id].ten_ngan).join(", ")} · ${r.phieu.length} phiếu tự tạo${r.ai_chay&&r.ai_chay.length?" · Claude đang làm "+r.ai_chay.join(", "):""}`);
-    $("#form").reset(); S.tep=[]; S.xh=[]; S.uu="P2"; document.querySelectorAll("#uu button").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.v==="P2")));
+    $("#form").reset(); $("#goiY").innerHTML=""; GY=null; S.tep=[]; S.xh=[]; S.uu="P2"; document.querySelectorAll("#uu button").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.v==="P2")));
     veTep(); veLuong(); await veDanhSach(); $("#hList").scrollIntoView({behavior:"smooth"});
   }catch(err){ $("#err").textContent=err.message; }
   finally{ $("#send").disabled=false; }
 });
 
 // ---------- Việc CEO đã giao ----------
-const lop=t=>t==="Xong"?"done":t==="Vướng"||t==="Chờ CEO duyệt"?"warn":"";
+const lop=t=>t==="Xong"?"done":t==="Vướng"||t==="Chờ CEO duyệt"?"warn":t==="Đã ngừng"?"stop":"";
+const DONG=["Xong","Đã ngừng"];
 async function veDanhSach(){
   let L; try{ L=await api("/api/phieu"); }catch(e){ return; }
   const goc=L.filter(x=>x.nguoi_giao==="CEO"&&x.nguoi_nhan==="TL-DP").sort((a,b)=>b.tao_luc.localeCompare(a.tao_luc));
   const con=ma=>L.filter(x=>x.phieu_cha===ma);
   $("#tree").innerHTML=goc.length?goc.map(g=>{
-    const c=con(g.ma), la=[].concat(...c.map(x=>{ const l=con(x.ma); return l.length?l:[x]; }));
+    const c=con(g.ma), la=[].concat(...c.map(x=>{ const l=con(x.ma); return l.length?l:[x]; })).filter(x=>x.trang_thai!=="Đã ngừng");
     const xong=la.filter(x=>x.trang_thai==="Xong").length;
     return `<li><div class="top"><span class="mono">${esc(g.ma)}</span><span class="tag st ${lop(g.trang_thai)}">${esc(g.trang_thai)}</span><span class="tag">${esc(g.uu_tien)}</span>
       ${g.qua_han&&g.trang_thai!=="Xong"?`<span class="tag err">Quá hạn</span>`:""}<span class="sub" style="margin:0">Hạn ${new Date(g.han).toLocaleString("vi-VN",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"})}</span>
@@ -370,12 +438,34 @@ async function veDanhSach(){
       <div class="prog" role="img" aria-label="${xong}/${la.length} phiếu thực hiện đã xong"><i style="width:${la.length?Math.round(xong/la.length*100):0}%"></i></div><span class="sub" style="margin:0">${xong}/${la.length} phiếu thực hiện xong</span>
       ${g.tep&&g.tep.length?`<span class="sub" style="margin:0">· ${g.tep.map(t=>`<a href="/api/tep/${esc(t.id)}/${encodeURIComponent(t.ten)}">${esc(t.ten)}</a>`).join(", ")}</span>`:""}</div>
       <ul class="sub-tree">${c.map(x=>`<li class="dept-${esc(x.phong)}"><span class="dot"></span><span class="mono">${esc(x.ma)}</span>${esc(PH[x.phong]?.ten_ngan||"")} · ${esc(x.nguoi_nhan)}<span class="tag st ${lop(x.trang_thai)}">${esc(x.trang_thai)}</span>
-        ${con(x.ma).map(l=>`→ <a class="mono" href="/phong.html?id=${esc(l.phong)}">${esc(l.ma)}</a> ${esc(l.nguoi_nhan)} <span class="tag st ${lop(l.trang_thai)}">${esc(l.trang_thai)}</span>`).join(" ")}</li>`).join("")}</ul>
+        ${con(x.ma).map(l=>`→ <a class="mono" href="/phong.html?id=${esc(l.phong)}">${esc(l.ma)}</a> ${esc(l.nguoi_nhan)} <span class="tag st ${lop(l.trang_thai)}">${esc(l.trang_thai)}</span>`).join(" ")}
+        ${x.nguoi_giao==="TL-DP"&&!DONG.includes(x.trang_thai)?`<button type="button" class="btn small" data-ngung="${esc(x.ma)}" title="Ngừng nhánh này vì giao sai bộ phận">Sai bộ phận</button>`:""}</li>`).join("")}</ul>
+      ${g.cho_dinh_tuyen?`<div class="cho-chon"><b>Chờ chọn phòng:</b> nhánh sai bộ phận đã ngừng, Trợ lý chưa tự chọn được phòng mới.
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">${Object.values(PH).map(p=>`<button type="button" class="btn small" data-giaolai="${esc(g.ma)}" data-phong="${esc(p.id)}">${esc(p.ten_ngan)}</button>`).join("")}</div></div>`:""}
       ${g.trang_thai==="Chờ nghiệm thu"?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center"><input aria-label="Lý do trả lại ${esc(g.ma)}" data-ly="${esc(g.ma)}" placeholder="Lý do nếu trả lại" style="flex:1;min-width:200px;min-height:40px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--bg)">
         <button type="button" class="btn primary" data-hd="nghiem_thu" data-ma="${esc(g.ma)}">Nghiệm thu đạt</button><button type="button" class="btn" data-hd="tra_lai" data-ma="${esc(g.ma)}">Trả lại</button></div>`:""}</li>`;
   }).join(""):`<li class="sub" style="border:0;padding:0">Chưa giao việc nào.</li>`;
 }
 $("#tree").addEventListener("click",async e=>{
+  const ng=e.target.closest("[data-ngung]");
+  if(ng){
+    const ly=prompt(`Ngừng ${ng.dataset.ngung} và mọi phiếu con vì giao sai bộ phận.\nLý do (bắt buộc):`);
+    if(ly===null) return; if(!ly.trim()){ toast("Cần ghi lý do ngừng.",true); return; }
+    ng.disabled=true;
+    try{ const r=await api(`/api/phieu/${ng.dataset.ngung}/ngung`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({ai:"CEO",ly_do:ly.trim()})});
+      const moi=r.dinh_tuyen_lai;
+      toast(`Đã ngừng ${r.ngung.join(", ")}`+(moi?` · giao lại cho ${moi.phong.map(id=>PH[id].ten_ngan).join(", ")}`:r.cho_chon_phong?" · chọn phòng mới bên dưới":""),!moi&&r.cho_chon_phong); await veDanhSach(); }
+    catch(err){ toast(err.message,true); ng.disabled=false; }
+    return;
+  }
+  const gl=e.target.closest("[data-giaolai]");
+  if(gl){
+    gl.disabled=true;
+    try{ const r=await api(`/api/phieu/${gl.dataset.giaolai}/dieu-phoi`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({ai:"CEO",phong:[gl.dataset.phong]})});
+      toast(`Đã giao lại ${r.goc} cho ${r.dinh_tuyen.map(id=>PH[id].ten_ngan).join(", ")}`); await veDanhSach(); }
+    catch(err){ toast(err.message,true); gl.disabled=false; }
+    return;
+  }
   const b=e.target.closest("[data-hd]"); if(!b) return;
   const ma=b.dataset.ma, ly=document.querySelector(`[data-ly="${CSS.escape(ma)}"]`);
   b.disabled=true;

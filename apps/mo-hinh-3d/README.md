@@ -38,6 +38,16 @@ Trang riêng `/giao-viec.html`: **màn hình CEO giao việc** toàn trang, có 
 
 - **Sửa phiếu** (người giao, CEO, Trợ lý điều phối, Trưởng phòng đang giữ phiếu; khi chưa nộp nghiệm thu): sửa mục tiêu, đầu vào, đầu ra, tiêu chí, ưu tiên, cổng CEO, mức dữ liệu, người nhận. Bắt buộc ghi lý do; nhật ký ghi giá trị cũ → mới. Đổi người nhận thì phiếu về Mới.
 - **Chuyển Trợ lý điều phối** (phiếu CEO giao thẳng, chưa bắt đầu làm): phiếu thành phiếu gốc của Trợ lý; Trợ lý chọn phòng theo nội dung và tạo phiếu Trưởng phòng, phiếu chuyên viên như màn hình Giao việc. Định tuyến là so khớp từ khoá tại máy, không gửi nội dung ra dịch vụ ngoài. Tệp lưu ở `data/tep/` (không commit); tệp bấm "Bỏ" trên màn hình vẫn nằm trong `data/tep/`.
+- **Ngang điểm thì không tự giao**: khi hai phòng trở lên cùng điểm cao nhất, Trợ lý điều phối dừng và báo "Các phòng ngang điểm…", CEO phải chọn phòng. Từ khoá quá chung (ví dụ "nội dung") không đặt ở cấp phòng.
+- **Ngừng vì sai bộ phận** (CEO, Trợ lý điều phối, hoặc Trưởng phòng đang nhận việc; bắt buộc ghi lý do): phiếu Trưởng phòng và mọi phiếu con của nhánh chuyển sang trạng thái cuối **Đã ngừng**, không ai làm tiếp được. Phiếu gốc của CEO hết nhánh đang chạy thì về Trợ lý điều phối: có chọn phòng thì giao ngay; không chọn thì Trợ lý tự chọn lại, bỏ qua phòng vừa ngừng; vẫn không chọn được thì phiếu gốc **chờ chọn phòng** trên màn Giao việc. Chuyên viên thấy sai thì báo vướng lên Trưởng phòng, không tự ngừng. Phiếu đã ngừng không tính quá hạn, không tính vào cộng dồn.
+
+### Luồng việc trên mô hình công ty
+
+Trang chủ có tab **Luồng việc** và nhãn trạng thái trên từng toà nhà phòng (rảnh, việc chờ nhận, đang làm, chờ CEO, vướng), tự làm mới mỗi 20 giây. Mỗi việc hiện bước đang tới (Chờ nhận → Đã nhận → Đang làm → Chờ Trưởng phòng nghiệm thu → Chờ CEO duyệt → Xong), số phiếu thực hiện đã xong, hạn, người làm và **báo cáo về** ai (theo chuỗi phiếu cha: Chuyên viên → Trưởng phòng → Trợ lý điều phối → CEO).
+
+### Gợi ý từ AI khi giao việc
+
+Màn Giao việc có nút **Gợi ý từ AI**: Trợ lý điều phối đề xuất khung mô tả (bối cảnh, phạm vi, đầu vào, ràng buộc, người dùng kết quả), đầu ra, kết quả cần có để đạt mục tiêu, tiêu chí nghiệm thu, ưu tiên và cổng CEO. Bấm "Thêm" thì gợi ý được nối sau chữ CEO viết, không ghi đè. Có `ANTHROPIC_API_KEY` thì hỏi Claude (effort `medium`, mỗi lần khoảng 0,02 USD); chưa có khoá hoặc Mức dữ liệu Đỏ thì gợi ý theo thẻ vị trí của chuyên viên phù hợp, không gửi ra ngoài.
 
 Trang riêng `/ceo.html`: **bảng điều hành CEO**, lấy số liệu thẳng từ nhật ký phiếu của cả 5 phòng, tự làm mới mỗi 30 giây:
 
@@ -112,8 +122,10 @@ Hạn chế: chưa có đăng nhập — "vai đang thao tác" chọn trên tran
 | `POST /api/phieu` | Tạo phiếu: `ai, loai, nguoi_giao, nguoi_nhan, muc_tieu, dau_vao, dau_ra, tieu_chi[], uu_tien, cong, phieu_cha, ghi_chu_rui_ro` |
 | `POST /api/phieu/PH-0001/hanh-dong` | `{ hanh_dong, ai, ly_do, tieu_chi[] }` — `nhan, bat_dau, nop, nghiem_thu, tra_lai, vuong, go_vuong, ceo_duyet, ceo_tra_lai` |
 | `POST /api/phieu/PH-0001/sua` | `{ ai, ly_do, muc_tieu?, dau_vao?, dau_ra?, tieu_chi[]?, uu_tien?, cong?, muc_du_lieu?, han?, nguoi_nhan? }` |
-| `POST /api/phieu/PH-0001/dieu-phoi` | `{ ai, phong[]?, ai_lam_ngay? }` — chuyển phiếu CEO giao cho Trợ lý điều phối định tuyến |
+| `POST /api/phieu/PH-0001/dieu-phoi` | `{ ai, phong[]?, ai_lam_ngay? }` — chuyển phiếu CEO giao cho Trợ lý điều phối định tuyến; phiếu gốc đang chờ chọn phòng thì giao cho phòng chọn |
 | `POST /api/phieu/PH-0001/ai-lam` | `{ ai }` — Claude làm phiếu (chạy nền, trả 202) |
+| `POST /api/phieu/PH-0001/ngung` | `{ ai, ly_do, phong[]?, ai_lam_ngay? }` — ngừng nhánh vì sai bộ phận, định tuyến lại phiếu gốc |
+| `POST /api/giao-viec/goi-y` | `{ muc_tieu, dau_vao, dau_ra, tieu_chi[], tep[], muc_du_lieu }` → `{ nguon: claude\|mau, goi_y }` |
 | `GET /api/ai` | Có khoá Claude hay chưa, model, effort |
 | `POST /api/tep` | `{ ten, du_lieu (base64) }` → `{ id, ten, kich_thuoc, doc_duoc, van_ban }` |
 | `GET /api/tep/<id>/<tên>` | Tải tệp đính kèm |

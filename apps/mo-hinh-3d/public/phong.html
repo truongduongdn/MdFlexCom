@@ -248,7 +248,8 @@ try{ CANVAS=await api("/api/canvas"); }catch(_){}
 let AI={coKhoa:false}; try{ AI=await api("/api/ai"); }catch(_){}
 const CV_AI=new Set([].concat(...CFG.phong.map(p=>[].concat(...p.to.map(t=>t.ai.map(a=>a.ma))))));
 
-const COT=["Mới","Đã nhận","Đang làm","Chờ nghiệm thu","Vướng","Chờ CEO duyệt","Xong"];
+const COT=["Mới","Đã nhận","Đang làm","Chờ nghiệm thu","Vướng","Chờ CEO duyệt","Xong","Đã ngừng"];
+const DONG=["Xong","Đã ngừng"];
 const DB={};
 CFG.vi_tri_chung.forEach(v=>DB[v.ma]={ten:v.ten,phong:null,laTP:false});
 CFG.phong.forEach(p=>{ DB[p.truong_phong.ai.ma]={ten:p.truong_phong.ai.ten,phong:p.id,laTP:true}; p.to.forEach(t=>t.ai.forEach(a=>DB[a.ma]={ten:a.ten,phong:p.id,laTP:false})); });
@@ -296,6 +297,7 @@ async function taiPhieu(nen){
 const laGui=x=>x.phong_giao===S.id&&x.phong!==S.id;
 function locPhieu(){ return S.list.filter(x=>S.filter==="tat-ca"||(S.filter==="gui"?laGui(x):x.phong===S.id)); }
 function slaHtml(x){
+  if(x.trang_thai==="Đã ngừng") return `<div class="slatxt">Đã ngừng ${new Date(x.ngung_luc||x.tao_luc).toLocaleString("vi-VN",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"})}</div>`;
   if(x.trang_thai==="Xong") return `<div class="slatxt${x.qua_han?" err":""}">${x.qua_han?"Xong trễ hạn":"Xong đúng hạn"}</div>`;
   const pct=Math.min(1,x.ty_le_sla), cls=x.qua_han?"err":pct>=CFG.sla.canh_bao_ty_le?"warn":"";
   const han=new Date(x.han);
@@ -318,7 +320,7 @@ $("#board").addEventListener("click",e=>{ const b=e.target.closest(".card"); if(
 $("#filter").addEventListener("click",e=>{ const b=e.target.closest("button[data-f]"); if(!b) return; S.filter=b.dataset.f; document.querySelectorAll("#filter button").forEach(x=>x.setAttribute("aria-pressed",String(x===b))); renderBoard(); });
 
 function renderStats(){
-  const nhan=S.list.filter(x=>x.phong===S.id), mo=nhan.filter(x=>x.trang_thai!=="Xong"), xong=nhan.filter(x=>x.trang_thai==="Xong");
+  const nhan=S.list.filter(x=>x.phong===S.id), mo=nhan.filter(x=>!DONG.includes(x.trang_thai)), xong=nhan.filter(x=>x.trang_thai==="Xong");
   const quaHan=mo.filter(x=>x.qua_han).length, sapTre=mo.filter(x=>!x.qua_han&&x.ty_le_sla>=CFG.sla.canh_bao_ty_le).length;
   const pct=(a,b)=>b?Math.round(a/b*100)+"%":"–";
   const items=[["Đang mở",mo.length,""],["Quá hạn",quaHan,quaHan?"err":""],["Sắp trễ",sapTre,sapTre?"warn":""],["Chờ CEO",nhan.filter(x=>x.trang_thai==="Chờ CEO duyệt").length,""],
@@ -393,7 +395,7 @@ function paneBanGiao(){
 // Hành động hiện theo trạng thái; quyền do máy chủ kiểm tra
 const NUT={"Mới":[["nhan","Nhận phiếu","primary"]],"Đã nhận":[["bat_dau","Bắt đầu làm","primary"],["vuong","Báo vướng","danger"]],
   "Đang làm":[["nop","Nộp nghiệm thu","primary"],["vuong","Báo vướng","danger"]],"Chờ nghiệm thu":[["nghiem_thu","Nghiệm thu đạt","primary"],["tra_lai","Trả lại","danger"]],
-  "Vướng":[["go_vuong","Hết vướng, làm tiếp","primary"]],"Chờ CEO duyệt":[["ceo_duyet","CEO duyệt","primary"],["ceo_tra_lai","CEO trả lại","danger"]],"Xong":[]};
+  "Vướng":[["go_vuong","Hết vướng, làm tiếp","primary"]],"Chờ CEO duyệt":[["ceo_duyet","CEO duyệt","primary"],["ceo_tra_lai","CEO trả lại","danger"]],"Xong":[],"Đã ngừng":[]};
 const CAN_LY_DO=["vuong","tra_lai","ceo_tra_lai"];
 function panePhieu(){
   const x=S.list.find(y=>y.ma===S.sel);
@@ -440,10 +442,18 @@ function khoiAI(x){
 }
 // Sửa phiếu, chuyển Trợ lý điều phối
 function khoiQuanLy(x){
-  if(!["Mới","Đã nhận","Đang làm","Vướng"].includes(x.trang_thai)||x.ai_dang_lam) return "";
-  const chuyen=x.nguoi_giao==="CEO"&&x.nguoi_nhan!=="TL-DP"&&["Mới","Đã nhận"].includes(x.trang_thai)&&!S.list.some(y=>y.phieu_cha===x.ma);
-  return `<h3>Điều chỉnh phiếu</h3><div class="actions"><button class="btn" data-sua="1">Sửa phiếu</button>${chuyen?`<button class="btn" data-dieuphoi="1">Chuyển Trợ lý điều phối</button>`:""}</div>
-    ${chuyen?`<p class="note">Giao nhầm phòng? Trợ lý điều phối đọc nội dung, chọn đúng phòng và chuyên viên, phiếu này thành phiếu gốc theo dõi trên Bảng CEO.${AI.coKhoa?' <label><input type="checkbox" id="aiNgay"> Cho Claude làm ngay sau khi chuyển</label>':""}</p>`:""}`;
+  if(DONG.includes(x.trang_thai)) return "";
+  const suaDuoc=["Mới","Đã nhận","Đang làm","Vướng"].includes(x.trang_thai)&&!x.ai_dang_lam;
+  const chuyen=suaDuoc&&x.nguoi_giao==="CEO"&&x.nguoi_nhan!=="TL-DP"&&["Mới","Đã nhận"].includes(x.trang_thai)&&!S.list.some(y=>y.phieu_cha===x.ma);
+  const khac=CFG.phong.filter(p=>p.id!==x.phong);
+  return `<h3>Điều chỉnh phiếu</h3>${suaDuoc?`<div class="actions"><button class="btn" data-sua="1">Sửa phiếu</button>${chuyen?`<button class="btn" data-dieuphoi="1">Chuyển Trợ lý điều phối</button>`:""}</div>`:""}
+    ${chuyen?`<p class="note">Giao nhầm phòng? Trợ lý điều phối đọc nội dung, chọn đúng phòng và chuyên viên, phiếu này thành phiếu gốc theo dõi trên Bảng CEO.${AI.coKhoa?' <label><input type="checkbox" id="aiNgay"> Cho Claude làm ngay sau khi chuyển</label>':""}</p>`:""}
+    <details class="box" id="ngungBox"><summary><b>Ngừng vì sai bộ phận</b></summary>
+      <p class="note">Dừng phiếu này cùng phiếu Trưởng phòng và mọi phiếu con trong nhánh, không ai làm tiếp việc sai nghiệp vụ. Phiếu gốc của CEO về Trợ lý điều phối để giao lại đúng phòng. CEO, Trợ lý điều phối hoặc Trưởng phòng đang nhận việc được ngừng.</p>
+      <label class="field"><span>Lý do (bắt buộc)</span><textarea id="ngungLyDo" placeholder="Ví dụ: Việc pháp chế, không thuộc nghiệp vụ Marketing"></textarea></label>
+      <label class="field"><span>Chuyển sang phòng</span><select id="ngungPhong"><option value="">Để Trợ lý điều phối chọn lại (bỏ qua phòng vừa ngừng)</option>${khac.map(p=>`<option value="${p.id}">${esc(p.ten_ngan)}</option>`).join("")}</select></label>
+      ${AI.coKhoa?'<label><input type="checkbox" id="ngungAi"> Cho Claude làm ngay ở phòng mới</label>':""}
+      <div class="actions"><button class="btn danger" data-ngung="1">Ngừng phiếu</button></div></details>`;
 }
 
 $("#pane").addEventListener("click",async e=>{
@@ -455,6 +465,18 @@ $("#pane").addEventListener("click",async e=>{
       const ph=CFG.phong.find(p=>p.id===r.dinh_tuyen[0]);
       toast(`Trợ lý điều phối đã giao ${r.goc} cho ${r.dinh_tuyen.map(id=>CFG.phong.find(p=>p.id===id).ten_ngan).join(", ")}${r.ai_chay.length?" · Claude đang làm":""}`);
       if(ph){ const la=r.phieu[r.phieu.length-1]; chonPhong(ph.id,true); S.sel=la; S.tab="phieu"; } }
+    catch(err){ toast(err.message,true); b.disabled=false; }
+    return;
+  }
+  if(x0&&e.target.closest("[data-ngung]")){
+    const b=e.target.closest("[data-ngung]"), ly=$("#ngungLyDo").value.trim(), ph=$("#ngungPhong").value;
+    if(!ly){ toast("Cần ghi lý do ngừng.",true); $("#ngungLyDo").focus(); return; }
+    if(!confirm(`Ngừng ${x0.ma} và mọi phiếu trong nhánh? Phiếu đã ngừng không làm tiếp được.`)) return;
+    b.disabled=true;
+    try{ const r=await api(`/api/phieu/${x0.ma}/ngung`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({ai:$("#actor").value,ly_do:ly,phong:ph?[ph]:[],ai_lam_ngay:!!($("#ngungAi")&&$("#ngungAi").checked)})});
+      const moi=r.dinh_tuyen_lai;
+      toast(`Đã ngừng ${r.ngung.join(", ")}`+(moi?` · Trợ lý giao lại ${r.goc} cho ${moi.phong.map(id=>CFG.phong.find(p=>p.id===id).ten_ngan).join(", ")}`:r.cho_chon_phong?` · ${r.goc} chờ chọn phòng ở màn Giao việc`:""),!moi&&r.cho_chon_phong);
+      if(moi){ const la=moi.phieu[moi.phieu.length-1]; chonPhong(moi.phong[0],true); S.sel=la; S.tab="phieu"; } else await taiPhieu(); }
     catch(err){ toast(err.message,true); b.disabled=false; }
     return;
   }

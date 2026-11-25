@@ -289,7 +289,6 @@
         "seo",
         "quảng cáo",
         "từ khoá",
-        "nội dung",
         "bài viết",
         "viết bài",
         "webinar",
@@ -1077,7 +1076,15 @@
         "điều lệ",
         "nhãn hiệu",
         "hợp đồng lao động",
-        "hợp đồng mẫu"
+        "hợp đồng mẫu",
+        "pháp luật",
+        "văn bản pháp luật",
+        "văn bản quy phạm",
+        "quy phạm pháp luật",
+        "nghị định",
+        "thông tư",
+        "luật",
+        "hiệu lực"
       ],
       "quy_che": "QC-NSHC-v1.0 (nháp)",
       "truong_phong": {
@@ -1236,7 +1243,15 @@
                 "đăng ký",
                 "nhãn hiệu",
                 "hành chính",
-                "văn phòng"
+                "văn phòng",
+                "pháp luật",
+                "văn bản pháp luật",
+                "văn bản quy phạm",
+                "quy phạm pháp luật",
+                "nghị định",
+                "thông tư",
+                "luật",
+                "hiệu lực"
               ],
               "nhiem_vu": [
                 "Theo dõi danh mục hồ sơ pháp lý và hạn gia hạn",

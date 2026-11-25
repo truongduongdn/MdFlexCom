@@ -68,6 +68,28 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:12px 
 .lbl.team{font-weight:500}
 .lbl.ai{border-left-color:var(--ai)}
 .lbl.dim{opacity:.35}
+.lbl em{display:block;font-style:normal;font-weight:500;font-size:11px;color:var(--quiet);margin-top:1px}
+.lbl em.busy{color:var(--accent)} .lbl em.stuck{color:var(--err)} .lbl em.ceo{color:var(--brand-accent)}
+/* Luồng việc */
+.wk-sum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:8px 0 4px}
+.wk-sum div{border:1px solid var(--line);border-radius:var(--r-card);padding:8px;background:var(--surface)}
+.wk-sum b{display:block;font-family:var(--f-mono);font-size:18px}
+.wk-sum span{font-size:12px;color:var(--quiet)}
+.wk-dept{border:1px solid var(--line);border-left:4px solid var(--c);border-radius:var(--r-card);padding:12px;margin:8px 0;background:var(--panel)}
+.wk-dept header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wk-dept header b{font-size:15px;cursor:pointer}
+.st{font-size:12px;padding:0 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.st.idle{color:var(--quiet);border-style:dashed} .st.busy{border-color:var(--accent);color:var(--accent)} .st.stuck{border-color:var(--err);color:var(--err)} .st.ceo{border-color:var(--brand-accent)} .st.wait{border-color:var(--faint)}
+.wk-item{border-top:1px solid var(--line);margin-top:8px;padding-top:8px;font-size:13px}
+.wk-item .mono{font-family:var(--f-mono);font-size:12px}
+.wk-steps{display:flex;gap:2px;margin:6px 0 4px}
+.wk-steps i{flex:1;height:6px;border-radius:2px;background:var(--line)}
+.wk-steps i.on{background:var(--accent)} .wk-steps i.cur{background:var(--brand-accent)}
+.wk-meta{font-size:12px;color:var(--quiet)}
+.wk-meta .err{color:var(--err)}
+.wk-chain{font-size:12px;margin-top:4px}
+.wk-chain span{white-space:nowrap}
+@media (max-width:640px){ .wk-sum{grid-template-columns:repeat(2,minmax(0,1fr))} }
 .hud{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:12px;display:flex;flex-direction:column;gap:8px;max-width:calc(100% - 24px)}
 .stats{display:flex;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-card);padding:8px 12px;flex-wrap:wrap}
 .stat b{display:block;font-family:var(--f-mono);font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
@@ -228,11 +250,13 @@ pre.code{font-family:var(--f-mono);font-size:12px;background:var(--surface);bord
   <aside>
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" id="tabOrg" aria-selected="true" aria-controls="paneOrg">Tổ chức</button>
+      <button class="tab" role="tab" id="tabWork" aria-selected="false" aria-controls="paneWork">Luồng việc</button>
       <button class="tab" role="tab" id="tabCanvas" aria-selected="false" aria-controls="paneCanvas">Canvas &amp; chức năng</button>
       <button class="tab" role="tab" id="tabDesign" aria-selected="false" aria-controls="paneDesign">Thiết kế AI</button>
       <button class="tab" role="tab" id="tabFound" aria-selected="false" aria-controls="paneFound">Thành lập</button>
     </div>
     <div class="pane" id="paneOrg" role="tabpanel"></div>
+    <div class="pane" id="paneWork" role="tabpanel" hidden></div>
     <div class="pane" id="paneCanvas" role="tabpanel" hidden></div>
     <div class="pane" id="paneDesign" role="tabpanel" hidden></div>
     <div class="pane" id="paneFound" role="tabpanel" hidden></div>
@@ -523,6 +547,7 @@ function buildFlows(){
 
 /* ============ NHÃN HTML ============ */
 const labels=[];
+const WORK={phong:{},list:null,cfg:null,by:{},goc:[],loi:""};
 function addLabel(html,getPos,cls,extra){ const el=document.createElement("div"); el.className="lbl "+(cls||""); el.innerHTML=html; labelsEl.appendChild(el); const L=Object.assign({el,getPos},extra||{}); labels.push(L); return L; }
 addLabel("CEO",()=>new THREE.Vector3(0,7.4,0),"",{core:true}).el.style.setProperty("--c","var(--c-ceo)");
 const aiLbl=addLabel("Trợ lý điều phối (AI)",()=>new THREE.Vector3(0,3.4,3.8),"ai team");
@@ -534,7 +559,8 @@ DEPTS.forEach(d=>{
 });
 function refreshLabels(){
   DEPTS.forEach(d=>{
-    d.lbl.el.innerHTML=esc(d.short||d.name)+"<small>"+deptN(d,stage)+"</small>";
+    const w=WORK.phong[d.id];
+    d.lbl.el.innerHTML=esc(d.short||d.name)+"<small>"+deptN(d,stage)+"</small>"+(w?`<em class="${w.cls}">${esc(w.nhan)}</em>`:"");
     d.teams.forEach(tm=>{ const n=teamN(tm,stage); tm.lbl.el.innerHTML=esc(tm.name)+"<small>"+(tm.kiem?"kiêm":n)+"</small>"; });
   });
 }
@@ -638,6 +664,8 @@ function renderOrg(){
     <h2><span class="sw" style="background:var(${d.color});width:12px;height:12px"></span>${esc(d.name)}</h2>
     <p class="sub">${esc(d.head)} · ${deptN(d,stage)} người tại ${esc(STAGES[stage].name)} (${esc(STAGES[stage].sub)})</p>
     <p><a class="btn primary" style="text-decoration:none;display:inline-block" href="/phong.html?id=${d.id}">Mở trang làm việc của phòng →</a></p>
+    ${WORK.phong[d.id]?`<h3>Việc đang chạy <span class="st ${WORK.phong[d.id].cls}" style="text-transform:none;letter-spacing:0">${esc(WORK.phong[d.id].nhan)}</span></h3>
+      ${WORK.phong[d.id].viec.length?WORK.phong[d.id].viec.map(theViec).join(""):'<p class="sub">Phòng đang rảnh, có thể nhận việc mới.</p>'}`:""}
     <dl class="kv"><dt>Nhiệm vụ</dt><dd>${esc(d.mission)}</dd><dt>Đầu ra</dt><dd>${esc(d.outputs)}</dd><dt>KPI</dt><dd>${esc(d.kpi)}</dd></dl>
     <h3>Tổ và vị trí</h3>
     <div style="overflow-x:auto"><table><thead><tr><th>Vị trí</th>${STAGES.map((x,i)=>`<th class="n" ${i===stage?'style="color:var(--accent)"':''}>${esc(x.name)}</th>`).join("")}</tr></thead>
@@ -825,11 +853,88 @@ function renderResult(){
   $("#dCopy").addEventListener("click",async ev=>{ const b=ev.currentTarget; try{await navigator.clipboard.writeText(r.css); b.textContent="Đã sao chép";}catch(_){ const pre=$("#dResult pre"); const rg=document.createRange(); rg.selectNodeContents(pre); const sel=getSelection(); sel.removeAllRanges(); sel.addRange(rg); b.textContent="Đã chọn, nhấn Ctrl+C"; } });
 }
 
+/* ============ LUỒNG VIỆC: phòng nào rảnh, đang làm gì, tới đâu, báo cáo về ai ============ */
+const BUOC=["Mới","Đã nhận","Đang làm","Chờ nghiệm thu","Chờ CEO duyệt","Xong"];
+const BUOC_TEN=["Chờ nhận","Đã nhận","Đang làm","Chờ Trưởng phòng nghiệm thu","Chờ CEO duyệt","Xong"];
+async function taiViec(){
+  try{
+    const [p,c]=await Promise.all([fetch("/api/phieu"),WORK.cfg?null:fetch("/api/phong")]);
+    if(!p.ok) throw 0; WORK.list=await p.json(); if(c&&c.ok) WORK.cfg=await c.json(); WORK.loi="";
+  }catch(e){ WORK.loi="Không đọc được phiếu việc (/api/phieu)."; }
+  tinhViec(); refreshLabels(); renderWork(); if(selected) renderOrg();
+}
+function tenVT(m){
+  const C=WORK.cfg; if(!C) return m;
+  const v=C.vi_tri_chung.find(x=>x.ma===m); if(v) return v.ten;
+  for(const p of C.phong){ if(p.truong_phong.ai.ma===m) return p.truong_phong.ai.ten; for(const t of p.to) for(const a of t.ai) if(a.ma===m) return a.ten; }
+  return m;
+}
+// Chuỗi báo cáo của một phiếu: người làm → người giao → … → CEO (theo phiếu cha)
+function chuoiBaoCao(x){
+  const by=WORK.by, ch=[x.nguoi_nhan]; let cur=x;
+  while(cur){ if(!ch.includes(cur.nguoi_giao)) ch.push(cur.nguoi_giao); cur=by[cur.phieu_cha]; }
+  return ch;
+}
+function tinhViec(){
+  const L=WORK.list||[], by=WORK.by=Object.fromEntries(L.map(x=>[x.ma,x]));
+  const dong=x=>x.trang_thai==="Xong"||x.trang_thai==="Đã ngừng";
+  const con=ma=>L.filter(x=>x.phieu_cha===ma&&x.loai!=="Đề xuất"&&x.trang_thai!=="Đã ngừng");
+  WORK.phong={};
+  DEPTS.forEach(d=>{
+    const mine=L.filter(x=>x.phong===d.id), mo=mine.filter(x=>!dong(x));
+    // Việc của phòng = phiếu cao nhất trong phòng (phiếu Trưởng phòng nhận, hoặc phiếu lẻ không có cha trong phòng)
+    const goc=mo.filter(x=>!(by[x.phieu_cha]&&by[x.phieu_cha].phong===d.id));
+    const viec=goc.map(g=>{
+      const la=con(g.ma).length?con(g.ma):[g];
+      const buoc=Math.min(...la.map(x=>Math.max(0,BUOC.indexOf(x.trang_thai==="Vướng"?"Đang làm":x.trang_thai))));
+      const xong=la.filter(x=>x.trang_thai==="Xong").length;
+      return {g,la,buoc,xong,vuong:la.some(x=>x.trang_thai==="Vướng")||g.trang_thai==="Vướng",ai:la.some(x=>x.ai_dang_lam),ceo:la.some(x=>x.trang_thai==="Chờ CEO duyệt")};
+    });
+    let cls="idle",nhan="rảnh";
+    if(viec.some(v=>v.vuong)){cls="stuck";nhan=`vướng · ${viec.length} việc`;}
+    else if(viec.some(v=>v.ceo)){cls="ceo";nhan=`chờ CEO · ${viec.length} việc`;}
+    else if(viec.some(v=>v.buoc>=2)){cls="busy";nhan=`đang làm ${viec.length} việc`;}
+    else if(viec.length){cls="wait";nhan=viec.every(v=>v.buoc===0)?`${viec.length} việc chờ nhận`:`${viec.length} việc đã nhận, chưa bắt đầu`;}
+    WORK.phong[d.id]={cls,nhan,viec,xongTuan:mine.filter(x=>x.trang_thai==="Xong"&&Date.now()-Date.parse(x.xong_luc||0)<7*864e5).length,quaHan:mo.filter(x=>x.qua_han).length};
+  });
+  WORK.goc=L.filter(x=>x.nguoi_giao==="CEO"&&x.nguoi_nhan==="TL-DP"&&!dong(x));
+}
+function theViec(v){
+  const g=v.g, ch=chuoiBaoCao(v.la[0]);
+  const pct=v.la.length?Math.round(v.xong/v.la.length*100):0;
+  const han=new Date(g.han).toLocaleString("vi-VN",{hour:"2-digit",minute:"2-digit",day:"2-digit",month:"2-digit"});
+  return `<div class="wk-item"><div><span class="mono">${esc(g.ma)}</span> ${esc(g.muc_tieu)}</div>
+    <div class="wk-steps" role="img" aria-label="Bước ${v.buoc+1}/6: ${esc(BUOC_TEN[v.buoc])}">${BUOC.map((_,i)=>`<i class="${i<v.buoc?"on":i===v.buoc?"cur":""}"></i>`).join("")}</div>
+    <div class="wk-meta">${esc(BUOC_TEN[v.buoc])}${v.vuong?' · <span class="err">Vướng</span>':""}${v.ai?" · Claude đang làm":""} · ${v.xong}/${v.la.length} phiếu thực hiện xong (${pct}%) · ${g.qua_han?'<span class="err">quá hạn</span>':"hạn"} ${han}</div>
+    <div class="wk-meta">Người làm: ${v.la.map(x=>`<span class="mono">${esc(x.nguoi_nhan)}</span>`).join(", ")}</div>
+    <div class="wk-chain">Báo cáo về: ${ch.slice(1).map(m=>`<span>${esc(tenVT(m))}</span>`).join(" → ")}${v.la.some(x=>x.ket_qua_ai)?" · kết quả AI lưu ở data/ket-qua/":""}</div></div>`;
+}
+function renderWork(){
+  const el=$("#paneWork"); if(!el) return;
+  if(WORK.loi){ el.innerHTML=`<h2>Luồng việc</h2><div class="note err">${esc(WORK.loi)}</div>`; return; }
+  const P=WORK.phong, ds=DEPTS.map(d=>[d,P[d.id]]);
+  const ranh=ds.filter(([,w])=>w.cls==="idle").length, lam=ds.length-ranh, vuong=ds.filter(([,w])=>w.cls==="stuck").length;
+  const goc=WORK.goc||[];
+  const thu=["stuck","ceo","busy","wait","idle"];
+  el.innerHTML=`<h2>Luồng việc của công ty</h2>
+    <p class="sub">Cập nhật mỗi 20 giây từ phiếu việc. Việc đi: CEO → Trợ lý điều phối → Trưởng phòng → Chuyên viên. Kết quả báo ngược lại: Chuyên viên → Trưởng phòng nghiệm thu → Trợ lý cộng dồn → CEO nghiệm thu.</p>
+    <div class="wk-sum"><div><b>${lam}</b><span>phòng có việc</span></div><div><b>${ranh}</b><span>phòng rảnh</span></div><div><b>${vuong}</b><span>phòng vướng</span></div><div><b>${goc.length}</b><span>việc CEO đang chạy</span></div></div>
+    ${ds.slice().sort((a,b)=>thu.indexOf(a[1].cls)-thu.indexOf(b[1].cls)).map(([d,w])=>`<section class="wk-dept" style="--c:var(${d.color})">
+      <header><b data-phong="${d.id}" role="button" tabindex="0">${esc(d.short||d.name)}</b><span class="st ${w.cls}">${esc(w.nhan)}</span>${w.quaHan?`<span class="st stuck">${w.quaHan} quá hạn</span>`:""}
+        <a href="/phong.html?id=${d.id}" style="margin-left:auto;font-size:12px">Mở phòng →</a></header>
+      ${w.viec.length?w.viec.map(theViec).join(""):`<p class="wk-meta" style="margin:6px 0 0">Không có việc đang mở${w.xongTuan?` · ${w.xongTuan} phiếu xong trong 7 ngày`:""}. Có thể nhận việc mới.</p>`}</section>`).join("")}
+    <h3>Việc CEO đã giao đang chạy</h3>
+    ${goc.length?`<table><thead><tr><th>Phiếu</th><th>Phòng</th><th>Trạng thái</th></tr></thead><tbody>${goc.map(g=>{ const nh=(WORK.list||[]).filter(x=>x.phieu_cha===g.ma&&x.nguoi_giao==="TL-DP");
+      return `<tr><td><span class="mono">${esc(g.ma)}</span> ${esc(g.muc_tieu)}</td><td>${nh.map(x=>`${esc((DEPTS.find(d=>d.id===x.phong)||{}).short||x.phong)} <small style="color:var(--quiet)">${esc(x.trang_thai)}</small>`).join("<br>")||(g.cho_dinh_tuyen?"Chờ chọn phòng":"—")}</td><td>${esc(g.trang_thai)}</td></tr>`; }).join("")}</tbody></table>`:'<p class="sub">Chưa có việc CEO giao đang chạy.</p>'}
+    <p style="margin-top:12px"><a href="/giao-viec.html">Giao việc mới →</a> · <a href="/ceo.html">Bảng CEO →</a></p>`;
+  el.querySelectorAll("[data-phong]").forEach(b=>{ const go=()=>select(deptById(b.dataset.phong)); b.addEventListener("click",go); b.addEventListener("keydown",e=>{ if(e.key==="Enter") go(); }); });
+}
+
 /* ============ TAB ============ */
-const TABS={org:["#tabOrg","#paneOrg"],canvas:["#tabCanvas","#paneCanvas"],design:["#tabDesign","#paneDesign"],found:["#tabFound","#paneFound"]};
+const TABS={org:["#tabOrg","#paneOrg"],work:["#tabWork","#paneWork"],canvas:["#tabCanvas","#paneCanvas"],design:["#tabDesign","#paneDesign"],found:["#tabFound","#paneFound"]};
 function showTab(which){ Object.entries(TABS).forEach(([k,[t,p]])=>{ $(t).setAttribute("aria-selected",String(k===which)); $(p).hidden=k!==which; }); }
 Object.entries(TABS).forEach(([k,[t]])=>$(t).addEventListener("click",()=>showTab(k)));
-loadCanvas(); loadDesign();
+loadCanvas(); loadDesign(); taiViec(); setInterval(()=>{ if(!document.hidden) taiViec(); },20000);
 
 /* Theo dõi đổi theme */
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{applyTheme();setDim();});
