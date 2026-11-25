@@ -158,7 +158,9 @@ const COT=["Mới","Đã nhận","Đang làm","Chờ nghiệm thu","Vướng","C
 const pct=(a,b)=>b?Math.round(a/b*100):null;
 const fmtPct=v=>v==null?"–":v+"%";
 function tuoi(ms){ const m=Math.round(ms/60000); if(m<60) return m+" phút"; const h=Math.round(m/60); if(h<48) return h+" giờ"; return Math.round(h/24)+" ngày"; }
-const vaoTT=x=>Date.parse(x.nhat_ky[x.nhat_ky.length-1].luc);
+// Mục nhật ký cuối không phải Phản hồi (phản hồi không đổi trạng thái, không tính vào thời gian chờ)
+const cuoiTT=x=>{ for(let i=x.nhat_ky.length-1;i>=0;i--) if(x.nhat_ky[i].hanh_dong!=="Phản hồi") return x.nhat_ky[i]; return x.nhat_ky[0]; };
+const vaoTT=x=>Date.parse(cuoiTT(x).luc);
 const ngay=d=>new Date(d).toLocaleDateString("vi-VN");
 const phongTag=id=>id&&PH[id]?`<span class="dept-${id}"><span class="dot"></span></span>${esc(PH[id].ten_ngan)}`:"Chung";
 const lnk=x=>`<a class="lnk mono" href="/phong.html?id=${esc(x.phong||x.phong_giao||CFG.phong[0].id)}">${esc(x.ma)}</a>`;
@@ -181,7 +183,7 @@ function ve(){
 
   // Việc chờ CEO
   $("#queue").innerHTML=cho.length?cho.sort((a,b)=>vaoTT(a)-vaoTT(b)).map(x=>{
-    const g=x.nhat_ky[x.nhat_ky.length-1].ghi_chu||"", ly=/^Chạm cổng/.test(g)?"":g;
+    const g=cuoiTT(x).ghi_chu||"", ly=/^Chạm cổng/.test(g)?"":g;
     return `<li class="dept-${esc(x.phong)}"><div>${lnk(x)} <span class="tag">${esc(x.loai)}</span> <span class="tag ${x.uu_tien.toLowerCase()}">${esc(x.uu_tien)}</span> ${phongTag(x.phong)} · chờ ${tuoi(now-vaoTT(x))}</div>
       <h3>${esc(x.muc_tieu)}</h3>
       <p class="sub" style="margin:0">${esc(x.nguoi_nhan)} làm · ${esc(x.nguoi_giao)} giao · Cổng: ${esc(x.cong)}${ly?" · "+esc(ly):""}</p>

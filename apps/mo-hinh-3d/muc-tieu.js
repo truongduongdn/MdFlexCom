@@ -108,7 +108,16 @@ function taoModuleMucTieu(dep) {
     if (b.don_vi !== undefined) moi.don_vi = kiemDonVi(b.don_vi, loi);
     if (b.muc_du_lieu !== undefined) { moi.muc_du_lieu = chu(b.muc_du_lieu); if (!MUC_DL.includes(moi.muc_du_lieu)) loi.push('Mức dữ liệu chỉ nhận Xanh, Vàng hoặc Đỏ.'); }
     if (b.chi_so !== undefined) moi.chi_so = kiemChiSo(b.chi_so);
+    if (b.ke_hoach !== undefined) moi.ke_hoach = kiemKeHoach(b.ke_hoach, moi.don_vi || mt.don_vi, loi);
     if (loi.length) return send(res, 400, { error: loi.join(' '), loi });
+    if (moi.don_vi) {
+      const bo = mt.don_vi.filter((id) => !moi.don_vi.includes(id));
+      const keHoach = moi.ke_hoach || mt.ke_hoach;
+      const daGiao = new Set(tatCaPhieu().filter((x) => mt.phieu_goc.includes(x.phieu_cha) && x.nguoi_giao === 'TL-DP').map((x) => x.phong));
+      const vuong = bo.map((id) => [id, [keHoach.some((m) => m.don_vi === id) && 'còn mốc kế hoạch', daGiao.has(id) && 'đã nhận phiếu', mt.danh_gia[id] && 'đã có đánh giá'].filter(Boolean)])
+        .filter(([, ly]) => ly.length);
+      if (vuong.length) return send(res, 409, { error: 'Không bỏ được đơn vị đang được tham chiếu: ' + vuong.map(([id, ly]) => `${id} (${ly.join(', ')})`).join('; ') + '. Ngừng phiếu hoặc chuyển mốc trước.' });
+    }
     const hien = (v) => (v && typeof v === 'object' ? (v.ten && v.tu ? v.ten : JSON.stringify(v)) : String(v));
     for (const [k, v] of Object.entries(moi)) {
       if (JSON.stringify(mt[k]) === JSON.stringify(v)) continue;
@@ -120,16 +129,32 @@ function taoModuleMucTieu(dep) {
     send(res, 200, mt);
   }
 
+  // Chỉ tích/bỏ tích mốc, thêm mốc mới, ghi số thực tế. Đổi tên, hạn, đơn vị, chỉ tiêu hay xoá: dùng Sửa mục tiêu (có lý do).
   async function tienDo(req, res, ma) {
     const b = await docBody(req, res); if (!b) return;
     const mt = doc(ma); if (!mt) return send(res, 404, { error: 'Không tìm thấy mục tiêu ' + ma + '.' });
     if (chanGhi(res, mt, b, MO)) return;
-    const loi = [];
-    if (b.ke_hoach !== undefined) mt.ke_hoach = kiemKeHoach(b.ke_hoach, mt.don_vi, loi);
-    if (b.chi_so !== undefined) mt.chi_so = kiemChiSo(b.chi_so);
+    const loi = [], doi = [];
+    let keHoach = mt.ke_hoach, chiSo = mt.chi_so;
+    if (b.ke_hoach !== undefined) {
+      keHoach = kiemKeHoach(b.ke_hoach, mt.don_vi, loi);
+      if (keHoach.length < mt.ke_hoach.length) loi.push('Không xoá mốc ở đây; dùng Sửa mục tiêu (cần lý do).');
+      mt.ke_hoach.forEach((cu, i) => {
+        const m = keHoach[i]; if (!m) return;
+        if (m.ten !== cu.ten || m.han !== cu.han || m.don_vi !== cu.don_vi) loi.push(`Mốc "${cu.ten}": đổi tên, hạn hay đơn vị dùng Sửa mục tiêu (cần lý do).`);
+        else if (m.xong !== cu.xong) doi.push(`${cu.ten}: ${cu.xong ? 'xong' : 'chưa xong'} → ${m.xong ? 'xong' : 'chưa xong'}`);
+      });
+      keHoach.slice(mt.ke_hoach.length).forEach((m) => doi.push(`thêm mốc ${m.ten} (${m.han}${m.don_vi ? ', ' + m.don_vi : ''})`));
+    }
+    if (b.chi_so !== undefined) {
+      chiSo = kiemChiSo(b.chi_so);
+      if (chiSo.length !== mt.chi_so.length || chiSo.some((c, i) => c.ten !== mt.chi_so[i].ten || c.chi_tieu !== mt.chi_so[i].chi_tieu)) loi.push('Đổi tên, chỉ tiêu hay số lượng chỉ số dùng Sửa mục tiêu (cần lý do).');
+      else chiSo.forEach((c, i) => { if (c.thuc_te !== mt.chi_so[i].thuc_te) doi.push(`${c.ten}: ${mt.chi_so[i].thuc_te || '—'} → ${c.thuc_te || '—'}`); });
+    }
     if (loi.length) return send(res, 400, { error: loi.join(' '), loi });
-    const xong = mt.ke_hoach.filter((m) => m.xong).length;
-    nhatKy(mt, 'CEO', 'Cập nhật kế hoạch/chỉ số', `${xong}/${mt.ke_hoach.length} mốc xong`);
+    if (!doi.length) return send(res, 400, { error: 'Không có gì thay đổi.' });
+    mt.ke_hoach = keHoach; mt.chi_so = chiSo;
+    nhatKy(mt, 'CEO', 'Cập nhật kế hoạch/chỉ số', doi.join('; '));
     ghi(mt);
     send(res, 200, mt);
   }
@@ -162,6 +187,23 @@ function taoModuleMucTieu(dep) {
     .sort((a, b) => (b.k.luc.localeCompare(a.k.luc)) || (b.i - a.i))
     .map(({ k, p }) => ({ luc: k.luc, ai: k.ai, loai: k.loai, noi_dung: k.ghi_chu, ma_phieu: p.ma, phong: p.phong || null }));
 
+  const BUOC = ['Mới', 'Đã nhận', 'Đang làm', 'Vướng', 'Chờ nghiệm thu', 'Chờ CEO duyệt', 'Xong'];
+  // Bước của đơn vị = trạng thái của phiếu lá chậm nhất (Vướng được ưu tiên báo)
+  const buocCua = (la) => {
+    const mo = la.filter((x) => !DONG.includes(x.trang_thai));
+    if (!mo.length) return la.length ? 'Xong' : 'Chưa giao';
+    if (mo.some((x) => x.trang_thai === 'Vướng')) return 'Vướng';
+    return mo.map((x) => x.trang_thai).sort((a, b) => BUOC.indexOf(a) - BUOC.indexOf(b))[0];
+  };
+  // Im lặng (quy tắc 3): phòng có phiếu đang mở quá 48 giờ (trừ phiếu đang chờ CEO duyệt) mà 48 giờ qua không phản hồi trên phiếu nào của phòng
+  function imLangPhong(id, all, db) {
+    const now = Date.now(), H = GIO_IM_LANG * 3600e3;
+    const cua = all.filter((x) => x.phong === id);
+    const cho = cua.filter((x) => !DONG.includes(x.trang_thai) && x.trang_thai !== 'Chờ CEO duyệt');
+    const ph = phanHoiTrong(cua).filter((r) => db[r.ai] && db[r.ai].phong === id)[0];
+    return cho.some((x) => now - Date.parse(x.tao_luc) > H) && !(ph && now - Date.parse(ph.luc) <= H);
+  }
+
   // Quy tắc chi tiết 1–3 trong thiết kế
   function tinhDonVi(mt, all) {
     const cfg = phongCfg() || { phong: [] }; const db = danhBa(cfg);
@@ -175,13 +217,13 @@ function taoModuleMucTieu(dep) {
       const mo = chuoi.filter((x) => !DONG.includes(x.trang_thai));
       const ph = phanHoiTrong(chuoi).filter((r) => db[r.ai] && db[r.ai].phong === id);
       const cuoi = ph[0] || null;
-      const imLang = mo.some((x) => now - Date.parse(x.tao_luc) > H) && !(cuoi && now - Date.parse(cuoi.luc) <= H);
+      const imLang = imLangPhong(id, all, db);
       const nhan = tps.map((x) => (x.nhat_ky.find((k) => k.den === 'Đã nhận') || {}).luc).filter(Boolean).sort()[0] || null;
       const p = cfg.phong.find((x) => x.id === id);
       return {
         phong: id, ten: p ? p.ten_ngan : id, truong_phong: p ? p.truong_phong.nguoi_that : null,
         phieu: tps.map((x) => x.ma), nhan_luc: nhan,
-        trang_thai: tps.length ? tps[tps.length - 1].trang_thai : 'Chưa giao',
+        trang_thai: tps.length ? tps[tps.length - 1].trang_thai : 'Chưa giao', buoc: tps.length ? buocCua(la) : 'Chưa giao',
         xong: la.filter((x) => x.trang_thai === 'Xong').length, tong: la.length,
         qua_han: mo.some((x) => kemChiSo(x).qua_han), vuong: chuoi.some((x) => x.trang_thai === 'Vướng'),
         cho_ceo: chuoi.some((x) => x.trang_thai === 'Chờ CEO duyệt'),
@@ -309,7 +351,7 @@ function taoModuleMucTieu(dep) {
         ty_le_dung_sla: xong.length ? Math.round(xong.filter((x) => Date.parse(x.xong_luc) <= Date.parse(x.han)).length / xong.length * 100) : null,
         dang_mo: mo.length, qua_han: mo.filter((x) => kemChiSo(x).qua_han).length, vuong: cua.filter((x) => x.trang_thai === 'Vướng').length,
         so_phan_hoi: ph.length, phan_hoi_cuoi: ph[0] || null,
-        im_lang: mo.some((x) => now - Date.parse(x.tao_luc) > H) && !(ph[0] && now - Date.parse(ph[0].luc) <= H)
+        im_lang: imLangPhong(p.id, tatCaPhieu(), db)
       };
     });
   }

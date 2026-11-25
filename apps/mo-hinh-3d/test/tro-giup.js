@@ -15,7 +15,8 @@ const congTrong = () => new Promise((ok, no) => {
 });
 
 // khoiDong({ coCau, tmp }) — tmp: chạy lại trên bản sao đã có (giữ data/)
-async function khoiDong({ coCau, tmp } = {}) {
+// env: biến môi trường thêm (ví dụ khoá giả + ANTHROPIC_BASE_URL trỏ cổng đóng, để thử nhánh có khoá mà không gọi ra ngoài)
+async function khoiDong({ coCau, tmp, env: envThem } = {}) {
   if (!tmp) {
     tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mo-hinh-3d-test-'));
     fs.cpSync(APP, tmp, { recursive: true, filter: (s) => !['data', 'test'].includes(path.relative(APP, s).split(path.sep)[0]) });
@@ -24,6 +25,7 @@ async function khoiDong({ coCau, tmp } = {}) {
   const env = { ...process.env, PORT: String(port) };
   for (const k of ['ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL', 'PERPLEXITY_API_KEY', 'PERPLEXITY_API_URL', 'CO_CAU']) delete env[k];
   if (coCau) env.CO_CAU = coCau;
+  Object.assign(env, envThem || {});
   const proc = spawn(process.execPath, ['server.js'], { cwd: tmp, env, stdio: ['ignore', 'pipe', 'pipe'] });
   let log = '';
   proc.stdout.on('data', (d) => { log += d; });

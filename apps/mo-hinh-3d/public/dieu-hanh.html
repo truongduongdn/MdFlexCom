@@ -174,7 +174,7 @@ const VAI=[["CEO","CEO"],["TL-DP","Trợ lý điều phối (AI)"]].concat(CFG.p
 $("#vai").innerHTML=VAI.map(([m,t])=>`<option value="${esc(m)}">${esc(t)}</option>`).join("");
 const store={get:k=>{try{return localStorage.getItem(k)}catch(_){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(_){}}};
 $("#vai").value=store.get("dh-vai")||"CEO";
-const S={ds:[],tp:[],sel:null,tab:"muc-tieu",moi:false,ky:store.get("dh-ky")||"tat-ca"};
+const S={ban:false,ds:[],tp:[],sel:null,tab:"muc-tieu",moi:false,ky:store.get("dh-ky")||"tat-ca"};
 // Liên kết thẳng: /dieu-hanh.html?mt=MT-0001&tab=trien-khai
 const Q=new URLSearchParams(location.search); if(/^MT-\d{4,}$/.test(Q.get("mt")||"")) S.sel=Q.get("mt"); if(["muc-tieu","ke-hoach","trien-khai","danh-gia"].includes(Q.get("tab"))) S.tab=Q.get("tab");
 const laCEO=()=>$("#vai").value==="CEO";
@@ -191,7 +191,7 @@ async function tai(){
     S.tp=await api("/api/truong-phong?"+new URLSearchParams(k?{ky:k.ten,tu:k.tu,den:k.den}:{ky:"tat-ca"}));
     $("#updated").textContent=`${S.ds.length} mục tiêu · cập nhật ${new Date().toLocaleTimeString("vi-VN")}`;
   }catch(e){ $("#updated").textContent="Lỗi tải dữ liệu: "+e.message; return; }
-  veDS(); veTP(); if(!dangGo()) veChinh();
+  veDS(); veTP(); if(!S.ban&&!dangGo()) veChinh();
 }
 // Đang gõ trong form thì không vẽ lại vùng chính khi tự làm mới
 const dangGo=()=>{ const a=document.activeElement; return !!(a&&$("#chinh").contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)); };
@@ -222,7 +222,7 @@ function veTP(){
 
 const MT=()=>S.ds.find(m=>m.ma===S.sel);
 function veChinh(){
-  const el=$("#chinh");
+  const el=$("#chinh"); S.ban=false;
   if(S.moi) return veFormMT(el,null);
   const m=MT();
   if(!m){ el.innerHTML=`<div class="panel"><h2>Buồng điều hành</h2><p>Chọn một mục tiêu bên trái, hoặc bấm <b>+ Mục tiêu mới</b>.</p>
@@ -297,9 +297,9 @@ function veTrienKhai(b,m,ghi){
   const dv=m.don_vi_chi_tiet;
   const coTraLoi=["CEO","TL-DP"].includes($("#vai").value);
   b.innerHTML=`<h3>Đơn vị nhận việc</h3>
-    <div class="scroll"><table><thead><tr><th>Đơn vị</th><th>Nhận lúc</th><th>Trạng thái</th><th class="n">Xong</th><th>Cảnh báo</th><th>Phản hồi gần nhất</th><th></th></tr></thead><tbody>
+    <div class="scroll"><table><thead><tr><th>Đơn vị</th><th>Nhận lúc</th><th>Bước</th><th class="n">Xong</th><th>Cảnh báo</th><th>Phản hồi gần nhất</th><th></th></tr></thead><tbody>
     ${dv.map(x=>`<tr><td><span class="dept-${esc(x.phong)}"><span class="dot"></span></span><b>${esc(x.ten)}</b><br><small>${esc(x.truong_phong||"")}</small></td>
-      <td class="mono">${gio(x.nhan_luc)}</td><td>${esc(x.trang_thai)}</td><td class="n">${x.xong}/${x.tong}</td>
+      <td class="mono">${gio(x.nhan_luc)}</td><td>${esc(x.buoc)}</td><td class="n">${x.xong}/${x.tong}</td>
       <td>${[x.qua_han?'<span class="tag err">quá hạn</span>':"",x.vuong?'<span class="tag err">vướng</span>':"",x.cho_ceo?'<span class="tag warn">chờ CEO</span>':"",x.im_lang?'<span class="tag warn">im lặng</span>':""].join(" ")||"—"}</td>
       <td>${x.phan_hoi_cuoi?`<b>${esc(x.phan_hoi_cuoi.loai)}</b> · ${gio(x.phan_hoi_cuoi.luc)}<br>${esc(x.phan_hoi_cuoi.noi_dung)}`:'<span class="empty">Chưa phản hồi</span>'}</td>
       <td>${x.phieu.length?`<a class="lnk mono" href="/phong.html?id=${encodeURIComponent(x.phong)}">${esc(x.phieu[x.phieu.length-1])}</a>`:""}
@@ -309,6 +309,7 @@ function veTrienKhai(b,m,ghi){
     <h3>Phản hồi (mới nhất trước)</h3>
     <ol class="log">${m.phan_hoi.map(r=>`<li class="ph-log"><b>${esc(r.loai)}</b> · ${esc(r.ai)} · ${gio(r.luc)} · <span class="mono">${esc(r.ma_phieu)}</span>${r.phong?" · "+esc(tenDV(r.phong)):""}<br>${esc(r.noi_dung)}</li>`).join("")||'<li class="empty">Chưa có phản hồi nào.</li>'}</ol>
     ${ghi?veFormGiao(m):""}`;
+  if(ghi) taiPhieuGan();
 }
 function veFormGiao(m){
   const kh=m.ke_hoach.filter(x=>!x.xong);
@@ -354,10 +355,12 @@ function veDanhGia(b,m,ghi){
 // ---------- Sự kiện ----------
 async function chay(btn,fn,okMsg){
   if(btn) btn.disabled=true;
-  try{ const r=await fn(); if(okMsg) toast(typeof okMsg==="function"?okMsg(r):okMsg); await tai(); return r; }
+  try{ const r=await fn(); if(okMsg) toast(typeof okMsg==="function"?okMsg(r):okMsg); S.ban=false; await tai(); return r; }
   catch(e){ toast(e.message,true); }
   finally{ if(btn) btn.disabled=false; }
 }
+// Form trong vùng chính có thay đổi chưa lưu: tự làm mới không vẽ lại (S.ban xoá khi vẽ lại sau thao tác)
+$("#chinh").addEventListener("input",()=>{ S.ban=true; });
 $("#vai").addEventListener("change",()=>{ store.set("dh-vai",$("#vai").value); veChinh(); });
 $("#ky").addEventListener("change",()=>{ S.ky=$("#ky").value; store.set("dh-ky",S.ky); tai(); });
 $("#moiMT").addEventListener("click",()=>{ if(!laCEO()){ toast("Chỉ vai CEO tạo được mục tiêu.",true); return; } S.moi=true; S.sel=null; veDS(); veChinh(); });
