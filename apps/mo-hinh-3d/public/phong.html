@@ -68,13 +68,21 @@ header{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:12px 
 main{min-height:0;min-width:0;display:flex;flex-direction:column}
 .boardhead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 16px}
 .boardhead h2{margin:0;font-size:16px;margin-right:auto}
-.board{flex:1;min-height:0;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(232px,1fr);gap:12px;padding:0 16px 16px;overflow-x:auto}
-.col{display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card)}
-.col h3{margin:0;padding:12px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--quiet);font-family:var(--f-body);font-weight:600;display:flex;justify-content:space-between;border-bottom:1px solid var(--line)}
+/* Bảng vừa màn hình: cột có phiếu giãn đều, cột trống thu thành dải hẹp (bấm để mở) */
+.board{flex:1;min-height:0;display:flex;gap:8px;padding:0 16px 16px;overflow-x:auto}
+.col{flex:1 1 0;min-width:200px;display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card)}
+.col h3{margin:0;padding:10px 12px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--quiet);font-family:var(--f-body);font-weight:600;display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line)}
 .col h3 b{font-family:var(--f-mono)}
+.col h3 button{border:0;background:none;padding:0;cursor:pointer;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;display:flex;justify-content:space-between;gap:8px;width:100%}
 .col ul{list-style:none;margin:0;padding:8px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;min-height:48px}
 .col .empty{font-size:12px;color:var(--quiet);padding:4px}
+.col.thu{flex:0 0 44px;min-width:44px;cursor:pointer}
+.col.thu:hover{border-color:var(--accent)}
+.col.thu h3{border-bottom:0;height:100%;padding:12px 0}
+.col.thu h3 button{writing-mode:vertical-rl;flex-direction:row;justify-content:flex-start;align-items:center;height:100%;width:100%}
+.col.thu ul{display:none}
 .card{display:block;width:100%;text-align:left;border:1px solid var(--line);border-left:4px solid var(--dept);border-radius:var(--r-btn);background:var(--bg);padding:8px 12px;cursor:pointer}
+.card .goal{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .card:hover{border-color:var(--accent)}
 .card[aria-current="true"]{outline:2px solid var(--accent)}
 .card .top{display:flex;gap:4px;align-items:center;flex-wrap:wrap;font-size:12px}
@@ -92,7 +100,21 @@ main{min-height:0;min-width:0;display:flex;flex-direction:column}
 .slatxt.err{color:var(--err)}
 
 aside{border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
-.tabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto;align-items:center}
+.tabs .tab{flex:1 1 auto;min-width:0;padding:8px 6px}
+.tabs .btn{flex:none;margin:0 6px;min-height:32px;padding:4px 8px;font-size:12px}
+.app.full .tabs .tab{flex:0 0 auto;padding:8px 20px}
+.app.full .tabs .btn{margin-left:auto;margin-right:16px}
+/* Toàn màn hình: khung chi tiết chiếm cả vùng dưới thanh vai, bảng phiếu ẩn */
+.app.full{grid-template-columns:minmax(0,1fr)}
+.app.full main{display:none}
+.app.full aside{border-left:0}
+.app.full .pane{padding:20px max(24px,calc((100% - 1400px)/2)) 40px}
+.app.full .pp{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:8px 40px;align-items:start}
+.app.full .pp-b h3:first-child{margin-top:0}
+.app.full dl.kv{grid-template-columns:140px 1fr}
+.app.full .kq-ai{max-height:none!important}
+.pp-head{margin-bottom:8px}
 .tab{flex:1;min-height:44px;padding:8px;border:0;border-bottom:2px solid transparent;background:none;cursor:pointer;font-weight:500;color:var(--quiet);white-space:nowrap}
 .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 .pane{overflow-y:auto;padding:16px 20px 32px;min-height:0;flex:1}
@@ -141,8 +163,13 @@ dialog h2{margin:0 0 16px;font-size:20px}
 @media (max-width:960px){
   body{overflow:auto}
   .app{display:block;height:auto}
-  .board{grid-auto-flow:row;grid-auto-columns:auto;grid-template-columns:1fr;overflow:visible}
+  .board{flex-direction:column;overflow:visible}
+  .col,.col.thu{flex:none;min-width:0}
+  .col.thu h3{padding:10px 12px}
+  .col.thu h3 button{writing-mode:horizontal-tb;justify-content:space-between}
   .col ul{max-height:none}
+  .app.full main{display:none}
+  .app.full .pp{display:block}
   aside{border-left:0;border-top:1px solid var(--line)}
   .stats{margin-left:0}
   .row2{grid-template-columns:1fr}
@@ -193,6 +220,7 @@ dialog h2{margin:0 0 16px;font-size:20px}
       <button class="tab" role="tab" data-tab="to" aria-selected="false">Tổ &amp; vị trí</button>
       <button class="tab" role="tab" data-tab="bg" aria-selected="false">Bàn giao</button>
       <button class="tab" role="tab" data-tab="phieu" aria-selected="false">Phiếu</button>
+      <button class="btn" id="fullBtn" type="button" aria-pressed="false" title="Xem khung chi tiết toàn màn hình (Esc để thu nhỏ)" aria-label="Toàn màn hình">⛶</button>
     </div>
     <div class="pane" id="pane" role="tabpanel"></div>
   </aside>
@@ -259,7 +287,7 @@ CFG.phong.forEach(p=>{ DB[p.truong_phong.ai.ma]={ten:p.truong_phong.ai.ten,phong
 const tenVT=m=>DB[m]?`${m} · ${DB[m].ten}`:m;
 
 const PHONG_DAU=CFG.phong[0].id;
-const S={id:new URLSearchParams(location.search).get("id")||PHONG_DAU,tab:"tong",filter:"tat-ca",sel:null,list:[],moc:Math.min(1,CFG.moc.length-1)};
+const S={id:new URLSearchParams(location.search).get("id")||PHONG_DAU,tab:"tong",filter:"tat-ca",sel:null,list:[],moc:Math.min(1,CFG.moc.length-1),moCot:new Set(),full:false};
 if(!CFG.phong.some(p=>p.id===S.id)) S.id=PHONG_DAU;
 const P=()=>CFG.phong.find(p=>p.id===S.id);
 
@@ -280,7 +308,7 @@ function chonPhong(id,push){
   S.id=id; S.sel=null;
   if(push) history.pushState(null,"","?id="+id);
   const p=P();
-  document.getElementById("app").className="app dept-"+id;
+  document.getElementById("app").className="app dept-"+id+(S.full?" full":"");
   document.body.className="dept-"+id;
   $("#logo").textContent=p.ma.slice(0,4);
   $("#title").textContent=p.ten;
@@ -312,7 +340,8 @@ function renderBoard(){
   const ds=locPhieu();
   $("#board").innerHTML=COT.map(c=>{
     const o=ds.filter(x=>x.trang_thai===c);
-    return `<section class="col" aria-label="${c}"><h3>${c}<b>${o.length}</b></h3><ul>${o.length?o.map(x=>`<li>
+    const thu=!o.length&&!S.moCot.has(c);
+    return `<section class="col${thu?" thu":""}" aria-label="${c}" data-cot="${c}"><h3><button type="button" data-cot="${c}" aria-expanded="${!thu}" title="${thu?"Mở cột":"Thu cột"} ${c}"><span>${c}</span><b>${o.length}</b></button></h3><ul>${o.length?o.map(x=>`<li>
       <button class="card dept-${esc(x.phong||S.id)}" data-ma="${esc(x.ma)}" aria-current="${S.sel===x.ma}">
         <span class="top"><span class="mono">${esc(x.ma)}</span><span class="tag">${esc(x.loai)}</span><span class="tag ${x.uu_tien.toLowerCase()}">${esc(x.uu_tien)}</span>
         ${laGui(x)?`<span class="tag out">gửi đi</span>`:""}${x.cong!=="Không có"?`<span class="tag gate">cổng CEO</span>`:""}</span>
@@ -320,7 +349,25 @@ function renderBoard(){
         <span class="who">${esc(x.nguoi_giao)} → ${esc(x.nguoi_nhan)}</span>${slaHtml(x)}</button></li>`).join(""):`<li class="empty">Chưa có phiếu</li>`}</ul></section>`;
   }).join("");
 }
-$("#board").addEventListener("click",e=>{ const b=e.target.closest(".card"); if(!b) return; S.sel=b.dataset.ma; S.tab="phieu"; renderBoard(); renderPane(); });
+$("#board").addEventListener("click",e=>{
+  const b=e.target.closest(".card");
+  if(!b){ // bấm tiêu đề cột (hoặc dải cột đang thu) để mở/thu cột trống
+    const c=e.target.closest("[data-cot]"); if(!c) return;
+    const ten=c.dataset.cot; S.moCot.has(ten)?S.moCot.delete(ten):S.moCot.add(ten); renderBoard(); return;
+  }
+  S.sel=b.dataset.ma; S.tab="phieu"; renderBoard(); renderPane();
+});
+// Bấm đúp thẻ phiếu: mở chi tiết toàn màn hình
+$("#board").addEventListener("dblclick",e=>{ const b=e.target.closest(".card"); if(!b) return; S.sel=b.dataset.ma; S.tab="phieu"; datFull(true); });
+function datFull(on){
+  S.full=on;
+  document.getElementById("app").classList.toggle("full",on);
+  $("#fullBtn").setAttribute("aria-pressed",String(on));
+  $("#fullBtn").textContent=on?"✕ Thu nhỏ":"⛶";
+  renderBoard(); renderPane();
+}
+$("#fullBtn").addEventListener("click",()=>datFull(!S.full));
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&S.full&&!dlg.open) datFull(false); });
 $("#filter").addEventListener("click",e=>{ const b=e.target.closest("button[data-f]"); if(!b) return; S.filter=b.dataset.f; document.querySelectorAll("#filter button").forEach(x=>x.setAttribute("aria-pressed",String(x===b))); renderBoard(); });
 
 function renderStats(){
@@ -406,8 +453,9 @@ function panePhieu(){
   if(!x) return `<h2>Phiếu</h2><p class="note">Bấm một phiếu trên bảng để xem chi tiết, tick tiêu chí và chuyển trạng thái.</p>`;
   const sua=x.trang_thai==="Đang làm";
   const nut=NUT[x.trang_thai]||[];
-  return `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="mono">${esc(x.ma)}</span><span class="tag">${esc(x.loai)}</span><span class="tag ${x.uu_tien.toLowerCase()}">${esc(x.uu_tien)}</span><span class="badge">${esc(x.trang_thai)}</span></div>
-    <h2 style="margin-top:8px">${esc(x.muc_tieu)}</h2>${slaHtml(x)}
+  return `<div class="pp-head"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="mono">${esc(x.ma)}</span><span class="tag">${esc(x.loai)}</span><span class="tag ${x.uu_tien.toLowerCase()}">${esc(x.uu_tien)}</span><span class="badge">${esc(x.trang_thai)}</span></div>
+    <h2 style="margin-top:8px">${esc(x.muc_tieu)}</h2>${slaHtml(x)}</div>
+    <div class="pp"><div class="pp-a">
     <h3>Thông tin</h3><dl class="kv">
       <dt>Người giao</dt><dd>${esc(tenVT(x.nguoi_giao))}</dd><dt>Người nhận</dt><dd>${esc(tenVT(x.nguoi_nhan))}</dd>
       <dt>Phiếu cha</dt><dd class="mono">${esc(x.phieu_cha)}</dd><dt>Đầu vào</dt><dd>${esc(x.dau_vao)}</dd><dt>Đầu ra</dt><dd>${esc(x.dau_ra)}</dd>
@@ -419,10 +467,13 @@ function panePhieu(){
     ${nut.length?`<h3>Thao tác với vai ${esc($("#actor").value)}</h3>
       ${nut.some(([h])=>CAN_LY_DO.includes(h))?`<label class="field"><span>Lý do (bắt buộc khi báo vướng hoặc trả lại)</span><textarea id="lyDo"></textarea></label>`:""}
       <div class="actions">${nut.map(([h,t,c])=>`<button class="btn ${c}" data-hd="${h}">${t}</button>`).join("")}</div>`:""}
-    ${khoiAI(x)}${khoiQuanLy(x)}
+    ${khoiQuanLy(x)}
+    </div><div class="pp-b">
+    ${khoiAI(x)}
     ${khoiPhanHoi(x)}
     <h3>Nhật ký</h3><ol class="log">${x.nhat_ky.slice().reverse().map(n=>`<li${n.hanh_dong==="Phản hồi"?' class="ph-log"':""}><b>${esc(n.hanh_dong)}${n.loai?" · "+esc(n.loai):""}</b> · <span class="mono">${esc(n.ai)}</span> · ${new Date(n.luc).toLocaleString("vi-VN")}
-      ${n.tu?`<br>${esc(n.tu)} → ${esc(n.den)}`:""}${n.ly_do?`<br>Lý do: ${esc(n.ly_do)}`:""}${n.ghi_chu?`<br>${esc(n.ghi_chu)}`:""}<br><span class="note mono">${esc(n.quy_dinh)}</span></li>`).join("")}</ol>`;
+      ${n.tu?`<br>${esc(n.tu)} → ${esc(n.den)}`:""}${n.ly_do?`<br>Lý do: ${esc(n.ly_do)}`:""}${n.ghi_chu?`<br>${esc(n.ghi_chu)}`:""}<br><span class="note mono">${esc(n.quy_dinh)}</span></li>`).join("")}</ol>
+    </div></div>`;
 }
 // Chuyên viên AI (Claude): nút làm phiếu, trạng thái, kết quả
 // Phản hồi bằng lời (Buồng điều hành CEO): người nhận, người giao, Trưởng phòng của phòng, CEO, Trợ lý điều phối
@@ -445,7 +496,7 @@ function khoiAI(x){
   if(x.ai_loi) h+=`<div class="box" style="border-color:var(--err)"><b>Lần chạy gần nhất lỗi</b><p>${esc(x.ai_loi)}</p></div>`;
   if(k) h+=`<div class="box"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="badge">Bản nháp của AI</span><span class="note mono">${esc(k.model)} · ${k.usage.vao}/${k.usage.ra} token · ≈ ${k.chi_phi_usd} USD</span></div>
     <p style="margin-top:8px"><b>${esc(k.tom_tat)}</b></p>
-    <details open><summary>Kết quả</summary><div style="white-space:pre-wrap;margin-top:8px;max-height:480px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg)">${esc(k.ket_qua)}</div></details>
+    <details open><summary>Kết quả</summary><div class="kq-ai" style="white-space:pre-wrap;margin-top:8px;max-height:480px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg)">${esc(k.ket_qua)}</div></details>
     <details><summary>AI tự đánh giá tiêu chí</summary><ul class="list">${k.tieu_chi.map(t=>`<li>${t.dat?"Đạt":"Chưa đạt"} · ${esc(t.noi_dung)}<br><span class="note">${esc(t.bang_chung)}</span></li>`).join("")}</ul></details>
     ${k.viec_can_nguoi.length?`<p style="margin-top:8px"><b>Việc người thật phải làm</b></p><ul class="list">${k.viec_can_nguoi.map(v=>`<li>${esc(v)}</li>`).join("")}</ul>`:""}
     ${k.cau_hoi.length?`<p style="margin-top:8px"><b>Câu hỏi cần trả lời</b></p><ul class="list">${k.cau_hoi.map(v=>`<li>${esc(v)}</li>`).join("")}</ul>`:""}</div>`;
@@ -592,7 +643,9 @@ form.addEventListener("submit",async e=>{
   finally{ $("#saveBtn").disabled=false; }
 });
 
-chonPhong(S.id,false);
+// Liên kết sâu: ?id=…&ma=PH-0006 mở sẵn phiếu; thêm &full=1 để xem toàn màn hình
+chonPhong(S.id,false); // chonPhong xoá S.sel, nên đặt phiếu sau; taiPhieu vẽ lại khi có dữ liệu
+{ const q=new URLSearchParams(location.search); if(q.get("ma")){ S.sel=q.get("ma"); S.tab="phieu"; } if(q.get("full")==="1") datFull(true); }
 // Làm mới mỗi 30 giây; khi có phiếu Claude đang làm thì mỗi 5 giây, và vẽ lại bảng phải khi Claude xong
 let dem=0, dangAI=false;
 setInterval(async()=>{
